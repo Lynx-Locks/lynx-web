@@ -1,0 +1,10 @@
+.navContainer {
+	display: flex;
+	justify-content: space-between;
+}
+
+.navRight {
+	display: grid;
+	grid-auto-flow: column;
+	grid-column-gap: 20px;
+}
