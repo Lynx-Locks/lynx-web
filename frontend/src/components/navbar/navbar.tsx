@@ -9,7 +9,7 @@ export default function Navbar() {
       <div className={styles.navLeft}>
         <Image
           className={styles.navImage}
-          src="/lynx.png"
+          src="/logo/lynx.png"
           width={32}
           height={32}
           alt="Lynx Locks"
