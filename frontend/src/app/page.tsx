@@ -1,5 +1,7 @@
-import Search from "./search";
-import UsersTable from "./table";
+import styles from "./home.module.css";
+import Search from "@/components/search/search";
+import UsersTable from "@/components/adminTable/table";
+import TableButtons from "@/components/tableButtons/tableButtons";
 
 interface User {
   id: number;
@@ -37,12 +39,12 @@ export default function Home() {
   ];
 
   return (
-    <main className="p-4 md:p-10 mx-auto max-w-7xl">
+    <div className={styles.homeContainer}>
       <div>Users</div>
+      <div>Add, Modify, and Remove your users</div>
       <Search />
-      <div className="mt-6">
-        <UsersTable users={users} />
-      </div>
-    </main>
+      <TableButtons />
+      <UsersTable users={users} />
+    </div>
   );
 }
