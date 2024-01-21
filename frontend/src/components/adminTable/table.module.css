@@ -1,0 +1,36 @@
+.tableContainer {
+	width: 100%;
+	background-color: white;
+	border-radius: 10px;
+	margin: 10px 0;
+	padding: 10px;
+}
+
+.table {
+	width: 100%;
+}
+
+.tableHeader {
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+.tableCell {
+	padding: 8px;
+}
+
+.tableRow {
+	border-bottom: 1px solid #ddd;
+}
+
+.emptyTable {
+	font-weight: bold;
+	font-style: italic;
+	font-size: large;
+	margin: 100px;
+	text-align: center;
+}
+
+.settingsIcon {
+	cursor: pointer;
+}
