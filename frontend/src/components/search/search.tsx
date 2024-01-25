@@ -1,3 +1,30 @@
+"use client";
+
+import React, { useState } from "react";
+import styles from "./search.module.css";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 export default function Search() {
-  return <div>Search</div>;
+  const [searchInput, setSearchInput] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setSearchInput(e.target.value);
+  };
+
+  return (
+    <div className={styles.searchContainer}>
+      <span className={styles.searchIcon}>
+        <FontAwesomeIcon icon={faMagnifyingGlass} />
+      </span>
+      <input
+        type="text"
+        placeholder="Search here"
+        onChange={handleChange}
+        value={searchInput}
+        className={styles.searchInput}
+      />
+    </div>
+  );
 }

@@ -42,8 +42,8 @@ export default function Home() {
 
   return (
     <div className={styles.homeContainer}>
-      <div>Users</div>
-      <div>Add, Modify, and Remove your users</div>
+      <h1 className={styles.homeHeader}>Users</h1>
+      <p className={styles.subHeading}>Add, Modify, and Remove your users</p>
       <Search />
       <TableButtons />
       <AdminTable users={users} />
