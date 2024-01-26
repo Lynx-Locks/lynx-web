@@ -8,8 +8,8 @@ export default function Modal({
   setShowModal: (showModal: boolean) => void;
 }) {
   return (
-    <div className={styles.modalContainer}>
-      <div className={styles.modalContent}>
+    <div className={styles.modalContainer} onClick={() => setShowModal(false)}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <span className={styles.close} onClick={() => setShowModal(false)}>
           <FontAwesomeIcon icon={faX} size="xs" />
         </span>
