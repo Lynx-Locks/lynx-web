@@ -1,7 +1,7 @@
 import styles from "./navbar.module.css";
 import Image from "next/image";
 
-const USER = "ADMIN"; // TODO: replace this with the user's name
+const USER = "Adrian Jendo"; // TODO: replace this with the user's name
 
 export default function Navbar() {
   return (
