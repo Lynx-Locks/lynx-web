@@ -4,10 +4,19 @@ import User from "@/types/user";
 import styles from "./table.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
+import Modal from "@/components/modal/modal";
 
 export default function AdminTable({ users }: { users: User[] }) {
-  const handleClickSettings = () => {
-    console.log("Open Modal");
+  const [settingsModal, setSettingsModal] = useState(-1);
+  const handleClickSettings = (idx: number) => {
+    setSettingsModal(idx);
+  };
+
+  const closeModal = (open: boolean) => {
+    if (!open) {
+      setSettingsModal(-1);
+    }
   };
 
   return (
@@ -46,7 +55,7 @@ export default function AdminTable({ users }: { users: User[] }) {
                 <FontAwesomeIcon
                   className={styles.settingsIcon}
                   icon={faGear}
-                  onClick={() => handleClickSettings()}
+                  onClick={() => handleClickSettings(idx)}
                 />
               </td>
             </tr>
@@ -56,6 +65,7 @@ export default function AdminTable({ users }: { users: User[] }) {
       {users.length === 0 && (
         <h1 className={styles.emptyTable}>Could not display any users</h1>
       )}
+      {settingsModal >= 0 && <Modal setShowModal={closeModal} />}
     </div>
   );
 }
