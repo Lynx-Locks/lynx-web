@@ -8,11 +8,12 @@
 	width: 400px;
 	margin: 10px 0px;
 	padding-left: 25px;
+	font-size: 18px;
 }
 
 .searchIcon {
 	position: absolute;
 	left: 5px;
-	top: 10px;
+	top: 12px;
 	pointer-events: none;
 }
