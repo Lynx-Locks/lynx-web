@@ -1,9 +1,8 @@
 import styles from "./home.module.css";
 import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
-import TableButtons from "@/components/addButton/button";
+import ButtonsRow from "@/components/buttonsRow/buttonsRow";
 import User from "@/types/user";
-import Head from "next/head";
 
 const users: User[] = [
   {
@@ -46,7 +45,7 @@ export default function Home() {
       <h1 className={styles.homeHeader}>Users</h1>
       <p className={styles.subHeading}>Add, Modify, and Remove your users</p>
       <Search />
-      <TableButtons />
+      <ButtonsRow />
       <AdminTable users={users} />
     </div>
   );

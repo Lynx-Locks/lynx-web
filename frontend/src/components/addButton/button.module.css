@@ -1,0 +1,11 @@
+.addButton {
+	background-color: #f29b04; /* Green */
+  border: none;
+  padding: 10px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+	border-radius: 15px;
+	margin-right: 20px;
+}
