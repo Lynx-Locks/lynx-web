@@ -1,8 +1,9 @@
 import styles from "./home.module.css";
 import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
-import TableButtons from "@/components/tableButtons/tableButtons";
+import TableButtons from "@/components/addButton/button";
 import User from "@/types/user";
+import Head from "next/head";
 
 const users: User[] = [
   {
