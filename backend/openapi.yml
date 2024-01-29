@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Swagger Lynx Locks Backend
+  version: 1.0.0
+  description: |-
+    This is the Lynx locks backend server specifications
+paths:
+  /api/users:
+    get:
+      tags:
+        - user
+      summary: Get all users
+      description: Get all users from table
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUsers'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUsers'
+components:
+  schemas:
+    Users:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: adam
+        email:
+          type: string
+          example: john@email.com
+        is_admin:
+          type: boolean
+          example: False
+      xml:
+        name: users
+    ArrayOfUsers:
+        type: array
+        items:
+          $ref: '#/components/schemas/Users'
