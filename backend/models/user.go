@@ -7,5 +7,5 @@ type User struct {
 	Id      int    `json:"id" gorm:"primary_key"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
-	IsAdmin bool   `json:"is_Admin"`
+	IsAdmin bool   `json:"is_admin"`
 }

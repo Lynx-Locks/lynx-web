@@ -8,7 +8,6 @@ import (
 )
 
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
 	users := []models.User{}
 	config.DB.Find(&users)
 	w.Header().Set("Content-Type", "application/json")
