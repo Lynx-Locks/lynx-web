@@ -7,10 +7,18 @@ type ButtonProps = {
   onClick?: () => void;
 };
 
-export default function Button({ text, onClick }: ButtonProps) {
+export function AddButton({ text, onClick }: ButtonProps) {
   return (
     <button className={styles.addButton} onClick={onClick}>
       <FontAwesomeIcon icon={faPlus} size="xs" /> {text}
+    </button>
+  );
+}
+
+export function SubmitButon({ text, onClick }: ButtonProps) {
+  return (
+    <button className={styles.submitButton} onClick={onClick}>
+      {text}
     </button>
   );
 }

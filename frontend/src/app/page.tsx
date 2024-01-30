@@ -44,7 +44,9 @@ export default function Home() {
     <div className={styles.homeContainer}>
       <h1 className={styles.homeHeader}>Users</h1>
       <p className={styles.subHeading}>Add, Modify, and Remove your users</p>
-      <Search />
+      <div className={styles.homeSearch}>
+        <Search placeholder="Search here" />
+      </div>
       <ButtonsRow />
       <AdminTable users={users} />
     </div>
