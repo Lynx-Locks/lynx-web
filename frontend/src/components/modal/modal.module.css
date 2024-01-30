@@ -9,6 +9,12 @@
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
+.modalHeader {
+  padding-bottom: 10px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
 /* Modal Content/Box */
 .modalContent {
   background-color: #fefefe;
@@ -16,8 +22,8 @@
   padding: 20px;
   border: 3px solid #888;
   border-radius: 10px;
-  width: 80%; /* Could be more or less, depending on screen size */
-  text-align: center;
+  width: 50%; /* Could be more or less, depending on screen size */
+  /* text-align: center; */
 }
 
 /* The Close Button */
@@ -32,4 +38,9 @@
   color: black;
   text-decoration: none;
   cursor: pointer;
+}
+
+.modalSubheader {
+  font-size: 20px;
+  font-weight: bold;
 }

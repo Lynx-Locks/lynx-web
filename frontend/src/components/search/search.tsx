@@ -5,7 +5,7 @@ import styles from "./search.module.css";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function Search() {
+export default function Search({ placeholder }: { placeholder: string }) {
   const [searchInput, setSearchInput] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +20,7 @@ export default function Search() {
       </span>
       <input
         type="text"
-        placeholder="Search here"
+        placeholder={placeholder}
         onChange={handleChange}
         value={searchInput}
         className={styles.searchInput}
