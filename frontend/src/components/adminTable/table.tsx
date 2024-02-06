@@ -9,7 +9,7 @@ import Modal from "@/components/modal/modal";
 import { SubmitButon } from "@/components/button/button";
 
 export default function AdminTable({ users }: { users: User[] }) {
-  const [settingsModal, setSettingsModal] = useState(1);
+  const [settingsModal, setSettingsModal] = useState(-1);
   const handleClickSettings = (idx: number) => {
     setSettingsModal(idx);
   };
