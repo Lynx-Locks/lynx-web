@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import styles from "./buttonsRow.module.css";
-import { AddButton, SubmitButon } from "@/components/addButton/button";
+import { AddButton, SubmitButon } from "@/components/button/button";
 import Modal from "@/components/modal/modal";
-import Select from "react-select";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 
 const employeeRoles = [
@@ -78,7 +77,7 @@ const entrypoints = [
 
 export default function ButtonRow() {
   const [newKeyModal, setNewKeyModal] = useState(false);
-  const [newRoleModal, setNewRoleModal] = useState(true);
+  const [newRoleModal, setNewRoleModal] = useState(false);
 
   const buttons = [
     {
