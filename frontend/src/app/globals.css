@@ -4,9 +4,8 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --button-color: #f29b04;
+  --button-rgb: 242, 155, 4;
   --background-rgb: 249, 250, 251;
-  
 }
 
 @media (prefers-color-scheme: dark) {

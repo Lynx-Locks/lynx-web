@@ -1,5 +1,5 @@
 .addButton {
-	background-color: var(--button-color);
+	background-color: rgb(var(--button-rgb));
   border: none;
   padding: 10px 16px;
   text-align: center;
@@ -12,7 +12,7 @@
 }
 
 .submitButton {
-  background-color: var(--button-color);
+  background-color: rgb(var(--button-rgb));
   display: flex;
   margin: 20px auto 0px;
   padding: 10px 16px;

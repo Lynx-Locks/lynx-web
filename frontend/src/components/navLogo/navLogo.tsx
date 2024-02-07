@@ -6,15 +6,13 @@ import { useEffect, useState } from "react";
 export default function NavLogo() {
   const [darkMode, setDarkMode] = useState(false);
 
-  const mq = window.matchMedia("(prefers-color-scheme: dark)");
-
-  mq.addEventListener("change", (e) => {
-    setDarkMode(e.matches);
-  });
-
   useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", (e) => {
+      setDarkMode(e.matches);
+    });
     setDarkMode(mq.matches);
-  }, [mq.matches]);
+  }, []);
 
   return (
     <div>
