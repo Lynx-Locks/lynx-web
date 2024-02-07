@@ -1,9 +1,21 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function NavLogo() {
-  const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const [darkMode, setDarkMode] = useState(false);
+
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+  mq.addEventListener("change", (e) => {
+    setDarkMode(e.matches);
+  });
+
+  useEffect(() => {
+    setDarkMode(mq.matches);
+  }, [mq.matches]);
+
   return (
     <div>
       {darkMode ? (
