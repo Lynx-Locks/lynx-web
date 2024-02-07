@@ -1,6 +1,5 @@
 .tableContainer {
 	width: 100%;
-	background-color: white;
 	border-radius: 10px;
 	margin: 10px 0;
 	padding: 10px;
@@ -12,7 +11,7 @@
 
 .tableHeader {
 	text-align: left;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid rgb(var(--foreground-rgb));
 }
 
 .tableCell {
@@ -20,7 +19,7 @@
 }
 
 .tableRow {
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid rgb(var(--foreground-rgb));
 }
 
 .emptyTable {
@@ -41,19 +40,19 @@
 }
 
 .settingsInputContainer {
-	display: flex;
-	justify-content: space-evenly;
+	display: grid;
+	grid-template-columns: 10% 45%;
 	padding-bottom: 15px;
+	row-gap: 15px;
 }
 
 .settingsInput {
 	width: 100%;
 	margin: 0 8px;
 	padding: 0 10px;
-	/* display: inline-block; */
-	border: 1px solid #ccc;
-	/* border-radius: 4px; */
-	/* box-sizing: border-box; */
+	border: 1px solid rgba(var(--foreground-rgb), 0.5);
+	background-color: rgb(var(--background-rgb));
+	border-radius: 4px;
 }
 
 .settingsButtonGroup {
@@ -62,11 +61,12 @@
 }
 
 .settingsButton {
-	background-color: #f29b04;
+	background-color: var(--button-color);
 	padding: 10px 20px;
 	text-align: center;
 	text-decoration: none;
 	display: inline-block;
 	font-size: 16px;
 	border-radius: 5px;
+	color: black;
 }

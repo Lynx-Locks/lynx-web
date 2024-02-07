@@ -10,6 +10,14 @@
 	margin: 10px 0px;
 	padding: 5px 0 5px 25px;
 	font-size: 18px;
+	border-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+	.searchInput {
+		border: 1px solid rgba(var(--foreground-rgb),0.5);
+		background: rgb(var(--background-rgb));
+	}
 }
 
 .searchIcon {
@@ -17,4 +25,5 @@
 	left: 5px;
 	top: 17px;
 	pointer-events: none;
+	color: rgb(var(--foreground-rgb));
 }

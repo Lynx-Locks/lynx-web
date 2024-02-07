@@ -13,6 +13,16 @@
 	color: #514e4e;
 }
 
+@media (prefers-color-scheme: dark) {
+	.homeHeader {
+		color: rgb(245, 245, 245);
+	}
+
+	.subHeading {
+		color: rgb(169,169,169);
+	}
+}
+
 .homeSearch {
 	max-width: 400px;
 }

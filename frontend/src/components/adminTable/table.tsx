@@ -73,15 +73,13 @@ export default function AdminTable({ users }: { users: User[] }) {
           content={
             <div className={styles.settingsModal}>
               <div className={styles.settingsInputContainer}>
-                Name:{" "}
+                <div>Name:</div>
                 <input
                   className={styles.settingsInput}
                   type="text"
                   value={users[settingsModal].name}
                 />
-              </div>
-              <div className={styles.settingsInputContainer}>
-                Email:{" "}
+                <div>Email:</div>
                 <input
                   className={styles.settingsInput}
                   type="text"
