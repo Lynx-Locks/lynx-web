@@ -61,7 +61,7 @@
 }
 
 .settingsButton {
-	background-color: var(--button-color);
+	background-color: rgb(var(--button-rgb));
 	padding: 10px 20px;
 	text-align: center;
 	text-decoration: none;
