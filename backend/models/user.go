@@ -4,8 +4,13 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Id      int    `json:"id" gorm:"primary_key"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	IsAdmin bool   `json:"is_admin"`
+	Name    string
+	Email   string
+	IsAdmin bool `json:"default;False"`
+}
+
+type UserReq struct {
+	Name    string `json:"name,omitempty"`
+	Email   string `json:"email,omitempty"`
+	IsAdmin bool   `json:"is_admin,string,default;False"`
 }
