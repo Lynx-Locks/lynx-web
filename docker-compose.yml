@@ -1,8 +1,21 @@
 version: "3.9"
 services:
-  backend:
-    build: .
+  frontend:
+    container_name: lynx-frontend
+    build:
+      context: .
+      target: dev
     volumes:
-      - ./backend/data:/backend/data
+      - ./frontend/:/frontend/
+      - /frontend/node_modules
+    ports:
+      - "3000:3000"
+  backend:
+    container_name: lynx-backend
+    build:
+      context: .
+      target: backend
+    volumes:
+      - ./backend/:/backend/
     ports:
       - "5001:5001"
