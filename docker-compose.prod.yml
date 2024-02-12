@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  lynx:
+    container_name: lynx-web
+    build: .
+    volumes:
+      - ./backend/data:/data
+    ports:
+      - "5001:5001"
