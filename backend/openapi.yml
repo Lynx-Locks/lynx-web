@@ -21,7 +21,276 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/ArrayOfUsers'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - user
+      summary: Create a new user
+      description: Create a new user
+      requestBody:
+        $ref: '#/components/requestBodies/UserBody'
+      responses:
+        '201':
+          description: Successfully Created
+          headers:
+            location:
+              schema:
+                type: string
+                description: get request url for created object
+        '400':
+          description: Invalid argument/s
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - user
+      summary: Update a user
+      description: Update a user
+      requestBody:
+        $ref: '#/components/requestBodies/UserUpdate'
+      responses:
+        '200':
+          description: Successfully Updated
+        '400':
+          description: Invalid argument/s
+        '500':
+          description: Internal server error
+
+
+
+  /api/users/{userID}:
+    get:
+      tags:
+        - user
+      summary: Get a single user
+      description: Get a single user
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Users'
+        '404':
+          description: No Content
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - user
+      summary: Delete a user
+      description: Delete a user
+      responses:
+        '200':
+          description: Successfully Deleted
+        '404':
+          description: No Content
+        '500':
+          description: Internal server error
+
+  /api/roles:
+    get:
+      tags:
+        - roles
+      summary: Get all roles
+      description: Get all roles
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoles'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoles'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - roles
+      summary: Create a new role
+      description: Create a new role
+      requestBody:
+        $ref: '#/components/requestBodies/RoleBody'
+      responses:
+        '201':
+          description: Successfully Created
+          headers:
+            location:
+              schema:
+                type: string
+                description: get request url for created object
+        '400':
+          description: Invalid argument/s
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - user
+      summary: Update a role
+      description: Update a role
+      requestBody:
+        $ref: '#/components/requestBodies/RoleUpdate'
+      responses:
+        '200':
+          description: Successfully Updated
+        '400':
+          description: Invalid argument/s
+        '500':
+          description: Internal server error
+
+  /api/roles/{roleId}/doors:
+    get:
+      tags:
+        - role_door
+      summary: Get all doors associated with the role
+      description: Get all doors associated with the role
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoles'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfRoles'
+        '404':
+          description: No Content
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - role_door
+      summary: Add new door associations to the role
+      description: Add new door associations to the role
+      requestBody:
+        $ref: '#/components/requestBodies/RoleIds'
+      responses:
+        '200':
+          description: Successfully Created
+        '400':
+          description: Invalid argument/s
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - role_door
+      summary: Delete door associations from the role
+      description: Delete door associations from the role
+      requestBody:
+        $ref: '#/components/requestBodies/RoleIds'
+      responses:
+        '200':
+          description: Successfully Deleted
+        '404':
+          description: No Content
+        '500':
+          description: Internal server error
+  /api/doors:
+    get:
+      tags:
+        - door
+      summary: Get all doors
+      description: Get all doors from table
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfDoors'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ArrayOfDoors'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - door
+      summary: Create a new door
+      description: Create a new door
+      requestBody:
+        $ref: '#/components/requestBodies/DoorBody'
+      responses:
+        '201':
+          description: Successfully Created
+          headers:
+            location:
+              schema:
+                type: string
+                description: get request url for created object
+        '400':
+          description: Invalid argument/s
+        '500':
+          description: Internal server error
+  /api/doors/{doorId}:
+    delete:
+      tags:
+        - door
+      summary: Delete a door
+      description: Delete a door
+      responses:
+        '200':
+          description: Successfully Deleted
+        '404':
+          description: No Content
+        '500':
+          description: Internal server error
+
+
+
 components:
+  requestBodies:
+    UserBody:
+      description: A JSON object containing user info
+      required: True
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsersReq'
+    RoleBody:
+      description: A JSON object containing role info
+      required: True
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolesReq'
+    RoleIds:
+      description: A JSON object containing multiple role ids
+      required: True
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ArrayofRoleIds'
+    DoorBody:
+      description: A JSON object containing door info
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DoorsReq'
+    UserUpdate:
+      description: A JSON object with userID and value to update
+      required: True
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Users'
+    RoleUpdate:
+      description: A JSON object with roleID and value to update
+      required: True
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Roles'
+
+
   schemas:
     Users:
       type: object
@@ -41,7 +310,91 @@ components:
           example: False
       xml:
         name: users
+
+    Roles:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: Janitor
+      xml:
+        name: roles
+    UsersReq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: adam
+        email:
+          type: string
+          example: john@email.com
+        is_admin:
+          type: boolean
+          example: False
+      xml:
+        name: users
+    RolesReq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Janitor
+      xml:
+        name: roles
     ArrayOfUsers:
         type: array
         items:
           $ref: '#/components/schemas/Users'
+    ArrayofRoleIds:
+      type: array
+      items:
+          type: object
+          properties:
+            id:
+              type: integer
+    ArrayOfRoles:
+      type: array
+      items:
+        $ref: '#/components/schemas/Roles'
+    ArrayOfDoorIds:
+      type: array
+      items:
+          type: object
+          properties:
+            id:
+              type: integer
+    Doors:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: front
+        description:
+          type: string
+          example: front door
+      xml:
+        name: doors
+    DoorsReq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: front
+        description:
+          type: string
+          example: front door
+      xml:
+        name: doors
+    ArrayOfDoors:
+      type: array
+      items:
+        $ref: '#/components/schemas/Doors'
+
