@@ -8,7 +8,7 @@ paths:
   /api/users:
     get:
       tags:
-        - user
+        - users
       summary: Get all users
       description: Get all users from table
       responses:
@@ -25,7 +25,7 @@ paths:
           description: Internal server error
     post:
       tags:
-        - user
+        - users
       summary: Create a new user
       description: Create a new user
       requestBody:
@@ -44,7 +44,7 @@ paths:
           description: Internal server error
     put:
       tags:
-        - user
+        - users
       summary: Update a user
       description: Update a user
       requestBody:
@@ -59,10 +59,18 @@ paths:
 
 
 
-  /api/users/{userID}:
+  /api/users/{userId}:
     get:
+      parameters:
+        - in: path
+          name: userId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The user ID
       tags:
-        - user
+        - users
       summary: Get a single user
       description: Get a single user
       responses:
@@ -80,8 +88,16 @@ paths:
         '500':
           description: Internal server error
     delete:
+      parameters:
+        - in: path
+          name: userId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The user ID
       tags:
-        - user
+        - users
       summary: Delete a user
       description: Delete a user
       responses:
@@ -131,7 +147,7 @@ paths:
           description: Internal server error
     put:
       tags:
-        - user
+        - roles
       summary: Update a role
       description: Update a role
       requestBody:
@@ -146,8 +162,16 @@ paths:
 
   /api/roles/{roleId}/doors:
     get:
+      parameters:
+        - in: path
+          name: roleId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The role ID
       tags:
-        - role_door
+        - roles_doors
       summary: Get all doors associated with the role
       description: Get all doors associated with the role
       responses:
@@ -165,8 +189,16 @@ paths:
         '500':
           description: Internal server error
     post:
+      parameters:
+        - in: path
+          name: roleId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The role ID
       tags:
-        - role_door
+        - roles_doors
       summary: Add new door associations to the role
       description: Add new door associations to the role
       requestBody:
@@ -179,12 +211,18 @@ paths:
         '500':
           description: Internal server error
     delete:
+      parameters:
+        - in: path
+          name: roleId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The role ID
       tags:
-        - role_door
+        - roles_doors
       summary: Delete door associations from the role
       description: Delete door associations from the role
-      requestBody:
-        $ref: '#/components/requestBodies/RoleIds'
       responses:
         '200':
           description: Successfully Deleted
@@ -195,7 +233,7 @@ paths:
   /api/doors:
     get:
       tags:
-        - door
+        - doors
       summary: Get all doors
       description: Get all doors from table
       responses:
@@ -212,7 +250,7 @@ paths:
           description: Internal server error
     post:
       tags:
-        - door
+        - doors
       summary: Create a new door
       description: Create a new door
       requestBody:
@@ -230,9 +268,17 @@ paths:
         '500':
           description: Internal server error
   /api/doors/{doorId}:
+    parameters:
+      - in: path
+        name: doorId   # Note the name is the same as in the path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: The door Id
     delete:
       tags:
-        - door
+        - doors
       summary: Delete a door
       description: Delete a door
       responses:
