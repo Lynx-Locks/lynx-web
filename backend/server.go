@@ -30,6 +30,7 @@ func main() {
 func api() chi.Router {
 	r := chi.NewRouter()
 	r.Mount("/users", routes.UsersRoute())
+	r.Mount("/auth", routes.AuthRoute())
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello: world"))
 	})
