@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +62,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(result.Error, w, r)
 		return
 	}
-	errJson := json.NewEncoder(w).Encode(r.Host + "/api/users/{" + strconv.Itoa(int(dbUser.ID)) + "}")
+	errJson := json.NewEncoder(w).Encode(dbUser)
 	if errJson != nil {
 		http.Error(w, "500", http.StatusInternalServerError)
 		return
