@@ -1,12 +1,10 @@
 package models
 
-import "gorm.io/gorm"
-
 type User struct {
-	gorm.Model
-	Name    string
-	Email   string
-	IsAdmin bool `json:"default;False"`
+	Common
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	IsAdmin bool   `json:"is_admin,default;False"`
 }
 
 type UserReq struct {
