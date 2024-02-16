@@ -16,12 +16,9 @@ func CheckErr(err error) {
 func CheckFields(s interface{}) bool {
 	vals := reflect.ValueOf(s)
 	fieldNum := vals.NumField()
-
 	for i := 0; i < fieldNum; i++ {
 		curVal := vals.Field(i)
-
-		isSet := curVal.IsValid() && !curVal.IsZero()
-
+		isSet := curVal.IsValid() && curVal.String() != ""
 		if !isSet {
 			return false
 		}
