@@ -35,24 +35,9 @@ type WebAuthnOptions struct {
 	AuthenticatorSelection AuthenticatorSelection `json:"authenticator_selection"`
 }
 
-type UserReq struct {
-	Name    string `json:"name,omitempty"`
-	Email   string `json:"email,omitempty"`
-	IsAdmin bool   `json:"is_admin,string,default;False"`
+type RegisterReq struct {
+	Id                      string `json:"id"`
+	AuthenticatorAttachment string `json:"authenticator_attachment"`
+	Type                    string `json:"type"`
+	// might require user field or some other identifying info
 }
-
-authenticatorAttachment
-:
-"platform"
-id
-:
-"5Hn5Xwlc9Jk4EKOBsL9hMpaYrNk"
-rawId
-:
-"5Hn5Xwlc9Jk4EKOBsL9hMpaYrNk"
-response
-:
-{,…}
-type
-:
-"public-key"

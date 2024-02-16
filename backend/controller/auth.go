@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"github.com/google/uuid"
+	"log"
 	"net/http"
 )
 
@@ -33,6 +34,10 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 				Alg:  -7,
 				Type: "public-key",
 			},
+			{
+				Alg:  -257,
+				Type: "public-key",
+			},
 		},
 		AuthenticatorSelection: models.AuthenticatorSelection{
 			AuthenticatorAttachment: "platform",
@@ -48,9 +53,24 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterResponse(w http.ResponseWriter, r *http.Request) {
-	// pass
+	w.Header().Set("Content-Type", "application/json")
+	var registerReq models.RegisterReq
+	err := json.NewDecoder(r.Body).Decode(&registerReq)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, "400", http.StatusBadRequest)
+		return
+	}
+
+	// TODO: add to DB
+
+	errJson := json.NewEncoder(w).Encode(registerReq) // TODO: send meaningful response
+	if errJson != nil {
+		http.Error(w, "500", http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetKeys(w http.ResponseWriter, r *http.Request) {
-	// pass
+	// TODO
 }
