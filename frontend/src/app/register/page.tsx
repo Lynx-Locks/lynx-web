@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./register.module.css";
 import { useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
 import { ResponseCredential, ServerData } from "@/types/webAuthn";
 
+enum LoadingStatus {
+  Loading,
+  Success,
+  Error,
+}
+
 export default function RegisterUser() {
   const searchParams = useSearchParams();
+  const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
+    LoadingStatus.Loading
+  );
 
   useEffect(() => {
     async function f() {
@@ -16,11 +25,10 @@ export default function RegisterUser() {
 
       // TODO: verify token is valid in backend during registerRequest
 
-      const resp = await axios.get(`/api/auth/registerRequest`);
+      const resp = await axios.get(`/api/auth/register/request`);
       if (resp.status === 200) {
         // Do webauthn stuff
         const data: ServerData = resp.data;
-        console.log(data);
         const options: PublicKeyCredentialCreationOptions = {
           challenge: Uint8Array.from(data.challenge, (c) => c.charCodeAt(0)),
           rp: data.rp,
@@ -52,7 +60,7 @@ export default function RegisterUser() {
           credential.authenticator_attachment = cred.authenticatorAttachment;
         }
 
-        // TODO: might not end up needing this data
+        // TODO: find out if we need this data
 
         // Base64URL encode some values.
         // const clientDataJSON = base64url.encode(cred.response.clientDataJSON);
@@ -72,9 +80,13 @@ export default function RegisterUser() {
         // };
 
         // send public key to backend
-        axios.post("/api/auth/registerResponse", credential);
+        const status = await axios.post(
+          "/api/auth/register/response",
+          credential
+        );
+        setLoadingStatus(LoadingStatus.Success);
       } else {
-        // TODO: handle error (update page to error state)
+        setLoadingStatus(LoadingStatus.Error);
       }
     }
     f();
@@ -82,7 +94,18 @@ export default function RegisterUser() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.loader} />
+      {loadingStatus === LoadingStatus.Success && (
+        <div>Success. You may now close this window.</div>
+      )}
+      {loadingStatus === LoadingStatus.Error && (
+        <div>
+          Error. Something went wrong with your request. Please contact your
+          administrator.
+        </div>
+      )}
+      {loadingStatus === LoadingStatus.Loading && (
+        <div className={styles.loader} />
+      )}
     </div>
   );
 }

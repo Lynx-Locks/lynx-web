@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"api/config"
+	"api/helpers"
 	"api/models"
 	"crypto/rand"
 	"encoding/json"
@@ -19,15 +21,24 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 		// TODO: handle error
 	}
 
+	// TODO: parse uuid token from url param and fetch user id from activeTokens table
+	var user models.User
+	result := config.DB.First(&user)
+
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w, r)
+		return
+	}
+
 	options := models.WebAuthnOptions{
 		Challenge: challenge,
 		Rp: models.Rp{
 			Name: "Lynx Locks",
 		},
 		User: models.UserInfo{
-			Id:          uuid.NewString(), // TODO: get uuid token from url and fetch user id from activeTokens table
-			Name:        "john_james",
-			DisplayName: "John",
+			Id:          uuid.NewString(), // not sure if this is important
+			Name:        user.Name,
+			DisplayName: user.Name,
 		},
 		PubKeyCredParams: []models.PubKeyCredParams{
 			{
@@ -63,6 +74,8 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: add to DB
+
+	// TODO: delete token from activeTokens table
 
 	errJson := json.NewEncoder(w).Encode(registerReq) // TODO: send meaningful response
 	if errJson != nil {
