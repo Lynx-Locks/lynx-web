@@ -34,3 +34,25 @@ type WebAuthnOptions struct {
 	ExcludeCredentials     []ExcludeCredentials   `json:"exclude_credentials,omitempty"` // TODO: figure out how to use this (/if we need it) to prevent user from making multiple creds
 	AuthenticatorSelection AuthenticatorSelection `json:"authenticator_selection"`
 }
+
+type UserReq struct {
+	Name    string `json:"name,omitempty"`
+	Email   string `json:"email,omitempty"`
+	IsAdmin bool   `json:"is_admin,string,default;False"`
+}
+
+authenticatorAttachment
+:
+"platform"
+id
+:
+"5Hn5Xwlc9Jk4EKOBsL9hMpaYrNk"
+rawId
+:
+"5Hn5Xwlc9Jk4EKOBsL9hMpaYrNk"
+response
+:
+{,…}
+type
+:
+"public-key"
