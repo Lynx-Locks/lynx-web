@@ -21,6 +21,6 @@ func Connect() {
 		panic("failed to connect database")
 	}
 	// Migrate the schema
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Key{}, &models.Role{}, &models.ActiveTokens{}, &models.Door{})
 	DB = db
 }
