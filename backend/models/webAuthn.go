@@ -1,6 +1,7 @@
 package models
 
 type Rp struct {
+	Id   string `json:"id" default:"localhost"`
 	Name string `json:"name" default:"Lynx Locks"`
 }
 
@@ -41,18 +42,14 @@ type UserReq struct {
 	IsAdmin bool   `json:"is_admin,string,default;False"`
 }
 
-authenticatorAttachment
-:
-"platform"
-id
-:
-"5Hn5Xwlc9Jk4EKOBsL9hMpaYrNk"
-rawId
-:
-"5Hn5Xwlc9Jk4EKOBsL9hMpaYrNk"
-response
-:
-{,…}
-type
-:
-"public-key"
+type SigninReq struct {
+	RpId      string `json:"rp_id"`
+	Challenge []byte `json:"challenge"`
+}
+
+type AuthReq struct {
+	Id                      string `json:"id"`
+	AuthenticatorAttachment string `json:"authenticator_attachment"`
+	Type                    string `json:"type"`
+	// might require user field or some other identifying info
+}
