@@ -5,12 +5,14 @@ import (
 	"api/helpers"
 	"api/models"
 	"bytes"
+	"crypto/rand"
 	"encoding/json"
-	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/google/uuid"
 	"io"
 	"log"
 	"net/http"
+
+	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
+	"github.com/google/uuid"
 )
 
 // https://developers.google.com/codelabs/passkey-form-autofill
@@ -134,4 +136,81 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 
 func GetKeys(w http.ResponseWriter, r *http.Request) {
 	// TODO
+}
+
+func SigninRequest(w http.ResponseWriter, r *http.Request) {
+	challenge := make([]byte, 8) // maybe needs to be 16?
+	_, err := rand.Read(challenge)
+	if err != nil {
+		// TODO: handle error
+	}
+
+	rpId := "localhost" // TODO: put into environment variable
+
+	signinReq := models.SigninReq{
+		RpId:      rpId,
+		Challenge: challenge,
+	}
+
+	errJson := json.NewEncoder(w).Encode(signinReq)
+	if errJson != nil {
+		http.Error(w, "500", http.StatusInternalServerError)
+		return
+	}
+}
+
+func SigninResponse(w http.ResponseWriter, r *http.Request) {
+	//response := r.Body
+	//const response = req.body;
+	//const expectedChallenge = req.session.challenge;
+	//const expectedOrigin = getOrigin(req.get('User-Agent'));
+	//const expectedRPID = process.env.HOSTNAME;
+	//
+	//try {
+	//	// Find the credential stored to the database by the credential ID
+	//	const cred = Credentials.findById(response.id);
+	//	if (!cred) {
+	//	throw new Error('Credential not found.');
+	//}
+	//
+	//	// Find the user by the user ID stored to the credential
+	//	const user = Users.findById(cred.user_id);
+	//	if (!user) {
+	//	throw new Error('User not found.');
+	//}
+	//
+	//	// Base64URL decode some values
+	//	const authenticator = {
+	//	credentialPublicKey: isoBase64URL.toBuffer(cred.publicKey),
+	//	credentialID: isoBase64URL.toBuffer(cred.id),
+	//	transports: cred.transports,
+	//};
+	//
+	//	// Verify the credential
+	//	const { verified, authenticationInfo } = await verifyAuthenticationResponse({
+	//	response,
+	//	expectedChallenge,
+	//	expectedOrigin,
+	//	expectedRPID,
+	//	authenticator,
+	//	requireUserVerification: false,
+	//});
+	//
+	//	if (!verified) {
+	//	throw new Error('User verification failed.');
+	//}
+	//
+	//	// Don't forget to kill the challenge for this session.
+	//	delete req.session.challenge;
+	//
+	//	req.session.username = user.username;
+	//	req.session['signed-in'] = 'yes';
+	//
+	//	return res.json(user);
+	//} catch (e) {
+	//	delete req.session.challenge;
+	//
+	//	console.error(e);
+	//	return res.status(400).json({ error: e.message });
+	//}
 }
