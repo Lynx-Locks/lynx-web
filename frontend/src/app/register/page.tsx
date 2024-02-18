@@ -49,6 +49,7 @@ export default function RegisterUser() {
 
         const credential: any = {
           id: cred?.id || "",
+          rawId: cred?.rawId || "",
           type: cred?.type || "",
           rawId: base64url.encode(cred?.id || ""),
         };
