@@ -2,12 +2,10 @@ package config
 
 import (
 	"api/models"
-	"log"
-	"os"
-	"path/filepath"
-
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"os"
+	"path/filepath"
 )
 
 var DB *gorm.DB
@@ -25,8 +23,7 @@ func Connect() {
 	// Migrate the schema
 	db.AutoMigrate(&models.User{}, &models.Key{}, &models.Role{}, &models.ActiveTokens{}, &models.Door{}, &models.SessionData{})
 	if err != nil {
-		log.Print(err)
-		return
+		panic("failed to migrate database")
 	}
 	DB = db
 }

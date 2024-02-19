@@ -1,4 +1,4 @@
-package webauthn
+package config
 
 import (
 	"fmt"

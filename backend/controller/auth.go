@@ -4,7 +4,6 @@ import (
 	"api/config"
 	"api/helpers"
 	"api/models"
-	"api/webauthn"
 	"bytes"
 	"encoding/json"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
@@ -28,7 +27,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	options, session, err := webauthn.WebAuthn.BeginRegistration(user)
+	options, session, err := config.WebAuthn.BeginRegistration(user)
 	sessionData := models.SessionData{
 		Challenge:            session.Challenge,
 		UserId:               session.UserID,
@@ -109,7 +108,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		Extensions:           sessionData.Extensions,
 	}
 
-	credential, err := webauthn.WebAuthn.FinishRegistration(user, session, r)
+	credential, err := config.WebAuthn.FinishRegistration(user, session, r)
 	println(credential)
 	if err != nil {
 		// TODO: Handle Error
