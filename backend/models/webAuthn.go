@@ -1,43 +1,31 @@
 package models
 
-type Rp struct {
-	Name string `json:"name" default:"Lynx Locks"`
+import (
+	"github.com/go-webauthn/webauthn/protocol"
+	"time"
+)
+
+type SessionData struct {
+	Challenge            string    `json:"challenge"`
+	UserId               []byte    `gorm:"serializer:json" json:"userId"`
+	AllowedCredentialIds [][]byte  `gorm:"serializer:json" json:"allowedCredentials,omitempty"`
+	Expires              time.Time `json:"expires"`
+
+	UserVerification protocol.UserVerificationRequirement `gorm:"serializer:json" json:"userVerification"`
+	Extensions       protocol.AuthenticationExtensions    `gorm:"serializer:json" json:"extensions,omitempty"`
 }
 
-type UserInfo struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
+type response struct {
+	AttestationObject string   `json:"attestationObject"`
+	ClientDataJson    string   `json:"clientDataJson"`
+	Transports        []string `json:"transports"`
 }
 
-type PubKeyCredParams struct {
-	Type string `json:"type"`
-	Alg  int    `json:"alg"`
-}
-
-type ExcludeCredentials struct {
-	Id         string   `json:"id"`
-	Type       string   `json:"type"`
-	Transports []string `json:"transports"`
-}
-
-type AuthenticatorSelection struct {
-	AuthenticatorAttachment string `json:"authenticator_attachment"`
-	RequireResidentKey      bool   `json:"require_resident_key"`
-}
-
-type WebAuthnOptions struct {
-	Challenge              []byte                 `json:"challenge"`
-	Rp                     Rp                     `json:"rp"` // TODO: experiment with id attribute as well
-	User                   UserInfo               `json:"user"`
-	PubKeyCredParams       []PubKeyCredParams     `json:"pub_key_cred_params"`
-	ExcludeCredentials     []ExcludeCredentials   `json:"exclude_credentials,omitempty"` // TODO: figure out how to use this (/if we need it) to prevent user from making multiple creds
-	AuthenticatorSelection AuthenticatorSelection `json:"authenticator_selection"`
-}
-
-type RegisterReq struct {
-	Id                      string `json:"id"`
-	AuthenticatorAttachment string `json:"authenticator_attachment"`
-	Type                    string `json:"type"`
-	// might require user field or some other identifying info
+type CompleteRegistration struct {
+	Id                      string   `json:"id"`
+	RawId                   string   `json:"rawId"`
+	AuthenticatorAttachment string   `json:"authenticatorAttachment"`
+	Response                response `json:"response"`
+	Type                    string   `json:"type"`
+	Challenge               string   `json:"challenge"`
 }
