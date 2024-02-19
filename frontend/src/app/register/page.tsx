@@ -16,7 +16,7 @@ enum LoadingStatus {
 export default function RegisterUser() {
   const searchParams = useSearchParams();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
-    LoadingStatus.Loading
+    LoadingStatus.Loading,
   );
 
   useEffect(() => {
@@ -60,17 +60,17 @@ export default function RegisterUser() {
 
         // Base64URL encode some values.
         const clientDataJSONRaw = JSON.parse(
-          Buffer.from(cred.response.clientDataJSON).toString()
+          Buffer.from(cred.response.clientDataJSON).toString(),
         );
         clientDataJSONRaw.challenge = base64url.decode(
-          clientDataJSONRaw.challenge
+          clientDataJSONRaw.challenge,
         ); // need to decode challenge
 
         const clientDataJSON = base64url.encode(
-          JSON.stringify(clientDataJSONRaw)
+          JSON.stringify(clientDataJSONRaw),
         );
         const attestationObject = base64url.encode(
-          cred.response.attestationObject
+          cred.response.attestationObject,
         );
 
         // Obtain transports.
@@ -89,7 +89,7 @@ export default function RegisterUser() {
         // send public key to backend
         const status = await axios.post(
           "/api/auth/register/response",
-          credential
+          credential,
         );
         setLoadingStatus(LoadingStatus.Success);
       } else {
