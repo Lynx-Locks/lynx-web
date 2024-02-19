@@ -1,13 +1,13 @@
 .addButton {
-	background-color: rgb(var(--button-rgb));
+  background-color: rgb(var(--button-rgb));
   border: none;
   padding: 10px 16px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-	border-radius: 15px;
-	margin-right: 20px;
+  border-radius: 15px;
+  margin-right: 20px;
   color: black;
 }
 
@@ -16,6 +16,6 @@
   display: flex;
   margin: 20px auto 0px;
   padding: 10px 16px;
-	border-radius: 10px;
+  border-radius: 10px;
   color: black;
 }

@@ -1,5 +1,5 @@
 .buttonRowContainer {
-	display: flex;
-	flex-direction: row;
-	padding: 5px 0;
+  display: flex;
+  flex-direction: row;
+  padding: 5px 0;
 }

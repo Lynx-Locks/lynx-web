@@ -1,7 +1,7 @@
 .searchDropdownContainer {
-	position: relative;
-	display: inline-block;
-	width: 100%;
+  position: relative;
+  display: inline-block;
+  width: 100%;
 }
 
 .subheader {
@@ -10,5 +10,5 @@
 }
 
 .selectDropdown {
-	padding: 15px 0;
+  padding: 15px 0;
 }
