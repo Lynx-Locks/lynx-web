@@ -6,10 +6,10 @@ import (
 
 type Key struct {
 	Common
-	UserId       uint `json:"user_id"`
+	UserId       uint `json:"userId"`
 	User         User
 	Roles        []*Role   `gorm:"many2many:key_role;"`
-	PublicKey    string    `json:"public_key"`
+	PublicKey    string    `json:"publicKey"`
 	Expiration   uint      `json:"expiration"` // unix timestamp
-	LatestAccess time.Time `json:"latest_access"`
+	LatestAccess time.Time `json:"latestAccess"`
 }
