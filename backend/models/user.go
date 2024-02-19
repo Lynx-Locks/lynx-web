@@ -15,12 +15,6 @@ type User struct {
 	WebauthnId uuid.UUID `gorm:"type:uuid" json:"webauthnId"`
 }
 
-type UserReq struct {
-	Name    string `json:"name,omitempty"`
-	Email   string `json:"email,omitempty"`
-	IsAdmin bool   `json:"is_admin,default;False"`
-}
-
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	webauthnId, err := uuid.NewUUID()
 	u.WebauthnId = webauthnId

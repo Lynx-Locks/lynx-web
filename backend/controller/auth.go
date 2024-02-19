@@ -23,7 +23,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	result := config.DB.First(&user)
 
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -45,7 +45,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	// store sesion data
 	result = config.DB.Create(&sessionData)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -81,7 +81,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	challenge := completeRegistration.Challenge
 	result := config.DB.Where("challenge = ?", challenge).First(&sessionData)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -95,7 +95,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	result = config.DB.First(&user)
 	config.DB.First(&user)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
