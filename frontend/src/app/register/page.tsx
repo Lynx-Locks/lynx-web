@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import styles from "./register.module.css";
 import { useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
-import { ResponseCredential, ServerData } from "@/types/webAuthn";
+import { RegisterRequest } from "@/types/webAuthn";
+import base64url from "base64url";
 
 enum LoadingStatus {
   Loading,
@@ -25,59 +26,65 @@ export default function RegisterUser() {
 
       // TODO: verify token is valid in backend during registerRequest
 
-      const resp = await axios.get(`/api/auth/register/request`);
+      const resp = await axios.post(`/api/auth/register/request`);
       if (resp.status === 200) {
         // Do webauthn stuff
-        const data: ServerData = resp.data;
+        const rawResp: RegisterRequest = resp.data;
         const options: PublicKeyCredentialCreationOptions = {
-          challenge: Uint8Array.from(data.challenge, (c) => c.charCodeAt(0)),
-          rp: data.rp,
+          challenge: Uint8Array.from(rawResp.challenge, (c) => c.charCodeAt(0)),
+          rp: rawResp.rp,
           user: {
-            id: Uint8Array.from(data.user.id, (c) => c.charCodeAt(0)), // TODO: change this when we use int id
-            name: data.user.name,
-            displayName: data.user.display_name,
+            id: Uint8Array.from(rawResp.user.id, (c) => c.charCodeAt(0)),
+            name: rawResp.user.name,
+            displayName: rawResp.user.displayName,
           },
-          pubKeyCredParams: data.pub_key_cred_params,
-          authenticatorSelection: {
-            authenticatorAttachment:
-              data.authenticator_selection.authenticatorAttachment,
-            requireResidentKey:
-              data.authenticator_selection.require_resident_ley,
-          },
+          pubKeyCredParams: rawResp.pubKeyCredParams,
+          authenticatorSelection: rawResp.authenticatorSelection,
+          timeout: rawResp.timeout,
         };
         // Prompt user to generate a passkey
         const cred: any = await navigator.credentials.create({
           publicKey: options,
         });
 
-        const credential: ResponseCredential = {
+        const credential: any = {
           id: cred?.id || "",
           type: cred?.type || "",
+          rawId: base64url.encode(cred?.id || ""),
         };
 
         // The authenticatorAttachment string in the PublicKeyCredential object is a new addition in WebAuthn L3.
         if (cred.authenticatorAttachment) {
-          credential.authenticator_attachment = cred.authenticatorAttachment;
+          credential.authenticatorAttachment = cred.authenticatorAttachment;
         }
 
-        // TODO: find out if we need this data
-
         // Base64URL encode some values.
-        // const clientDataJSON = base64url.encode(cred.response.clientDataJSON);
-        // const attestationObject = base64url.encode(
-        //   cred.response.attestationObject
-        // );
+        const clientDataJSONRaw = JSON.parse(
+          Buffer.from(cred.response.clientDataJSON).toString()
+        );
+        clientDataJSONRaw.challenge = base64url.decode(
+          clientDataJSONRaw.challenge
+        ); // need to decode challenge
 
-        // // Obtain transports.
-        // const transports = cred.response.getTransports
-        //   ? cred.response.getTransports()
-        //   : [];
+        const clientDataJSON = base64url.encode(
+          JSON.stringify(clientDataJSONRaw)
+        );
+        const attestationObject = base64url.encode(
+          cred.response.attestationObject
+        );
 
-        // credential.response = {
-        //   clientDataJSON,
-        //   attestationObject,
-        //   transports,
-        // };
+        // Obtain transports.
+        const transports = cred.response.getTransports
+          ? cred.response.getTransports()
+          : [];
+
+        credential.response = {
+          clientDataJSON,
+          attestationObject,
+          transports,
+        };
+
+        credential.challenge = rawResp.challenge;
 
         // send public key to backend
         const status = await axios.post(
