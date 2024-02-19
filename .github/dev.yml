@@ -1,0 +1,55 @@
+name: Development Workflow
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - master
+
+jobs:
+  frontend:
+    name: Validate Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'frontend'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '**/.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm run validate
+  backend:
+    name: Validate Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check code formatting
+        uses: Jerome1337/gofmt-action@v1.0.5
+        with:
+          gofmt-path: './backend'
+          gofmt-flags: '-l -d'
+  docker:
+    name: Validate Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: lynx-web:latest
