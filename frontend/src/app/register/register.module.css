@@ -1,15 +1,15 @@
 .container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		vertical-align: middle;
-		padding: 20px 10px;
-		min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  padding: 20px 10px;
+  min-height: 80vh;
 }
 
 .loader {
-	margin: auto;
+  margin: auto;
   border: 16px solid rgba(var(--foreground-rgb), 0.1);
   border-radius: 50%;
   border-top: 16px solid rgb(var(--button-rgb));
@@ -21,11 +21,19 @@
 
 /* Safari */
 @-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
