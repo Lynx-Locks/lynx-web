@@ -36,12 +36,6 @@ type WebAuthnOptions struct {
 	AuthenticatorSelection AuthenticatorSelection `json:"authenticator_selection"`
 }
 
-type UserReq struct {
-	Name    string `json:"name,omitempty"`
-	Email   string `json:"email,omitempty"`
-	IsAdmin bool   `json:"is_admin,string,default;False"`
-}
-
 type SigninReq struct {
 	RpId      string `json:"rp_id"`
 	Challenge []byte `json:"challenge"`
