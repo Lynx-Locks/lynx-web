@@ -56,8 +56,8 @@ func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) {
 	}
 }
 
-func GetById[T models.AllTables](w http.ResponseWriter, table T, Id string) {
-	result := config.DB.First(&table, Id)
+func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter, table T, param P) {
+	result := config.DB.Where(&param).First(&table)
 
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
