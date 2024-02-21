@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import styles from "./register.module.css";
 import { useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
-import { RegisterRequest } from "@/types/webAuthn";
+import { RegisterRequest, ResponseCredential } from "@/types/webAuthn";
 import base64url from "base64url";
 
 enum LoadingStatus {
@@ -47,10 +47,11 @@ export default function RegisterUser() {
           publicKey: options,
         });
 
-        const credential: any = {
+        const credential: ResponseCredential = {
           id: cred?.id || "",
-          rawId: cred?.id || "",
+          rawId: base64url.encode(cred?.id || ""),
           type: cred?.type || "",
+          challenge: rawResp.challenge,
         };
 
         // The authenticatorAttachment string in the PublicKeyCredential object is a new addition in WebAuthn L3.
@@ -83,8 +84,6 @@ export default function RegisterUser() {
           attestationObject,
           transports,
         };
-
-        credential.challenge = rawResp.challenge;
 
         // send public key to backend
         const status = await axios.post(

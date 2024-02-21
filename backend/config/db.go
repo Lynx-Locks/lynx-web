@@ -1,14 +1,13 @@
 package config
 
 import (
+	db2 "api/db"
 	"api/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
 )
-
-var DB *gorm.DB
 
 func Connect() {
 	dbpath := filepath.Join(".", "data")
@@ -25,5 +24,5 @@ func Connect() {
 	if err != nil {
 		panic("failed to migrate database")
 	}
-	DB = db
+	db2.DB = db
 }

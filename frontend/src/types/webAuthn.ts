@@ -7,6 +7,18 @@ export interface RegisterRequest {
   timeout: number;
 }
 
+export interface LoginRequest {
+  challenge: string;
+  allowCredentials: {
+    id: string;
+    transports: AuthenticatorTransport[];
+    type: PublicKeyCredentialType;
+  }[];
+  timeout: number;
+  rpId: string;
+  userVerification: UserVerificationRequirement;
+}
+
 
 export interface ResponseCredential {
   id: String;
@@ -21,4 +33,5 @@ export interface ResponseCredential {
     signature?: string;
     userHandle?: string;
   };
+  challenge: string;
 }

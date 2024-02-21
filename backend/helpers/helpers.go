@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"api/config"
+	"api/db"
 	"api/models"
 	"encoding/json"
 	"errors"
@@ -43,7 +43,7 @@ func DBErrorHandling(error error, w http.ResponseWriter) {
 }
 
 func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) {
-	result := config.DB.Find(&table)
+	result := db.DB.Find(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return
@@ -57,7 +57,7 @@ func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) {
 }
 
 func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter, table T, param P) {
-	result := config.DB.Where(&param).First(&table)
+	result := db.DB.Where(&param).First(&table)
 
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
@@ -81,7 +81,7 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 		return
 	}
 
-	result := config.DB.Create(&table)
+	result := db.DB.Create(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return
@@ -94,7 +94,7 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 }
 
 func DeleteById[T models.AllTables](w http.ResponseWriter, table T, Id string) {
-	result := config.DB.Unscoped().Delete(&table, Id)
+	result := db.DB.Unscoped().Delete(&table, Id)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return
