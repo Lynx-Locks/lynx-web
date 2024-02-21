@@ -58,7 +58,7 @@ type response struct {
 	Transports        []string `json:"transports"`
 }
 
-type CompleteRegistration struct {
+type CompleteWebauthnResponse struct {
 	Id                      string   `json:"id"`
 	RawId                   string   `json:"rawId"`
 	AuthenticatorAttachment string   `json:"authenticatorAttachment"`

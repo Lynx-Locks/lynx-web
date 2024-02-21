@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"api/config"
+	"api/db"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	users := []models.User{}
-	result := config.DB.Find(&users)
+	result := db.DB.Find(&users)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w, r)
 		return
@@ -29,7 +29,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	uId := chi.URLParam(r, "userId")
 	var user models.User
-	result := config.DB.First(&user, uId)
+	result := db.DB.First(&user, uId)
 
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w, r)
@@ -57,7 +57,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	dbUser := models.User{Name: user.Name,
 		Email: user.Email, IsAdmin: user.IsAdmin}
-	result := config.DB.Create(&dbUser)
+	result := db.DB.Create(&dbUser)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w, r)
 		return
@@ -74,7 +74,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	uId := chi.URLParam(r, "userId")
 	var user models.User
-	result := config.DB.Unscoped().Delete(&user, uId)
+	result := db.DB.Unscoped().Delete(&user, uId)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w, r)
 		return
