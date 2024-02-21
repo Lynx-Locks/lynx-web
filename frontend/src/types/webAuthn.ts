@@ -12,7 +12,7 @@ export interface ResponseCredential {
   id: String;
   rawId: String;
   type: String;
-  authenticator_attachment?: String;
+  authenticatorAttachment?: String;
   response?: {
     clientDataJSON: String;
     attestationObject?: String;
