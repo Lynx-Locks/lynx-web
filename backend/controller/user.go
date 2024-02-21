@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"strconv"
 )
 
 func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
@@ -14,8 +15,14 @@ func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	uId := chi.URLParam(r, "userId")
-	helpers.GetById(w, models.User{}, uId)
+
+	uId, err := strconv.ParseUint(chi.URLParam(r, "userId"), 10, 32)
+	if err != nil {
+		http.Error(w, "400", http.StatusBadRequest)
+		return
+	}
+	//extra uint is for 64 bit to 32 bit
+	helpers.GetFirstTable(w, models.User{}, models.Common{Id: uint(uId)})
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {

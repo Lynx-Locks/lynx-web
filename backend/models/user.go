@@ -11,7 +11,7 @@ type User struct {
 	Common
 	Name       string    `json:"name"`
 	Email      string    `gorm:"unique" json:"email"`
-	IsAdmin    bool      `json:"is_admin,default;False"`
+	IsAdmin    bool      `json:"isAdmin,default;False"`
 	WebauthnId uuid.UUID `gorm:"type:uuid" json:"webauthnId"`
 }
 
