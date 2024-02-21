@@ -2,6 +2,7 @@ package controller
 
 import (
 	"api/config"
+	"api/db"
 	"api/helpers"
 	"api/models"
 	"bytes"
@@ -20,7 +21,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	// TODO: parse uuid token from request body and fetch user id from activeTokens table
 	var user models.User
-	result := config.DB.First(&user)
+	result := db.DB.First(&user)
 
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
@@ -43,7 +44,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// store sesion data
-	result = config.DB.Create(&sessionData)
+	result = db.DB.Create(&sessionData)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return
@@ -59,16 +60,16 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	contents, _ := io.ReadAll(r.Body)
+	bodyContents, _ := io.ReadAll(r.Body)
 	err := r.Body.Close()
 	if err != nil {
 		log.Print("Cannot read body")
 		return
 	}
-	r.Body = io.NopCloser(bytes.NewReader(contents))
+	r.Body = io.NopCloser(bytes.NewReader(bodyContents))
 
-	var completeRegistration models.CompleteRegistration
-	err = json.NewDecoder(bytes.NewReader(contents)).Decode(&completeRegistration)
+	var completeRegistration models.CompleteWebauthnResponse
+	err = json.NewDecoder(bytes.NewReader(bodyContents)).Decode(&completeRegistration)
 
 	if err != nil {
 		log.Print(err)
@@ -77,9 +78,8 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	}
 	// Get the session data stored from the function above
 	var sessionData models.SessionData
-	config.DB.First(&sessionData)
 	challenge := completeRegistration.Challenge
-	result := config.DB.Where("challenge = ?", challenge).First(&sessionData)
+	result := db.DB.Where("challenge = ?", challenge).First(&sessionData)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return
@@ -92,8 +92,8 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// TODO: handle error
 	}
-	result = config.DB.First(&user)
-	config.DB.First(&user)
+	result = db.DB.First(&user)
+	db.DB.First(&user)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return
@@ -142,9 +142,9 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		Flags:           flags,
 		Authenticator:   authenticator,
 	}
-	result = config.DB.Create(&dbCredential)
+	result = db.DB.Create(&dbCredential)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -152,19 +152,16 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	key := models.Key{
 		UserId:    user.Id,
 		Roles:     nil, // TODO: use activeTokens table to find roles
-		PublicKey: string(credential.PublicKey),
+		PublicKey: credential.PublicKey,
 	}
 
-	result = config.DB.Create(&key) // pass pointer of data to Create
+	result = db.DB.Create(&key) // pass pointer of data to Create
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
 	// TODO: delete token from activeTokens table & session from sessions table
-
-	// If creation was successful, store the credential object
-	// Pseudocode to add the user credential.
 
 	errJson := json.NewEncoder(w).Encode("Registration Success")
 	if errJson != nil {
@@ -187,9 +184,9 @@ func SigninRequest(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	var user models.User
-	result := config.DB.First(&user, body.Id)
+	result := db.DB.First(&user, body.Id)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -216,9 +213,9 @@ func SigninRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// store sesion data
-	result = config.DB.Create(&sessionData)
+	result = db.DB.Create(&sessionData)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w, r)
+		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -230,57 +227,100 @@ func SigninRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func SigninResponse(w http.ResponseWriter, r *http.Request) {
-	//response := r.Body
-	//const response = req.body;
-	//const expectedChallenge = req.session.challenge;
-	//const expectedOrigin = getOrigin(req.get('User-Agent'));
-	//const expectedRPID = process.env.HOSTNAME;
-	//
-	//try {
-	//	// Find the credential stored to the database by the credential ID
-	//	const cred = Credentials.findById(response.id);
-	//	if (!cred) {
-	//	throw new Error('Credential not found.');
-	//}
-	//
-	//	// Find the user by the user ID stored to the credential
-	//	const user = Users.findById(cred.user_id);
-	//	if (!user) {
-	//	throw new Error('User not found.');
-	//}
-	//
-	//	// Base64URL decode some values
-	//	const authenticator = {
-	//	credentialPublicKey: isoBase64URL.toBuffer(cred.publicKey),
-	//	credentialID: isoBase64URL.toBuffer(cred.id),
-	//	transports: cred.transports,
-	//};
-	//
-	//	// Verify the credential
-	//	const { verified, authenticationInfo } = await verifyAuthenticationResponse({
-	//	response,
-	//	expectedChallenge,
-	//	expectedOrigin,
-	//	expectedRPID,
-	//	authenticator,
-	//	requireUserVerification: false,
-	//});
-	//
-	//	if (!verified) {
-	//	throw new Error('User verification failed.');
-	//}
-	//
-	//	// Don't forget to kill the challenge for this session.
-	//	delete req.session.challenge;
-	//
-	//	req.session.username = user.username;
-	//	req.session['signed-in'] = 'yes';
-	//
-	//	return res.json(user);
-	//} catch (e) {
-	//	delete req.session.challenge;
-	//
-	//	console.error(e);
-	//	return res.status(400).json({ error: e.message });
-	//}
+	w.Header().Set("Content-Type", "application/json")
+
+	contents, _ := io.ReadAll(r.Body)
+	err := r.Body.Close()
+	if err != nil {
+		log.Print("Cannot read body")
+		return
+	}
+	r.Body = io.NopCloser(bytes.NewReader(contents))
+
+	var completeRegistration models.CompleteWebauthnResponse
+	err = json.NewDecoder(bytes.NewReader(contents)).Decode(&completeRegistration)
+
+	if err != nil {
+		log.Print(err)
+		http.Error(w, "400", http.StatusBadRequest)
+		return
+	}
+	// Get the session data stored from the function above
+	var sessionData models.SessionData
+	challenge := completeRegistration.Response.ClientDataJson
+	result := db.DB.Where("challenge = ?", challenge).First(&sessionData)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w)
+		return
+	}
+
+	// Get the user
+	var user models.User
+	u := uuid.UUID{}
+	err = u.UnmarshalBinary(sessionData.UserId)
+	if err != nil {
+		// TODO: handle error
+	}
+	result = db.DB.First(&user)
+	db.DB.First(&user)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w)
+		return
+	}
+
+	session := webauthn2.SessionData{
+		Challenge:            sessionData.Challenge,
+		UserID:               sessionData.UserId,
+		AllowedCredentialIDs: sessionData.AllowedCredentialIds,
+		Expires:              sessionData.Expires,
+		UserVerification:     sessionData.UserVerification,
+		Extensions:           sessionData.Extensions,
+	}
+
+	credential, err := config.WebAuthn.FinishLogin(user, session, r)
+	if err != nil {
+		// TODO: Handle Error
+
+		return
+	}
+
+	// If login was successful, update the credential object
+	transports := make([]string, 0)
+	for _, val := range credential.Transport {
+		transports = append(transports, string(val))
+	}
+
+	flags := models.Flags{
+		credential.Flags.UserPresent,
+		credential.Flags.UserVerified,
+		credential.Flags.BackupEligible,
+		credential.Flags.BackupState,
+	}
+
+	authenticator := models.Authenticator{
+		AAGUID:       credential.Authenticator.AAGUID,
+		SignCount:    credential.Authenticator.SignCount,
+		CloneWarning: credential.Authenticator.CloneWarning,
+		Attachment:   string(credential.Authenticator.Attachment),
+	}
+
+	dbCredential := models.Credential{
+		Id:              credential.ID,
+		PublicKey:       credential.PublicKey,
+		AttestationType: credential.AttestationType,
+		Transport:       transports,
+		Flags:           flags,
+		Authenticator:   authenticator,
+	}
+	result = db.DB.Save(&dbCredential)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w)
+		return
+	}
+
+	errJson := json.NewEncoder(w).Encode("Login Success")
+	if errJson != nil {
+		http.Error(w, "500", http.StatusInternalServerError)
+		return
+	}
 }

@@ -12,9 +12,9 @@ var (
 
 func init() {
 	wconfig := &webauthn.Config{
-		RPDisplayName: "Lynx Locks",                      // Display Name for your site
-		RPID:          "localhost",                       // Generally the FQDN for your site
-		RPOrigins:     []string{"http://localhost:3000"}, // The origin URLs allowed for WebAuthn requests
+		RPDisplayName: "Lynx Locks",          // Display Name for your site
+		RPID:          "localhost",           // Generally the FQDN for your site
+		RPOrigins:     []string{"localhost"}, // The origin URLs allowed for WebAuthn requests
 	}
 
 	if WebAuthn, err = webauthn.New(wconfig); err != nil {

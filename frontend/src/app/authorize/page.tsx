@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "@/axios/client";
 import base64url from "base64url";
-import { ResponseCredential } from "@/types/webAuthn";
+import { LoginRequest, ResponseCredential } from "@/types/webAuthn";
 
 // endpoints: /auth/signin/request
 
@@ -32,24 +32,41 @@ export default function AuthorizeUser() {
 
       if (resp.status === 200) {
         // Do webauthn stuff
-        debugger;
-        const options = resp.data;
-        options.challenge = base64url.decode(options.data.challenge);
-        options.allowCredentials = [];
+        const rawResp: LoginRequest = resp.data;
+        const options: PublicKeyCredentialRequestOptions = {
+          // allowCredentials: rawResp.allowCredentials.map((cred) => (
+          //    {
+          //     id: Uint8Array.from(cred.id, (c) => c.charCodeAt(0)),
+          //     type: cred.type,
+          //     transports: cred.transports,}
+          // )          ),
+          allowCredentials: [], 
+          challenge: Uint8Array.from(rawResp.challenge, (c) => c.charCodeAt(0)),
+          rpId: rawResp.rpId,
+          timeout: rawResp.timeout,
+          userVerification: rawResp.userVerification
+        }
 
         // Invoke the WebAuthn get() method.
+        console.log("HERE")
         const cred: any = await navigator.credentials.get({
           publicKey: options,
           // Request a conditional UI.
           mediation: "conditional",
         });
-
-        // TODO: Add an ability to authenticate with a passkey: Verify the credential.
+        console.log("HERE")
+        // Add an ability to authenticate with a passkey: Verify the credential.
         const credential: ResponseCredential = {
           id: cred.id,
-          rawId: cred.id, // Pass a Base64URL encoded ID string.
+          rawId: base64url.encode(cred?.id || ""), // Pass a Base64URL encoded ID string.
           type: cred.type,
+          challenge: rawResp.challenge
         };
+
+        console.log("got credential", credential);
+        console.log(cred)
+        console.log(rawResp)
+        debugger;
 
         // Base64URL encode some values.
         const clientDataJSON = base64url.encode(cred.response.clientDataJSON);
@@ -66,6 +83,7 @@ export default function AuthorizeUser() {
           userHandle,
         };
 
+        console.log(credential);
         debugger;
 
         // verify the credential
@@ -83,7 +101,7 @@ export default function AuthorizeUser() {
       }
     }
     f();
-  }, [searchParams]);
+  }, []);
 
   return (
     <div>

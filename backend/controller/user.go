@@ -4,9 +4,10 @@ import (
 	"api/helpers"
 	"api/models"
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
