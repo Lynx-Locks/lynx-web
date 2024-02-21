@@ -26,7 +26,7 @@ export default function RegisterUser() {
 
       // TODO: verify token is valid in backend during registerRequest
 
-      const resp = await axios.post(`/api/auth/register/request`);
+      const resp = await axios.post(`/auth/register/request`);
       if (resp.status === 200) {
         // Do webauthn stuff
         const rawResp: RegisterRequest = resp.data;
@@ -49,9 +49,8 @@ export default function RegisterUser() {
 
         const credential: any = {
           id: cred?.id || "",
-          rawId: cred?.rawId || "",
+          rawId: cred?.id || "",
           type: cred?.type || "",
-          rawId: base64url.encode(cred?.id || ""),
         };
 
         // The authenticatorAttachment string in the PublicKeyCredential object is a new addition in WebAuthn L3.
@@ -89,7 +88,7 @@ export default function RegisterUser() {
 
         // send public key to backend
         const status = await axios.post(
-          "/api/auth/register/response",
+          "/auth/register/response",
           credential,
         );
         setLoadingStatus(LoadingStatus.Success);

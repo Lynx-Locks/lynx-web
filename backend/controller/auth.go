@@ -5,14 +5,12 @@ import (
 	"api/helpers"
 	"api/models"
 	"bytes"
-	"crypto/rand"
 	"encoding/json"
+	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
+	"github.com/google/uuid"
 	"io"
 	"log"
 	"net/http"
-
-	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/google/uuid"
 )
 
 // https://developers.google.com/codelabs/passkey-form-autofill
@@ -111,21 +109,62 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	credential, err := config.WebAuthn.FinishRegistration(user, session, r)
-	println(credential)
 	if err != nil {
 		// TODO: Handle Error
 
 		return
 	}
 
+	transports := make([]string, 0)
+	for _, val := range credential.Transport {
+		transports = append(transports, string(val))
+	}
+
+	flags := models.Flags{
+		credential.Flags.UserPresent,
+		credential.Flags.UserVerified,
+		credential.Flags.BackupEligible,
+		credential.Flags.BackupState,
+	}
+
+	authenticator := models.Authenticator{
+		AAGUID:       credential.Authenticator.AAGUID,
+		SignCount:    credential.Authenticator.SignCount,
+		CloneWarning: credential.Authenticator.CloneWarning,
+		Attachment:   string(credential.Authenticator.Attachment),
+	}
+
+	dbCredential := models.Credential{
+		Id:              credential.ID,
+		PublicKey:       credential.PublicKey,
+		AttestationType: credential.AttestationType,
+		Transport:       transports,
+		Flags:           flags,
+		Authenticator:   authenticator,
+	}
+	result = config.DB.Create(&dbCredential)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w, r)
+		return
+	}
+
 	// TODO: add public key to DB
+	key := models.Key{
+		UserId:    user.Id,
+		Roles:     nil, // TODO: use activeTokens table to find roles
+		PublicKey: string(credential.PublicKey),
+	}
+
+	result = config.DB.Create(&key) // pass pointer of data to Create
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w, r)
+		return
+	}
 
 	// TODO: delete token from activeTokens table & session from sessions table
 
 	// If creation was successful, store the credential object
 	// Pseudocode to add the user credential.
-	// user.AddCredential(credential)
-	// datastore.SaveUser(user)
 
 	errJson := json.NewEncoder(w).Encode("Registration Success")
 	if errJson != nil {
@@ -139,20 +178,51 @@ func GetKeys(w http.ResponseWriter, r *http.Request) {
 }
 
 func SigninRequest(w http.ResponseWriter, r *http.Request) {
-	challenge := make([]byte, 8) // maybe needs to be 16?
-	_, err := rand.Read(challenge)
+	w.Header().Set("Content-Type", "application/json")
+
+	// Find the user
+	body := struct {
+		Id uint `json:"id"`
+	}{}
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	var user models.User
+	result := config.DB.First(&user, body.Id)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w, r)
+		return
+	}
+
+	options, session, err := config.WebAuthn.BeginLogin(user)
+	if err != nil {
+		// Handle Error and return.
+
+		return
+	}
+
+	// store the session values
+	sessionData := models.SessionData{
+		Challenge:            session.Challenge,
+		UserId:               session.UserID,
+		AllowedCredentialIds: session.AllowedCredentialIDs,
+		Expires:              session.Expires,
+		UserVerification:     session.UserVerification,
+		Extensions:           session.Extensions,
+	}
+
+	// handle errors
 	if err != nil {
 		// TODO: handle error
 	}
 
-	rpId := "localhost" // TODO: put into environment variable
-
-	signinReq := models.SigninReq{
-		RpId:      rpId,
-		Challenge: challenge,
+	// store sesion data
+	result = config.DB.Create(&sessionData)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w, r)
+		return
 	}
 
-	errJson := json.NewEncoder(w).Encode(signinReq)
+	errJson := json.NewEncoder(w).Encode(&options.Response)
 	if errJson != nil {
 		http.Error(w, "500", http.StatusInternalServerError)
 		return
