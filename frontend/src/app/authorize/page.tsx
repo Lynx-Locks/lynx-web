@@ -26,10 +26,13 @@ export default function AuthorizeUser() {
 
       // TODO: decode token to get door_id & check if token is valid
 
-      const resp = await axios.post("/auth/signin/request");
+      const resp = await axios.post("/auth/signin/request", {
+        id: 1,
+      });
 
       if (resp.status === 200) {
         // Do webauthn stuff
+        debugger;
         const options = resp.data;
         options.challenge = base64url.decode(options.data.challenge);
         options.allowCredentials = [];
