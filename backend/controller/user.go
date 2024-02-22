@@ -73,8 +73,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	uId := chi.URLParam(r, "userId")
-	var user models.User
-	result := db.DB.Unscoped().Delete(&user, uId)
+	result := db.DB.Unscoped().Delete(&models.User{}, uId)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w, r)
 		return
