@@ -11,27 +11,26 @@ import (
 
 type User struct {
 	Common
-	Name       string    `json:"name"`
-	Email      string    `gorm:"unique" json:"email"`
-	IsAdmin    bool      `json:"isAdmin,default;False"`
-	WebauthnId uuid.UUID `gorm:"type:uuid" json:"webauthnId"`
+	Name       string `json:"name"`
+	Email      string `gorm:"unique" json:"email"`
+	IsAdmin    bool   `json:"isAdmin,default;False"`
+	WebauthnId []byte `gorm:"serializer:json" json:"webauthnId"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	webauthnId, err := uuid.NewUUID()
-	u.WebauthnId = webauthnId
 	if err != nil {
 		err = errors.New("can't save invalid data")
+	}
+	u.WebauthnId, err = webauthnId.MarshalBinary() // convert to byte array
+	if err != nil {
+		err = errors.New("can't marshal to binary")
 	}
 	return
 }
 
 func (user User) WebAuthnID() []byte {
-	bin, err := user.WebauthnId.MarshalBinary()
-	if err != nil {
-		// TODO: handle err
-	}
-	return bin
+	return user.WebauthnId
 }
 
 func (user User) WebAuthnName() string {
@@ -52,9 +51,7 @@ func (user User) WebAuthnCredentials() []webauthn.Credential {
 	result := db.DB.Table(
 		"credentials",
 	).Joins(
-		"LEFT JOIN keys ON keys.public_key = credentials.public_key",
-	).Joins(
-		"LEFT JOIN users ON keys.user_id = users.id",
+		"LEFT JOIN users ON credentials.user_id = users.id",
 	).Find(&credentials)
 
 	if result.Error != nil {
@@ -69,7 +66,7 @@ func (user User) WebAuthnCredentials() []webauthn.Credential {
 			transport = append(transport, protocol.AuthenticatorTransport(tp))
 		}
 		credentialsFinal = append(credentialsFinal, webauthn.Credential{
-			ID:              cred.Id,
+			ID:              cred.WebauthnId,
 			PublicKey:       cred.PublicKey,
 			AttestationType: cred.AttestationType,
 			Transport:       transport,
