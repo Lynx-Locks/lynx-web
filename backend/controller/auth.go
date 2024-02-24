@@ -70,8 +70,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		UserId: user.WebAuthnID(),
 	}
 	result = db.DB.First(&sessionData)
-	//db.DB.Where("user_id = ?", sessionData.UserId).Delete(&models.SessionData{}) // TODO: FIX THIS @adam_barroso
-	db.DB.Delete(models.SessionData{UserId: user.WebAuthnID()})
+	db.DB.Delete(&sessionData)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return
@@ -203,9 +202,11 @@ func SigninResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the session data stored from the function above
-	var sessionData models.SessionData
-	result = db.DB.Where("user_id = ?", user.Id).Delete(&sessionData)
-	//db.DB.Unscoped().Delete(&sessionData)
+	sessionData := models.SessionData{
+		UserId: user.WebAuthnID(),
+	}
+	result = db.DB.First(&sessionData)
+	db.DB.Delete(&sessionData)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return

@@ -31,31 +31,12 @@ export default function AuthorizeUser() {
 
     if (resp.status === 200) {
       // Do webauthn stuff
-      const rawResp: LoginRequest = resp.data;
-      console.log(rawResp)
-      debugger;
-      const options: PublicKeyCredentialRequestOptionsJSON = {
-        // allowCredentials: rawResp.allowCredentials.map((cred) => (
-        //    {
-        //     id:cred.id,
-        //     type: cred.type,
-        //     transports: cred.transports,}
-        // )          ),
-        challenge: rawResp.challenge,
-        rpId: rawResp.rpId,
-        timeout: rawResp.timeout,
-        userVerification: rawResp.userVerification
-      }
-
+      const options: LoginRequest = resp.data;
       const credential = await startAuthentication(options);
-
-      console.log(credential);
-      debugger;
-      
       // verify the credential
       const verifyResp = await axios.post("/auth/signin/response", {
         ...credential,
-        challenge: rawResp.challenge,
+        challenge: options.challenge,
       });
 
       if (verifyResp.status === 200) {
