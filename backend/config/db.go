@@ -20,7 +20,7 @@ func Connect() {
 		panic("failed to connect database")
 	}
 	// Migrate the schema
-	db.AutoMigrate(&models.User{}, &models.Credential{}, &models.Role{}, &models.ActiveTokens{}, &models.Door{}, &models.SessionData{}, &models.Credential{})
+	db.AutoMigrate(&models.User{}, &models.Credential{}, &models.Role{}, &models.ActiveTokens{}, &models.Door{}, &models.SessionData{})
 	if err != nil {
 		panic("failed to migrate database")
 	}

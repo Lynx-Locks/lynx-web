@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import Modal from "@/components/modal/modal";
-import { SubmitButon } from "@/components/button/button";
+import { SubmitButton } from "@/components/button/button";
 
 export default function AdminTable({ users }: { users: User[] }) {
   const [settingsModal, setSettingsModal] = useState(-1);
@@ -93,7 +93,7 @@ export default function AdminTable({ users }: { users: User[] }) {
                 </button>
                 <button className={styles.settingsButton}>Delete User</button>
               </div>
-              <SubmitButon
+              <SubmitButton
                 text="Submit Changes"
                 onClick={() => setSettingsModal(-1)}
               />

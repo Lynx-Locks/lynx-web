@@ -15,7 +15,7 @@ export function AddButton({ text, onClick }: ButtonProps) {
   );
 }
 
-export function SubmitButon({ text, onClick }: ButtonProps) {
+export function SubmitButton({ text, onClick }: ButtonProps) {
   return (
     <button className={styles.submitButton} onClick={onClick}>
       {text}

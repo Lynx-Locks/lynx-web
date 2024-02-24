@@ -1,60 +1,63 @@
 "use client";
 
-import { startAuthentication } from '@simplewebauthn/browser';
+import { useState } from "react";
+import { startAuthentication } from "@simplewebauthn/browser";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import axios from "@/axios/client";
-import base64url from "base64url";
-import { LoginRequest, ResponseCredential } from "@/types/webAuthn";
-import { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types';
-
-enum LoadingStatus {
-  Loading,
-  Success,
-  Error,
-}
+import LoadingStatus from "@/types/loadingStatus";
+import { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
+import { SubmitButton } from "@/components/button/button";
+import styles from "./authorize.module.css";
+import Loader from "@/components/loader/loader";
 
 export default function AuthorizeUser() {
   const searchParams = useSearchParams();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
-    LoadingStatus.Loading
+    LoadingStatus.Nil
   );
 
-  async function f() {
+  async function loginWithPasskey() {
+    setLoadingStatus(LoadingStatus.Loading);
     const token = searchParams.get("token");
 
     // TODO: decode token to get door_id & check if token is valid
 
-    const resp = await axios.post("/auth/signin/request", {
-      id: 1,
-    });
-
-    if (resp.status === 200) {
+    try {
+      const resp = await axios.post(`/auth/signin/request/${token}`);
       // Do webauthn stuff
-      const options: LoginRequest = resp.data;
+      const options: PublicKeyCredentialRequestOptionsJSON = resp.data;
+      // Prompt user to user passkey
       const credential = await startAuthentication(options);
       // verify the credential
-      const verifyResp = await axios.post("/auth/signin/response", {
+      const verifyResp = await axios.post(`/auth/signin/response/${token}`, {
         ...credential,
         challenge: options.challenge,
       });
 
       if (verifyResp.status === 200) {
         setLoadingStatus(LoadingStatus.Success);
-      } else {
-        setLoadingStatus(LoadingStatus.Error);
       }
-    } else {
+    } catch (error) {
+      console.error(error);
       setLoadingStatus(LoadingStatus.Error);
     }
   }
 
   return (
-    <div>
-      <button onClick={()=>f()}> HERE</button>
-      {loadingStatus === LoadingStatus.Loading && <p>Loading...</p>}
-      {loadingStatus === LoadingStatus.Success && <p>Success</p>}
-      {loadingStatus === LoadingStatus.Error && <p>Error</p>}
+    <div className={styles.container}>
+      {loadingStatus === LoadingStatus.Nil && (
+        <SubmitButton onClick={() => loginWithPasskey()} text="Log In" />
+      )}
+      {loadingStatus === LoadingStatus.Loading && <Loader />}
+      {loadingStatus === LoadingStatus.Success && (
+        <div>Success. You may now close this window.</div>
+      )}
+      {loadingStatus === LoadingStatus.Error && (
+        <div>
+          Error. Something went wrong with your request. Please verify your
+          credentials and contact your administrator if issue persists.
+        </div>
+      )}
     </div>
   );
 }
