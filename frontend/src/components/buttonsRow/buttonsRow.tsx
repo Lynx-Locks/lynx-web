@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./buttonsRow.module.css";
-import { AddButton, SubmitButon } from "@/components/button/button";
+import { AddButton, SubmitButton } from "@/components/button/button";
 import Modal from "@/components/modal/modal";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 
@@ -105,7 +105,7 @@ export default function ButtonRow() {
         subheader="Role"
         isMulti
       />
-      <SubmitButon text="Submit" onClick={() => setNewKeyModal(false)} />
+      <SubmitButton text="Submit" onClick={() => setNewKeyModal(false)} />
     </div>
   );
 
@@ -123,7 +123,7 @@ export default function ButtonRow() {
         subheader="Entrypoints"
         isMulti
       />
-      <SubmitButon text="Submit" onClick={() => setNewRoleModal(false)} />
+      <SubmitButton text="Submit" onClick={() => setNewRoleModal(false)} />
     </div>
   );
 

@@ -11,5 +11,5 @@ type Common struct {
 }
 
 type AllTables interface {
-	User | Role | Door | Key | Common
+	User | Role | Door | Credential | Common
 }

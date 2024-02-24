@@ -1,55 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./register.module.css";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
 import { startRegistration } from "@simplewebauthn/browser";
 import { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
-
-enum LoadingStatus {
-  Loading,
-  Success,
-  Error,
-}
+import { SubmitButton } from "@/components/button/button";
+import LoadingStatus from "@/types/loadingStatus";
+import styles from "./register.module.css";
+import Loader from "@/components/loader/loader";
 
 export default function RegisterUser() {
   const searchParams = useSearchParams();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
-    LoadingStatus.Loading,
+    LoadingStatus.Nil
   );
 
-  async function f() {
-    // Decode token & check validity
+  async function registerPasskey() {
+    setLoadingStatus(LoadingStatus.Loading);
     const token = searchParams.get("token");
 
+    // Decode token & check validity
     // TODO: verify token is valid in backend during registerRequest
-
-    const resp = await axios.post(`/auth/register/request`);
-    if (resp.status === 200) {
+    try {
+      const resp = await axios.post(`/auth/register/request/${token}`);
       // Do webauthn stuff
       const options: PublicKeyCredentialCreationOptionsJSON = resp.data;
-      console.log(options);
       // Prompt user to generate a passkey
       const credential = await startRegistration(options);
-
-      console.log(credential)
       // send public key to backend
-      const status = await axios.post(
-        "/auth/register/response", {
-          ...credential,
-          challenge: options.challenge,
-        }
-      );
-      setLoadingStatus(LoadingStatus.Success);
-    } else {
+      const status = await axios.post(`/auth/register/response/${token}`, {
+        ...credential,
+        challenge: options.challenge,
+      });
+      if (status.status === 200) {
+        setLoadingStatus(LoadingStatus.Success);
+      }
+    } catch (error) {
+      console.error(error);
       setLoadingStatus(LoadingStatus.Error);
     }
   }
 
   return (
     <div className={styles.container}>
-      <button onClick={()=>f()}> HERE</button>
+      {loadingStatus === LoadingStatus.Nil && (
+        <SubmitButton
+          onClick={() => registerPasskey()}
+          text="Create a New Passkey"
+        />
+      )}
+      {loadingStatus === LoadingStatus.Loading && <Loader />}
       {loadingStatus === LoadingStatus.Success && (
         <div>Success. You may now close this window.</div>
       )}
@@ -58,9 +59,6 @@ export default function RegisterUser() {
           Error. Something went wrong with your request. Please contact your
           administrator.
         </div>
-      )}
-      {loadingStatus === LoadingStatus.Loading && (
-        <div className={styles.loader} />
       )}
     </div>
   );

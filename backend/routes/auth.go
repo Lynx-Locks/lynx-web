@@ -8,9 +8,9 @@ import (
 
 func AuthRoute() chi.Router {
 	r := chi.NewRouter()
-	r.Post("/register/request", controller.RegisterRequest)
-	r.Post("/register/response", controller.RegisterResponse)
-	r.Post("/signin/request", controller.SigninRequest)
-	r.Post("/signin/response", controller.SigninResponse)
+	r.Post("/register/request/{userId}", controller.RegisterRequest)
+	r.Post("/register/response/{userId}", controller.RegisterResponse)
+	r.Post("/signin/request/{userId}", controller.SigninRequest)
+	r.Post("/signin/response/{userId}", controller.SigninResponse)
 	return r
 }
