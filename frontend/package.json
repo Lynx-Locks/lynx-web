@@ -19,6 +19,8 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@simplewebauthn/browser": "^9.0.1",
+    "@simplewebauthn/types": "^9.0.1",
     "axios": "^1.6.7",
     "base64url": "^3.0.1",
     "next": "14.0.4",
