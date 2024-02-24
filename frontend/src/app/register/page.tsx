@@ -13,7 +13,7 @@ import Loader from "@/components/loader/loader";
 export default function RegisterUser() {
   const searchParams = useSearchParams();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
-    LoadingStatus.Nil
+    LoadingStatus.Nil,
   );
 
   async function registerPasskey() {
