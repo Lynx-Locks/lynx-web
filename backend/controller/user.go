@@ -4,10 +4,8 @@ import (
 	"api/helpers"
 	"api/models"
 	"encoding/json"
-	"net/http"
-	"strconv"
-
 	"github.com/go-chi/chi/v5"
+	"net/http"
 )
 
 func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
@@ -20,14 +18,10 @@ func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uId, err := strconv.ParseUint(chi.URLParam(r, "userId"), 10, 32)
-	if err != nil {
-		http.Error(w, "400", http.StatusBadRequest)
-		return
-	}
+	err, uId := helpers.ParseInt(w, r, "userId")
 	//extra uint is for 64 bit to 32 bit
-	err2, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uint(uId)})
-	if err2 == nil {
+	err, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uId})
+	if err == nil {
 		helpers.JsonWriter(w, user)
 	}
 }
@@ -38,8 +32,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	// essentially reset if the user inputted anything to common as it should not be editable
 	user.Common = models.Common{}
-	err2, user := helpers.CreateNewRecord(w, user, err)
-	if err2 == nil {
+	err, user = helpers.CreateNewRecord(w, user, err)
+	if err == nil {
 		helpers.JsonWriter(w, user)
 	}
 }

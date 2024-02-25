@@ -5,10 +5,12 @@ import (
 	"api/models"
 	"encoding/json"
 	"errors"
+	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"reflect"
+	"strconv"
 )
 
 func CheckErr(err error) {
@@ -36,16 +38,16 @@ func CheckEmptyString(s interface{}) bool {
 }
 func DBErrorHandling(error error, w http.ResponseWriter) {
 	if errors.Is(error, gorm.ErrRecordNotFound) {
-		http.Error(w, "404", http.StatusBadRequest)
+		http.Error(w, "404 record not found", http.StatusNotFound)
 	} else {
-		http.Error(w, "500", http.StatusInternalServerError)
+		http.Error(w, "500 unable to handle request", http.StatusInternalServerError)
 	}
 }
 
 func JsonWriter(w http.ResponseWriter, table interface{}) {
 	errJson := json.NewEncoder(w).Encode(&table)
 	if errJson != nil {
-		http.Error(w, "500", http.StatusInternalServerError)
+		http.Error(w, "500 unable to encode response", http.StatusInternalServerError)
 	}
 }
 
@@ -77,7 +79,7 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 		} else {
 			log.Print("Request contains empty string params")
 		}
-		http.Error(w, "400", http.StatusBadRequest)
+		http.Error(w, "400 malformed request", http.StatusBadRequest)
 		return errors.New("400"), table
 	}
 
@@ -96,8 +98,17 @@ func DeleteById[T models.AllTables](w http.ResponseWriter, table T, Id string) e
 		return result.Error
 	}
 	if result.RowsAffected < 1 {
-		http.Error(w, "404", http.StatusBadRequest)
+		http.Error(w, "404 record not found", http.StatusNotFound)
 		return errors.New("404")
 	}
 	return nil
+}
+
+func ParseInt(w http.ResponseWriter, r *http.Request, key string) (error, uint) {
+	uId, err := strconv.ParseUint(chi.URLParam(r, key), 10, 32)
+	if err != nil {
+		http.Error(w, "400 failed integer parsing", http.StatusBadRequest)
+		return errors.New("400"), 0
+	}
+	return nil, uint(uId)
 }

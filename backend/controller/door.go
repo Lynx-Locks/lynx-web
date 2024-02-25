@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"api/config"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -11,9 +10,10 @@ import (
 
 func GetAllDoors(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	doors := []models.Door{}
-	config.DB.Preload("Roles").Find(&doors)
-	helpers.JsonWriter(w, doors)
+	err, doors := helpers.GetAllTable(w, []models.Door{})
+	if err == nil {
+		helpers.JsonWriter(w, doors)
+	}
 }
 
 func CreateDoor(w http.ResponseWriter, r *http.Request) {
@@ -22,8 +22,8 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&role)
 	// essentially reset if the user inputted anything to common as it should not be editable
 	role.Common = models.Common{}
-	err2, user := helpers.CreateNewRecord(w, role, err)
-	if err2 == nil {
+	err, user := helpers.CreateNewRecord(w, role, err)
+	if err == nil {
 		helpers.JsonWriter(w, user)
 	}
 }
