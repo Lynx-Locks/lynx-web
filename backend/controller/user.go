@@ -12,7 +12,10 @@ import (
 
 func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	helpers.GetAllTable(w, []models.User{})
+	err, users := helpers.GetAllTable(w, []models.User{})
+	if err == nil {
+		helpers.JsonWriter(w, users)
+	}
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -23,7 +26,10 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//extra uint is for 64 bit to 32 bit
-	helpers.GetFirstTable(w, models.User{}, models.Common{Id: uint(uId)})
+	err2, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uint(uId)})
+	if err2 == nil {
+		helpers.JsonWriter(w, user)
+	}
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -32,11 +38,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	// essentially reset if the user inputted anything to common as it should not be editable
 	user.Common = models.Common{}
-	helpers.CreateNewRecord(w, user, err)
+	err2, user := helpers.CreateNewRecord(w, user, err)
+	if err2 == nil {
+		helpers.JsonWriter(w, user)
+	}
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	uId := chi.URLParam(r, "userId")
-	helpers.DeleteById(w, models.User{}, uId)
+	err := helpers.DeleteById(w, models.User{}, uId)
+	if err == nil {
+		w.WriteHeader(200)
+	}
 }
