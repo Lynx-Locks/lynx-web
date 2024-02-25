@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"api/db"
+	"api/config"
 	"api/models"
 	"encoding/json"
 	"errors"
@@ -42,35 +42,35 @@ func DBErrorHandling(error error, w http.ResponseWriter) {
 	}
 }
 
-func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) {
-	result := db.DB.Find(&table)
-	if result.Error != nil {
-		DBErrorHandling(result.Error, w)
-		return
-	}
-	//go yells at you if you don't error check this, better to be safe
+func JsonWriter(w http.ResponseWriter, table interface{}) {
 	errJson := json.NewEncoder(w).Encode(&table)
 	if errJson != nil {
 		http.Error(w, "500", http.StatusInternalServerError)
-		return
 	}
 }
 
-func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter, table T, param P) {
-	result := db.DB.Where(&param).First(&table)
+func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) (error, []T) {
+	result := config.DB.Omit("Doors").Find(&table)
+	if result.Error != nil {
+		DBErrorHandling(result.Error, w)
+		return result.Error, table
+	}
+	return nil, table
+
+}
+
+func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter, table T, param P) (error, T) {
+	result := config.DB.Where(&param).First(&table)
 
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
-		return
+		return result.Error, table
 	}
-	errJson := json.NewEncoder(w).Encode(&table)
-	if errJson != nil {
-		http.Error(w, "500", http.StatusInternalServerError)
-		return
-	}
+	return nil, table
+
 }
 
-func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err error) {
+func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err error) (error, T) {
 	if err != nil || !CheckEmptyString(table) {
 		if err != nil {
 			log.Print(err)
@@ -78,30 +78,26 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 			log.Print("Request contains empty string params")
 		}
 		http.Error(w, "400", http.StatusBadRequest)
-		return
+		return errors.New("400"), table
 	}
 
-	result := db.DB.Create(&table)
+	result := config.DB.Create(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
-		return
+		return result.Error, table
 	}
-	errJson := json.NewEncoder(w).Encode(table)
-	if errJson != nil {
-		http.Error(w, "500", http.StatusInternalServerError)
-		return
-	}
+	return nil, table
 }
 
-func DeleteById[T models.AllTables](w http.ResponseWriter, table T, Id string) {
-	result := db.DB.Unscoped().Delete(&table, Id)
+func DeleteById[T models.AllTables](w http.ResponseWriter, table T, Id string) error {
+	result := config.DB.Unscoped().Delete(&table, Id)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
-		return
+		return result.Error
 	}
 	if result.RowsAffected < 1 {
 		http.Error(w, "404", http.StatusBadRequest)
-		return
+		return errors.New("404")
 	}
-	w.WriteHeader(200)
+	return nil
 }

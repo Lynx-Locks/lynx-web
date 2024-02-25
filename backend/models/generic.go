@@ -5,7 +5,7 @@ import (
 )
 
 type Common struct {
-	Id        uint      `json:"id" gorm:"->"`
+	Id        uint      `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
