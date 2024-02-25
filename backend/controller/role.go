@@ -6,9 +6,7 @@ import (
 	"api/models"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
-	"log"
 	"net/http"
-	"strconv"
 )
 
 func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
@@ -17,19 +15,20 @@ func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
 	if err == nil {
 		helpers.JsonWriter(w, roles)
 	}
-	roles = []models.Role{}
-	config.DB.Preload("Doors").Find(&roles)
-	helpers.JsonWriter(w, roles)
+
+	//for viewing all connections
+	//roles = []models.Role{}
+	//config.DB.Preload("Doors").Find(&roles)
+	//helpers.JsonWriter(w, roles)
 }
 
 func CreateRole(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var role models.Role
 	err := json.NewDecoder(r.Body).Decode(&role)
-	// essentially reset if the user inputted anything to common as it should not be editable
 	role.Common = models.Common{}
-	err2, role := helpers.CreateNewRecord(w, role, err)
-	if err2 == nil {
+	err, role = helpers.CreateNewRecord(w, role, err)
+	if err == nil {
 		helpers.JsonWriter(w, role)
 	}
 }
@@ -45,50 +44,55 @@ func DeleteRole(w http.ResponseWriter, r *http.Request) {
 
 func UpsertDoorAssociation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	rId, err := strconv.ParseUint(chi.URLParam(r, "roleId"), 10, 32)
+	err, rId := helpers.ParseInt(w, r, "roleId")
 	if err != nil {
-		http.Error(w, "400", http.StatusBadRequest)
 		return
 	}
 	doorIDs := []uint{}
 	err = json.NewDecoder(r.Body).Decode(&doorIDs)
 	if err != nil {
-		http.Error(w, "400", http.StatusBadRequest)
+		http.Error(w, "400 malformed doorIDs", http.StatusBadRequest)
 		return
 	}
 	doors := []models.Door{}
 	json.NewEncoder(w).Encode(&doors)
 	if len(doorIDs) == 0 {
-		log.Println("HUH")
-		http.Error(w, "400", http.StatusBadRequest)
+		http.Error(w, "400 missing door ids", http.StatusBadRequest)
 		return
 	}
 	results := config.DB.Where(&doorIDs).Find(&doors)
 	json.NewEncoder(w).Encode(&results.RowsAffected)
 	if results.RowsAffected != int64(len(doorIDs)) {
-		http.Error(w, "400", http.StatusBadRequest)
+		http.Error(w, "40 one or more invalid door id/s", http.StatusBadRequest)
 		return
 	}
 
 	err, role := helpers.GetFirstTable(w, models.Role{}, models.Role{Common: models.Common{Id: uint(rId)}})
 	if err != nil {
+		helpers.DBErrorHandling(err, w)
 		return
 	}
 
-	config.DB.Debug().Model(&role).Association("Doors").Replace(&doors)
-	json.NewEncoder(w).Encode(&role)
+	err = config.DB.Model(&role).Association("Doors").Replace(&doors)
+	if err != nil {
+		helpers.DBErrorHandling(err, w)
+		return
+	}
+	helpers.JsonWriter(w, &role)
 }
 
 func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	rId, err := strconv.ParseUint(chi.URLParam(r, "roleId"), 10, 32)
+	err, rId := helpers.ParseInt(w, r, "roleId")
 	if err != nil {
-		http.Error(w, "400", http.StatusBadRequest)
 		return
 	}
-	role := models.Role{Common: models.Common{Id: uint(rId)}}
+	role := models.Role{Common: models.Common{Id: rId}}
 	doors := []models.Door{}
-	config.DB.Model(&role).Association("Doors").Find(&doors)
-	json.NewEncoder(w).Encode(&doors)
+	err = config.DB.Model(&role).Association("Doors").Find(&doors)
+	if err != nil {
+		helpers.DBErrorHandling(err, w)
+		return
+	}
+	helpers.JsonWriter(w, &doors)
 }
