@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"api/config"
+	"api/db"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -42,7 +42,7 @@ func DeleteRole(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpsertDoorAssociation(w http.ResponseWriter, r *http.Request) {
+func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, rId := helpers.ParseInt(w, r, "roleId")
 	if err != nil {
@@ -55,13 +55,13 @@ func UpsertDoorAssociation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	doors := []models.Door{}
-	json.NewEncoder(w).Encode(&doors)
+
 	if len(doorIDs) == 0 {
 		http.Error(w, "400 missing door ids", http.StatusBadRequest)
 		return
 	}
-	results := config.DB.Where(&doorIDs).Find(&doors)
-	json.NewEncoder(w).Encode(&results.RowsAffected)
+	results := db.DB.Where(&doorIDs).Find(&doors)
+
 	if results.RowsAffected != int64(len(doorIDs)) {
 		http.Error(w, "40 one or more invalid door id/s", http.StatusBadRequest)
 		return
@@ -73,7 +73,7 @@ func UpsertDoorAssociation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = config.DB.Model(&role).Association("Doors").Replace(&doors)
+	err = db.DB.Model(&role).Association("Doors").Replace(&doors)
 	if err != nil {
 		helpers.DBErrorHandling(err, w)
 		return
@@ -89,7 +89,7 @@ func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
 	}
 	role := models.Role{Common: models.Common{Id: rId}}
 	doors := []models.Door{}
-	err = config.DB.Model(&role).Association("Doors").Find(&doors)
+	err = db.DB.Model(&role).Association("Doors").Find(&doors)
 	if err != nil {
 		helpers.DBErrorHandling(err, w)
 		return
