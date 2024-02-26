@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"api/config"
+	"api/db"
 	"api/models"
 	"encoding/json"
 	"errors"
@@ -52,7 +52,7 @@ func JsonWriter(w http.ResponseWriter, table interface{}) {
 }
 
 func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) (error, []T) {
-	result := config.DB.Omit("Doors").Find(&table)
+	result := db.DB.Omit("Doors").Find(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error, table
@@ -62,7 +62,7 @@ func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) (error, [
 }
 
 func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter, table T, param P) (error, T) {
-	result := config.DB.Where(&param).First(&table)
+	result := db.DB.Where(&param).First(&table)
 
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
@@ -83,7 +83,7 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 		return errors.New("400"), table
 	}
 
-	result := config.DB.Create(&table)
+	result := db.DB.Create(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error, table
@@ -92,7 +92,7 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 }
 
 func DeleteById[T models.AllTables](w http.ResponseWriter, table T, Id string) error {
-	result := config.DB.Unscoped().Delete(&table, Id)
+	result := db.DB.Unscoped().Delete(&table, Id)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error

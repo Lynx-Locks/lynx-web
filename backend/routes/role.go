@@ -9,7 +9,7 @@ func RolesRoute() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", controller.GetAllRoles)
 	r.Get("/{roleId}/doors", controller.GetDoorAssociations)
-	r.Post("/{roleId}/doors", controller.UpsertDoorAssociation)
+	r.Post("/{roleId}/doors", controller.ReplaceDoorAssociation)
 	r.Post("/", controller.CreateRole)
 	r.Delete("/{roleId}", controller.DeleteRole)
 
