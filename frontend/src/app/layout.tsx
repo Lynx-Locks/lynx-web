@@ -1,6 +1,5 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "../components/navbar/navbar";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { Metadata } from "next";
@@ -10,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Lynx Locks",
-  description: "Lynx Locks Admin Portal",
+  description: "Welcome to Lynx Locks",
 };
 
 export default function RootLayout({
@@ -22,7 +21,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="container">
-          <Navbar />
           <main>{children}</main>
         </div>
       </body>
