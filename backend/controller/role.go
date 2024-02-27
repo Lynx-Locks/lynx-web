@@ -5,41 +5,50 @@ import (
 	"api/helpers"
 	"api/models"
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
 func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, roles := helpers.GetAllTable(w, []models.Role{})
-	if err == nil {
-		helpers.JsonWriter(w, roles)
+	if err != nil {
+		return
 	}
-
-	//for viewing all connections
-	//roles = []models.Role{}
-	//config.DB.Preload("Doors").Find(&roles)
-	//helpers.JsonWriter(w, roles)
+	helpers.JsonWriter(w, roles)
 }
 
 func CreateRole(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var role models.Role
 	err := json.NewDecoder(r.Body).Decode(&role)
-	role.Common = models.Common{}
-	err, role = helpers.CreateNewRecord(w, role, err)
-	if err == nil {
-		helpers.JsonWriter(w, role)
+	if err != nil {
+		http.Error(w, "400 malformed request", http.StatusBadRequest)
 	}
+	// essentially reset if the user inputted anything to common as it should not be editable
+	role.Common = models.Common{}
+	err, role = helpers.CreateNewRecord(w, role)
+	if err != nil {
+		return
+	}
+	helpers.JsonWriter(w, role)
 }
 
 func DeleteRole(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	rId := chi.URLParam(r, "roleId")
-	err := helpers.DeleteById(w, models.Role{}, rId)
-	if err == nil {
-		w.WriteHeader(200)
+	err, rId := helpers.ParseInt(w, r, "roleId")
+	if err != nil {
+		return
 	}
+	err = helpers.DeleteByPk(w, models.Role{}, rId)
+	if err != nil {
+		return
+	}
+	err = db.DB.Unscoped().Model(&models.Role{Common: models.Common{Id: rId}}).Association("Doors").Unscoped().Clear()
+	if err != nil {
+		http.Error(w, "500 unable to delete association/s", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(200)
 }
 
 func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +72,7 @@ func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 	results := db.DB.Where(&doorIDs).Find(&doors)
 
 	if results.RowsAffected != int64(len(doorIDs)) {
-		http.Error(w, "40 one or more invalid door id/s", http.StatusBadRequest)
+		http.Error(w, "400 one or more invalid door id/s", http.StatusBadRequest)
 		return
 	}
 
