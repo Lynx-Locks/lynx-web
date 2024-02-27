@@ -72,14 +72,9 @@ func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter
 
 }
 
-func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err error) (error, T) {
-	if err != nil || !CheckEmptyString(table) {
-		if err != nil {
-			log.Print(err)
-		} else {
-			log.Print("Request contains empty string params")
-		}
-		http.Error(w, "400 malformed request", http.StatusBadRequest)
+func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error, T) {
+	if !CheckEmptyString(table) {
+		log.Print("Request contains empty string params")
 		return errors.New("400"), table
 	}
 
@@ -91,8 +86,8 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T, err err
 	return nil, table
 }
 
-func DeleteById[T models.AllTables](w http.ResponseWriter, table T, Id string) error {
-	result := db.DB.Unscoped().Delete(&table, Id)
+func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, Pk uint) error {
+	result := db.DB.Unscoped().Delete(&table, Pk)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error
