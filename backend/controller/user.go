@@ -43,6 +43,19 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	helpers.JsonWriter(w, &user)
 }
 
+func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	email := r.URL.Query().Get("email")
+	if email == "" {
+		http.Error(w, "Email parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	// Assuming you have a GetUserByEmail function in your models package
+	helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
+}
+
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user models.User
