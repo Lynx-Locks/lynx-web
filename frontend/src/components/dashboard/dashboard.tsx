@@ -3,6 +3,8 @@ import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
 import ButtonsRow from "@/components/buttonsRow/buttonsRow";
 import User from "@/types/user";
+import { useEffect } from "react";
+import axios from "@/axios/client";
 
 const users: User[] = [
   {
@@ -40,6 +42,11 @@ const users: User[] = [
 ];
 
 export default function Dashboard() {
+  useEffect(() => {
+    const f = async () => {
+      const users = axios.get("/users");
+    };
+  }, []);
   return (
     <div className={styles.dashboardContainer}>
       <h1 className={styles.dashboardHeader}>Users</h1>

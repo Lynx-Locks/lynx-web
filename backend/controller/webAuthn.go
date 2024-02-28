@@ -6,6 +6,7 @@ import (
 	"api/helpers"
 	"api/models"
 	"encoding/json"
+	"errors"
 	"github.com/go-chi/chi/v5"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 
 // https://developers.google.com/codelabs/passkey-form-autofill
 
-func getUser(w http.ResponseWriter, r *http.Request) (user models.User, valid bool) {
+func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User, valid bool) {
 	valid = true
 	id, err := strconv.ParseUint(chi.URLParam(r, "userId"), 10, 32)
 	if err != nil {
@@ -32,11 +33,73 @@ func getUser(w http.ResponseWriter, r *http.Request) (user models.User, valid bo
 	return
 }
 
+func ExecAuthResponse(w http.ResponseWriter, r *http.Request, user models.User) error {
+	// Get the session data stored from the function above
+	sessionData := models.SessionData{
+		UserId: user.WebAuthnID(),
+	}
+	result := db.DB.First(&sessionData)
+	if result.Error == nil {
+		result = db.DB.Delete(&sessionData)
+	}
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w)
+		return errors.New("could not delete session data")
+	}
+
+	session := webauthn2.SessionData{
+		Challenge:            sessionData.Challenge,
+		UserID:               sessionData.UserId,
+		AllowedCredentialIDs: sessionData.AllowedCredentialIds,
+		Expires:              sessionData.Expires,
+		UserVerification:     sessionData.UserVerification,
+		Extensions:           sessionData.Extensions,
+	}
+
+	credential, err := config.WebAuthn.FinishLogin(user, session, r)
+	if err != nil {
+		http.Error(w, "Could not finish log in", http.StatusInternalServerError)
+		return err
+	}
+
+	// If login was successful, update the credential object
+	transports := make([]string, 0)
+	for _, val := range credential.Transport {
+		transports = append(transports, string(val))
+	}
+
+	dbCredential := models.Credential{
+		WebauthnId:      credential.ID,
+		PublicKey:       credential.PublicKey,
+		AttestationType: credential.AttestationType,
+		Transport:       transports,
+		Flags: models.Flags{
+			UserPresent:    credential.Flags.UserPresent,
+			UserVerified:   credential.Flags.UserVerified,
+			BackupEligible: credential.Flags.BackupEligible,
+			BackupState:    credential.Flags.BackupState,
+		},
+		Authenticator: models.Authenticator{
+			AAGUID:       credential.Authenticator.AAGUID,
+			SignCount:    credential.Authenticator.SignCount,
+			CloneWarning: credential.Authenticator.CloneWarning,
+			Attachment:   string(credential.Authenticator.Attachment),
+		},
+	}
+
+	result = db.DB.Save(&dbCredential)
+	if result.Error != nil {
+		helpers.DBErrorHandling(result.Error, w)
+		return errors.New("could not save credentials")
+	}
+	return nil
+}
+
 // https://webauthn.guide/#registration
 func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	user, valid := getUser(w, r)
+	user, valid := GetUserByUrlParam(w, r)
 	if !valid {
 		return
 	}
@@ -76,7 +139,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	user, valid := getUser(w, r)
+	user, valid := GetUserByUrlParam(w, r)
 	if !valid {
 		return
 	}
@@ -156,7 +219,7 @@ func SigninRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Find the user
-	user, valid := getUser(w, r)
+	user, valid := GetUserByUrlParam(w, r)
 	if !valid {
 		return
 	}
@@ -195,67 +258,13 @@ func SigninResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Get the user
-	user, valid := getUser(w, r)
+	user, valid := GetUserByUrlParam(w, r)
 	if !valid {
 		return
 	}
 
-	// Get the session data stored from the function above
-	sessionData := models.SessionData{
-		UserId: user.WebAuthnID(),
-	}
-	result := db.DB.First(&sessionData)
-	if result.Error == nil {
-		result = db.DB.Delete(&sessionData)
-	}
-	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
-		return
-	}
-
-	session := webauthn2.SessionData{
-		Challenge:            sessionData.Challenge,
-		UserID:               sessionData.UserId,
-		AllowedCredentialIDs: sessionData.AllowedCredentialIds,
-		Expires:              sessionData.Expires,
-		UserVerification:     sessionData.UserVerification,
-		Extensions:           sessionData.Extensions,
-	}
-
-	credential, err := config.WebAuthn.FinishLogin(user, session, r)
+	err := ExecAuthResponse(w, r, user)
 	if err != nil {
-		http.Error(w, "Could not finish log in", http.StatusInternalServerError)
-		return
-	}
-
-	// If login was successful, update the credential object
-	transports := make([]string, 0)
-	for _, val := range credential.Transport {
-		transports = append(transports, string(val))
-	}
-
-	dbCredential := models.Credential{
-		WebauthnId:      credential.ID,
-		PublicKey:       credential.PublicKey,
-		AttestationType: credential.AttestationType,
-		Transport:       transports,
-		Flags: models.Flags{
-			UserPresent:    credential.Flags.UserPresent,
-			UserVerified:   credential.Flags.UserVerified,
-			BackupEligible: credential.Flags.BackupEligible,
-			BackupState:    credential.Flags.BackupState,
-		},
-		Authenticator: models.Authenticator{
-			AAGUID:       credential.Authenticator.AAGUID,
-			SignCount:    credential.Authenticator.SignCount,
-			CloneWarning: credential.Authenticator.CloneWarning,
-			Attachment:   string(credential.Authenticator.Attachment),
-		},
-	}
-
-	result = db.DB.Save(&dbCredential)
-	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
 

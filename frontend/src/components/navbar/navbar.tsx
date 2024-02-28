@@ -1,19 +1,23 @@
 import NavLogo from "@/components/navLogo/navLogo";
 import styles from "./navbar.module.css";
 
-const USER = "Adrian Jendo"; // TODO: replace this with the user's name
-
-export default function Navbar() {
+export default function Navbar({
+  email,
+  handleLogout,
+}: {
+  email: string;
+  handleLogout: () => void;
+}) {
   return (
     <nav className={styles.navContainer}>
       <div className={styles.navLeft}>
         <NavLogo />
       </div>
       <div className={styles.navRight}>
-        {/* TODO: Implement user dropdown */}
-        <div className={styles.navUser}>{USER}</div>
-        {/* TODO: Implement login / logout login */}
-        <div className={styles.navLogout}>Logout</div>
+        <div className={styles.navUser}>{email}</div>
+        <button className={styles.navLogout} onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </nav>
   );
