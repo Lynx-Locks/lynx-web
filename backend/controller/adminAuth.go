@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var secretKey = []byte("secret")
+var secretKey = []byte("secret") // TODO: put in .env file
 
 // as per https://medium.com/@cheickzida/golang-implementing-jwt-token-authentication-bba9bfd84d60
 func createToken(user models.User) (string, error) {
