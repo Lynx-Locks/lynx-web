@@ -115,6 +115,8 @@ func api() chi.Router {
 	r.Mount("/doors", routes.DoorsRoute())
 	r.Mount("/auth", routes.WebAuthnRoute())
 	r.Mount("/admin", routes.AdminAuthRoute())
+	r.Mount("/doors", routes.DoorsRoute())
+	r.Mount("/roles", routes.RolesRoute())
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello: world"))
 	})
