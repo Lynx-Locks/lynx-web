@@ -1,10 +1,30 @@
 .navContainer {
   display: flex;
   justify-content: space-between;
+  padding: 10px 0;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
 }
 
 .navRight {
-  display: grid;
-  grid-auto-flow: column;
-  grid-column-gap: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.navUser {
+  margin-right: 20px;
+}
+
+.navLogout {
+  color: rgb(var(--foreground-rgb));
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.navLogout:hover {
+  color: rgb(var(--background-rgb));
+  background-color: rgba(var(--button-rgb), 0.75);
 }

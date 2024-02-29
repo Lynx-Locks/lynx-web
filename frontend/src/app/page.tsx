@@ -2,15 +2,17 @@
 import Dashboard from "@/components/dashboard/dashboard";
 import Navbar from "@/components/navbar/navbar";
 import jwt from "jsonwebtoken";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [email, setEmail] = useState<null | string>(null);
+  const router = useRouter();
 
   const handleLogout = () => {
     setEmail(null);
     localStorage.removeItem("token");
+    router.push("/login");
   };
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function Home() {
       }
     }
     // Redirect to login
-    redirect("/login");
+    redirect("/login/?referrer=/");
   }, []);
 
   return (
