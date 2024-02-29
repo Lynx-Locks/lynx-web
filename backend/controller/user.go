@@ -35,7 +35,6 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Assuming you have a GetUserByEmail function in your models package
 	helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
 }
 

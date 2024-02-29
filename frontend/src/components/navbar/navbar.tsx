@@ -14,7 +14,7 @@ export default function Navbar({
         <NavLogo />
       </div>
       <div className={styles.navRight}>
-        <div className={styles.navUser}>{email}</div>
+        <p className={styles.navUser}>{email}</p>
         <button className={styles.navLogout} onClick={handleLogout}>
           Logout
         </button>
