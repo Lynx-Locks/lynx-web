@@ -17,7 +17,33 @@ import (
 
 // See https://github.com/go-chi/chi for documentation
 
-const PORT = 5001 // todo: put into environment var
+func init() {
+
+	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		allVars := []envVar{
+			{key: "API_BASE_URL", preset: "/api"},
+		}
+
+		err := filepath.Walk("/static/_next", func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !info.IsDir() && filepath.Ext(path) == ".js" {
+				err := replaceVarsInFile(path, allVars)
+				if err != nil {
+					fmt.Printf("Error replacing vars in file %s: %v\n", path, err)
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			fmt.Printf("Error walking the path: %v\n", err)
+		}
+	}
+}
 
 func main() {
 	r := chi.NewRouter()
@@ -95,4 +121,32 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
 		fs.ServeHTTP(w, r)
 	})
+}
+
+type envVar struct {
+	key    string
+	preset string
+}
+
+func replaceVarsInFile(filePath string, vars []envVar) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range vars {
+		bakedVar := fmt.Sprintf("BAKED_%s", v.key)
+		value, ok := os.LookupEnv(v.key)
+		if !ok {
+			value = v.preset
+		}
+		content = []byte(strings.ReplaceAll(string(content), bakedVar, value))
+	}
+
+	err = os.WriteFile(filePath, content, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

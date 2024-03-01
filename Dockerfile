@@ -39,6 +39,7 @@ CMD npm run dev
 
 # Frontend Static Build
 FROM base AS builder
+ARG NEXT_PUBLIC_API_BASE_URL=BAKED_API_BASE_URL
 
 COPY --from=base /frontend/node_modules ./node_modules
 COPY frontend .
