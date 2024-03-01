@@ -1,7 +1,7 @@
 # Backend
 FROM golang:1.21-alpine AS backend
 
-RUN apk --no-cache add build-base
+RUN apk --no-cache add build-base ca-certificates
 
 WORKDIR /backend
 
@@ -10,7 +10,6 @@ RUN go mod download
 RUN go build -ldflags "-linkmode external -extldflags -static" -o /lynx-backend
 
 EXPOSE 5001
-
 CMD ["/lynx-backend"]
 
 # Frontend Dependencies
@@ -49,8 +48,18 @@ RUN npm run build
 FROM scratch as prod
 ENV NODE_ENV=production
 
+# Import static frontend
 COPY --from=builder /frontend/out /static
+# Import compiled binary
 COPY --from=backend /lynx-backend /lynx-backend
+# Import the root ca-certificates (required for Let's Encrypt)
+COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-EXPOSE 5001
+EXPOSE 443
+EXPOSE 80
+
+# Mount the certificate cache directory as a volume to avoid Let's Encrypt rate limits
+VOLUME ["/cert-cache"]
+
+# Run the compiled binary
 CMD ["/lynx-backend"]

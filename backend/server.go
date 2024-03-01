@@ -8,7 +8,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"golang.org/x/crypto/acme/autocert"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -20,7 +23,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000*"},
+		AllowedOrigins: []string{"http://localhost:3000*", "https://app.lynx-locks.com*"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	}))
@@ -28,9 +31,37 @@ func main() {
 	FileServer(r, "/", http.Dir("./static"))
 	r.Mount("/api", api())
 
-	fmt.Printf("Server running on port %d\n", PORT)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
-	helpers.CheckErr(err)
+	var PORT int
+	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		PORT = 443
+
+		m := &autocert.Manager{
+			Cache:      autocert.DirCache("cert-cache"),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist("app.lynx-locks.com"),
+		}
+
+		server := &http.Server{
+			Addr:      fmt.Sprintf(":%d", PORT),
+			Handler:   r,
+			TLSConfig: m.TLSConfig(),
+		}
+
+		fmt.Printf("Server running on port %d\n", PORT)
+		go func() {
+			err := http.ListenAndServe(":80", m.HTTPHandler(nil))
+			helpers.CheckErr(err)
+		}()
+
+		err := server.ListenAndServeTLS("", "")
+		helpers.CheckErr(err)
+	} else {
+		PORT = 5001
+
+		fmt.Printf("Server running on port %d\n", PORT)
+		err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
+		helpers.CheckErr(err)
+	}
 }
 
 func api() chi.Router {
