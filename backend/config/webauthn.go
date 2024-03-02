@@ -15,7 +15,7 @@ func init() {
 	var id string
 	var origins []string
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
-		if domain, ok := os.LookupEnv("WEBAUTHN_DOMAIN"); ok {
+		if domain, ok := os.LookupEnv("CLIENT_DOMAIN"); ok {
 			id = domain
 			origins = []string{fmt.Sprintf("https://%s", domain)}
 		} else {
@@ -23,7 +23,7 @@ func init() {
 			origins = []string{"https://app.lynx-locks.com"}
 		}
 	} else {
-		id = "http://localhost:5001"
+		id = "localhost"
 		origins = []string{"http://localhost:3000", "http://localhost:5001"}
 	}
 

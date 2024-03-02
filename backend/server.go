@@ -18,12 +18,14 @@ import (
 // See https://github.com/go-chi/chi for documentation
 
 func init() {
-
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		// List of all BAKED environment variables to replace.
+		// If the given env variable is not present on runtime, the preset is used as default.
 		allVars := []envVar{
 			{key: "API_BASE_URL", preset: "/api"},
 		}
 
+		// Replace all BAKED environment variables in frontend with current runtime environment variables.
 		err := filepath.Walk("/static/_next", func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -47,10 +49,13 @@ func init() {
 
 func main() {
 	var origins []string
+	var clientDomain string
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
-		if domain, ok := os.LookupEnv("WEBAUTHN_DOMAIN"); ok {
+		if domain, ok := os.LookupEnv("CLIENT_DOMAIN"); ok {
+			clientDomain = domain
 			origins = []string{fmt.Sprintf("https://%s*", domain)}
 		} else {
+			clientDomain = "app.lynx-locks.com"
 			origins = []string{"https://app.lynx-locks.com*"}
 		}
 	} else {
@@ -68,35 +73,37 @@ func main() {
 	FileServer(r, "/", http.Dir("./static"))
 	r.Mount("/api", api())
 
-	var PORT int
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
-		PORT = 443
+		port := 443
 
 		m := &autocert.Manager{
 			Cache:      autocert.DirCache("cert-cache"),
 			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist("app.lynx-locks.com"),
+			HostPolicy: autocert.HostWhitelist(clientDomain),
 		}
 
 		server := &http.Server{
-			Addr:      fmt.Sprintf(":%d", PORT),
+			Addr:      fmt.Sprintf(":%d", port),
 			Handler:   r,
 			TLSConfig: m.TLSConfig(),
 		}
 
-		fmt.Printf("Server running on port %d\n", PORT)
+		fmt.Printf("Server running on port %d\n", port)
+
+		// Listen on port 80 with http-01 challenge handler (Let's Encrypt)
 		go func() {
 			err := http.ListenAndServe(":80", m.HTTPHandler(nil))
 			helpers.CheckErr(err)
 		}()
 
+		// Listen on port 443 with our custom application handler
 		err := server.ListenAndServeTLS("", "")
 		helpers.CheckErr(err)
 	} else {
-		PORT = 5001
+		port := 5001
 
-		fmt.Printf("Server running on port %d\n", PORT)
-		err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
+		fmt.Printf("Server running on port %d\n", port)
+		err := http.ListenAndServe(fmt.Sprintf(":%d", port), r)
 		helpers.CheckErr(err)
 	}
 }
