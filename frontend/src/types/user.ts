@@ -3,7 +3,7 @@ interface User {
   name: string;
   email: string;
   timeIn: string;
-  date: string;
+  lastDateIn: string;
 }
 
 export default User;

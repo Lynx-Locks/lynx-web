@@ -53,7 +53,7 @@
 
 .settingsInputContainer {
   display: grid;
-  grid-template-columns: 10% 45%;
+  grid-template-columns: 10% 50%;
   padding-bottom: 15px;
   row-gap: 15px;
 }
@@ -65,6 +65,13 @@
   border: 1px solid rgba(var(--foreground-rgb), 0.5);
   background-color: rgb(var(--background-rgb));
   border-radius: 4px;
+  height: 40px;
+}
+
+.settingsInputLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .settingsButtonGroup {
@@ -81,4 +88,19 @@
   font-size: 16px;
   border-radius: 5px;
   color: black;
+}
+
+.deleteButton {
+  background-color: rgb(var(--button-rgb));
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
+  color: black;
+}
+
+.deleteButton:hover {
+  background-color: rgba(255, 0, 0, 0.8);
 }

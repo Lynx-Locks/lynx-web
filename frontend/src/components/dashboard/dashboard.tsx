@@ -10,13 +10,24 @@ export default function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchInput, setSearchInput] = useState("");
 
+  const updateUser = async (user: User) => {
+    // TODO: axios to update user
+    const newUsers = users.map((u) => {
+      if (u.id === user.id) {
+        return user;
+      }
+      return u;
+    });
+    setUsers(newUsers);
+  };
+
   useEffect(() => {
     const getUsers = async () => {
       const users = await axios.get("/users");
       setUsers(
         users.data.map((user: User) => {
           user.timeIn = new Date().toLocaleTimeString(); // TODO: parse these from response
-          user.date = new Date().toLocaleDateString();
+          user.lastDateIn = new Date().toLocaleDateString();
           return user;
         })
       );
@@ -37,9 +48,14 @@ export default function Dashboard() {
       </div>
       <ButtonsRow />
       <AdminTable
-        users={users.filter((user) =>
-          user.name.toLowerCase().includes(searchInput.toLowerCase())
+        users={users.filter(
+          (user) =>
+            user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchInput.toLowerCase()) ||
+            user.timeIn.toLowerCase().includes(searchInput.toLowerCase()) ||
+            user.lastDateIn.toLowerCase().includes(searchInput.toLowerCase())
         )}
+        updateUser={updateUser}
       />
     </div>
   );

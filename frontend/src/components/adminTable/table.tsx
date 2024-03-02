@@ -11,9 +11,17 @@ import {
 import { useEffect, useState } from "react";
 import Modal from "@/components/modal/modal";
 import { SubmitButton } from "@/components/button/button";
+import SearchDropdown from "../searchDropdown/searchDropdown";
+import { employeeRoles } from "@/constants/roles";
 
-export default function AdminTable({ users }: { users: User[] }) {
-  const [settingsModal, setSettingsModal] = useState(-1);
+export default function AdminTable({
+  users,
+  updateUser,
+}: {
+  users: User[];
+  updateUser: (user: User) => void;
+}) {
+  const [settingsUser, setSettingsUser] = useState<User | null>(null);
   const [columnHeaders, setColumnHeaders] = useState([
     {
       name: "Name",
@@ -43,7 +51,7 @@ export default function AdminTable({ users }: { users: User[] }) {
       if (sortBy?.name === "Last Time In") {
         return first.timeIn.localeCompare(second.timeIn);
       } else if (sortBy?.name === "Date") {
-        return first.date.localeCompare(second.date);
+        return first.lastDateIn.localeCompare(second.lastDateIn);
       } else if (sortBy?.name === "Email") {
         return first.email.localeCompare(second.email);
       } else if (sortBy?.name === "Name") {
@@ -55,13 +63,11 @@ export default function AdminTable({ users }: { users: User[] }) {
   }, [columnHeaders, setSortedUsers, users]);
 
   const handleClickSettings = (idx: number) => {
-    setSettingsModal(idx);
+    setSettingsUser(sortedUsers[idx]);
   };
 
-  const closeModal = (open: boolean) => {
-    if (!open) {
-      setSettingsModal(-1);
-    }
+  const closeModal = (_: boolean) => {
+    setSettingsUser(null);
   };
 
   const handleSort = (idx: number) => {
@@ -78,6 +84,14 @@ export default function AdminTable({ users }: { users: User[] }) {
       };
     });
     setColumnHeaders(newColumnHeaders);
+  };
+
+  const handleSettingsTextChange = (
+    user: User,
+    key: "name" | "email",
+    value: string
+  ) => {
+    setSettingsUser({ ...user, [key]: value });
   };
 
   return (
@@ -117,7 +131,7 @@ export default function AdminTable({ users }: { users: User[] }) {
               <td className={styles.tableCell}>{user.name}</td>
               <td className={styles.tableCell}>{user.email}</td>
               <td className={styles.tableCell}>{user.timeIn}</td>
-              <td className={styles.tableCell}>{user.date}</td>
+              <td className={styles.tableCell}>{user.lastDateIn}</td>
               <td>
                 <FontAwesomeIcon
                   className={styles.settingsIcon}
@@ -132,36 +146,59 @@ export default function AdminTable({ users }: { users: User[] }) {
       {sortedUsers.length === 0 && (
         <h1 className={styles.emptyTable}>Could not display any users</h1>
       )}
-      {settingsModal >= 0 && (
+      {settingsUser && (
         <Modal
           setShowModal={closeModal}
-          title={`Settings for ${sortedUsers[settingsModal].name}`}
+          title={`Settings for ${settingsUser.name}`}
           content={
             <div className={styles.settingsModal}>
               <div className={styles.settingsInputContainer}>
-                <div>Name:</div>
+                <div className={styles.settingsInputLabel}>Name:</div>
                 <input
                   className={styles.settingsInput}
                   type="text"
-                  value={sortedUsers[settingsModal].name}
+                  value={settingsUser.name}
+                  onChange={(e) =>
+                    handleSettingsTextChange(
+                      settingsUser,
+                      "name",
+                      e.target.value
+                    )
+                  }
                 />
-                <div>Email:</div>
+                <div className={styles.settingsInputLabel}>Email:</div>
                 <input
                   className={styles.settingsInput}
                   type="text"
-                  value={sortedUsers[settingsModal].email}
+                  value={settingsUser.email}
+                  onChange={(e) =>
+                    handleSettingsTextChange(
+                      settingsUser,
+                      "email",
+                      e.target.value
+                    )
+                  }
+                />
+                <div className={styles.settingsInputLabel}>Roles:</div>
+                <SearchDropdown
+                  options={employeeRoles}
+                  placeholder="Select Role..."
+                  subheader=""
+                  isMulti
                 />
               </div>
               <div className={styles.settingsButtonGroup}>
-                <button className={styles.settingsButton}>Update role</button>
                 <button className={styles.settingsButton}>
-                  Revoke & Regenerate credentials
+                  Revoke credentials
                 </button>
-                <button className={styles.settingsButton}>Delete User</button>
+                <button className={styles.deleteButton}>Delete User</button>
               </div>
               <SubmitButton
                 text="Submit Changes"
-                onClick={() => setSettingsModal(-1)}
+                onClick={() => {
+                  updateUser(settingsUser);
+                  setSettingsUser(null);
+                }}
               />
             </div>
           }
