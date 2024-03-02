@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import styles from "./search.module.css";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function Search({ placeholder }: { placeholder: string }) {
-  const [searchInput, setSearchInput] = useState("");
-
+export default function Search({
+  placeholder,
+  searchInput,
+  setSearchInput,
+}: {
+  placeholder: string;
+  searchInput: string;
+  setSearchInput: React.Dispatch<React.SetStateAction<string>>;
+}) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     setSearchInput(e.target.value);

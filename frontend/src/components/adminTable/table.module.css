@@ -18,6 +18,18 @@
   padding: 8px;
 }
 
+.tableHeadCell {
+  display: flex;
+  padding: 8px;
+}
+
+.columnHeader {
+  display: inline-block;
+  justify-content: space-between;
+  align-items: center;
+  margin-right: 16px;
+}
+
 .tableRow {
   border-bottom: 1px solid rgb(var(--foreground-rgb));
 }

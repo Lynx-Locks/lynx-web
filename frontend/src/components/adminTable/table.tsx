@@ -3,13 +3,57 @@
 import User from "@/types/user";
 import styles from "./table.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import {
+  faCaretDown,
+  faCaretUp,
+  faGear,
+} from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
 import Modal from "@/components/modal/modal";
 import { SubmitButton } from "@/components/button/button";
 
 export default function AdminTable({ users }: { users: User[] }) {
   const [settingsModal, setSettingsModal] = useState(-1);
+  const [columnHeaders, setColumnHeaders] = useState([
+    {
+      name: "Name",
+      sort: "",
+    },
+    {
+      name: "Email",
+      sort: "",
+    },
+    {
+      name: "Last Time In",
+      sort: "",
+    },
+    {
+      name: "Date",
+      sort: "",
+    },
+  ]);
+  const [sortedUsers, setSortedUsers] = useState(users);
+
+  useEffect(() => {
+    const sortBy = columnHeaders.find((header) => header.sort !== "");
+    const newUsers = [...users];
+    newUsers.sort((a, b) => {
+      const first = sortBy?.sort === "asc" ? a : b;
+      const second = sortBy?.sort === "asc" ? b : a;
+      if (sortBy?.name === "Last Time In") {
+        return first.timeIn.localeCompare(second.timeIn);
+      } else if (sortBy?.name === "Date") {
+        return first.date.localeCompare(second.date);
+      } else if (sortBy?.name === "Email") {
+        return first.email.localeCompare(second.email);
+      } else if (sortBy?.name === "Name") {
+        return first.name.localeCompare(second.name);
+      }
+      return 0;
+    });
+    setSortedUsers(newUsers);
+  }, [columnHeaders, setSortedUsers, users]);
+
   const handleClickSettings = (idx: number) => {
     setSettingsModal(idx);
   };
@@ -20,6 +64,22 @@ export default function AdminTable({ users }: { users: User[] }) {
     }
   };
 
+  const handleSort = (idx: number) => {
+    const newColumnHeaders = columnHeaders.map((header, i) => {
+      if (i === idx) {
+        return {
+          ...header,
+          sort: header.sort === "asc" ? "desc" : "asc",
+        };
+      }
+      return {
+        ...header,
+        sort: "",
+      };
+    });
+    setColumnHeaders(newColumnHeaders);
+  };
+
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table} border={1} rules="rows">
@@ -28,16 +88,23 @@ export default function AdminTable({ users }: { users: User[] }) {
             <th className={styles.tableCell}>
               <input type="checkbox" />
             </th>
-            <th className={styles.tableCell}>Name</th>
-            <th className={styles.tableCell}>Username</th>
-            <th className={styles.tableCell}>Email</th>
-            <th className={styles.tableCell}>Last Time In</th>
-            <th className={styles.tableCell}>Date</th>
+            {columnHeaders.map((header, idx) => (
+              <th key={idx} className={styles.tableCell}>
+                <p className={styles.columnHeader}>{header.name}</p>
+                <button onClick={() => handleSort(idx)}>
+                  {header.sort === "asc" ? (
+                    <FontAwesomeIcon icon={faCaretUp} size="lg" />
+                  ) : (
+                    <FontAwesomeIcon icon={faCaretDown} size="lg" />
+                  )}
+                </button>
+              </th>
+            ))}
             <th />
           </tr>
         </thead>
         <tbody>
-          {users.map((user, idx) => (
+          {sortedUsers.map((user, idx) => (
             <tr
               key={user.id}
               className={
@@ -48,7 +115,6 @@ export default function AdminTable({ users }: { users: User[] }) {
                 <input type="checkbox" />
               </td>
               <td className={styles.tableCell}>{user.name}</td>
-              <td className={styles.tableCell}>{user.username}</td>
               <td className={styles.tableCell}>{user.email}</td>
               <td className={styles.tableCell}>{user.timeIn}</td>
               <td className={styles.tableCell}>{user.date}</td>
@@ -63,13 +129,13 @@ export default function AdminTable({ users }: { users: User[] }) {
           ))}
         </tbody>
       </table>
-      {users.length === 0 && (
+      {sortedUsers.length === 0 && (
         <h1 className={styles.emptyTable}>Could not display any users</h1>
       )}
       {settingsModal >= 0 && (
         <Modal
           setShowModal={closeModal}
-          title={`Settings for ${users[settingsModal].name}`}
+          title={`Settings for ${sortedUsers[settingsModal].name}`}
           content={
             <div className={styles.settingsModal}>
               <div className={styles.settingsInputContainer}>
@@ -77,13 +143,13 @@ export default function AdminTable({ users }: { users: User[] }) {
                 <input
                   className={styles.settingsInput}
                   type="text"
-                  value={users[settingsModal].name}
+                  value={sortedUsers[settingsModal].name}
                 />
                 <div>Email:</div>
                 <input
                   className={styles.settingsInput}
                   type="text"
-                  value={users[settingsModal].email}
+                  value={sortedUsers[settingsModal].email}
                 />
               </div>
               <div className={styles.settingsButtonGroup}>

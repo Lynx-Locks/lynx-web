@@ -3,59 +3,44 @@ import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
 import ButtonsRow from "@/components/buttonsRow/buttonsRow";
 import User from "@/types/user";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "@/axios/client";
 
-const users: User[] = [
-  {
-    id: 1,
-    name: "Leanne Graham",
-    username: "Bret",
-    email: "leannegraham@lynxlocks.com",
-    timeIn: "00:00:00",
-    date: "2024/01/01",
-  },
-  {
-    id: 2,
-    name: "Ervin Howell",
-    username: "Antonette",
-    email: "ervinhowell@lynxlocks.com",
-    timeIn: "00:00:00",
-    date: "2024/01/01",
-  },
-  {
-    id: 3,
-    name: "Clementine Bauch",
-    username: "Samantha",
-    email: "clementinebauch@lynxlocks.com",
-    timeIn: "00:00:00",
-    date: "2024/01/01",
-  },
-  {
-    id: 4,
-    name: "Patricia Lebsack",
-    username: "Karianne",
-    email: "patricialebsack@lynxlocks.com",
-    timeIn: "00:00:00",
-    date: "2024/01/01",
-  },
-];
-
 export default function Dashboard() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+
   useEffect(() => {
-    const f = async () => {
-      const users = axios.get("/users");
+    const getUsers = async () => {
+      const users = await axios.get("/users");
+      setUsers(
+        users.data.map((user: User) => {
+          user.timeIn = new Date().toLocaleTimeString(); // TODO: parse these from response
+          user.date = new Date().toLocaleDateString();
+          return user;
+        })
+      );
     };
+    getUsers();
   }, []);
+
   return (
     <div className={styles.dashboardContainer}>
       <h1 className={styles.dashboardHeader}>Users</h1>
       <p className={styles.subHeading}>Add, Modify, and Remove your users</p>
       <div className={styles.homeSearch}>
-        <Search placeholder="Search here" />
+        <Search
+          placeholder="Search here"
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+        />
       </div>
       <ButtonsRow />
-      <AdminTable users={users} />
+      <AdminTable
+        users={users.filter((user) =>
+          user.name.toLowerCase().includes(searchInput.toLowerCase())
+        )}
+      />
     </div>
   );
 }
