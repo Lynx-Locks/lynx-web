@@ -35,7 +35,13 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
+	if err != nil {
+		helpers.DBErrorHandling(err, w)
+		return
+	}
+
+	helpers.JsonWriter(w, &user)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
