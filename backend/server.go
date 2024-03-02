@@ -46,10 +46,21 @@ func init() {
 }
 
 func main() {
+	var origins []string
+	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		if domain, ok := os.LookupEnv("WEBAUTHN_DOMAIN"); ok {
+			origins = []string{fmt.Sprintf("https://%s*", domain)}
+		} else {
+			origins = []string{"https://app.lynx-locks.com*"}
+		}
+	} else {
+		origins = []string{"http://localhost:3000*"}
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000*", "https://app.lynx-locks.com*"},
+		AllowedOrigins: origins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	}))
