@@ -37,7 +37,6 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 
 	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
 	if err != nil {
-		helpers.DBErrorHandling(err, w)
 		return
 	}
 
