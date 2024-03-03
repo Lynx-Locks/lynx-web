@@ -19,11 +19,33 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	err, uId := helpers.ParseInt(w, r, "userId")
+	if err != nil {
+		return
+	}
 	err, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uId})
 	if err != nil {
 		return
 	}
 	helpers.JsonWriter(w, user)
+}
+
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	err, uId := helpers.ParseInt(w, r, "userId")
+	if err != nil {
+		return
+	}
+	err, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uId})
+	if err != nil {
+		return
+	}
+	err, user = helpers.UpdateSpecifiedParams(w, r, &user, user.Common, &user.Common)
+	if err != nil {
+		return
+	}
+	helpers.JsonWriter(w, user)
+
 }
 
 func GetUserByEmail(w http.ResponseWriter, r *http.Request) {

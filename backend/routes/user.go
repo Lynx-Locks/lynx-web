@@ -10,6 +10,7 @@ func UsersRoute() chi.Router {
 	r.Get("/", controller.GetAllUsers)
 	r.Get("/{userId}", controller.GetUser)
 	r.Get("/login", controller.GetUserByEmail)
+	r.Patch("/{userId}", controller.UpdateUser)
 	r.Post("/", controller.CreateUser)
 	r.Delete("/{userId}", controller.DeleteUser)
 	return r
