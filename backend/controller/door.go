@@ -17,6 +17,25 @@ func GetAllDoors(w http.ResponseWriter, _ *http.Request) {
 	helpers.JsonWriter(w, doors)
 }
 
+func UpdateDoor(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	err, dId := helpers.ParseInt(w, r, "doorId")
+	if err != nil {
+		return
+	}
+	err, door := helpers.GetFirstTable(w, models.Door{}, models.Common{Id: dId})
+	if err != nil {
+		return
+	}
+	err, door = helpers.UpdateSpecifiedParams(w, r, &door, door.Common, &door.Common)
+	if err != nil {
+		return
+	}
+	helpers.JsonWriter(w, door)
+
+}
+
 func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var role models.Door

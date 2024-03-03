@@ -15,7 +15,7 @@ func Connect() {
 	if err != nil {
 		panic("failed to create data directory")
 	}
-	db, err := gorm.Open(sqlite.Open("data/lynx-web.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("data/lynx-web.db"), &gorm.Config{TranslateError: true})
 	if err != nil {
 		panic("failed to connect database")
 	}

@@ -17,6 +17,25 @@ func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
 	helpers.JsonWriter(w, roles)
 }
 
+func UpdateRole(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	err, rId := helpers.ParseInt(w, r, "roleId")
+	if err != nil {
+		return
+	}
+	err, role := helpers.GetFirstTable(w, models.Role{}, models.Common{Id: rId})
+	if err != nil {
+		return
+	}
+	err, role = helpers.UpdateSpecifiedParams(w, r, &role, role.Common, &role.Common)
+	if err != nil {
+		return
+	}
+	helpers.JsonWriter(w, role)
+
+}
+
 func CreateRole(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var role models.Role

@@ -39,6 +39,8 @@ func CheckEmptyString(s interface{}) bool {
 func DBErrorHandling(error error, w http.ResponseWriter) {
 	if errors.Is(error, gorm.ErrRecordNotFound) {
 		http.Error(w, "404 record not found", http.StatusNotFound)
+	} else if errors.Is(error, gorm.ErrDuplicatedKey) {
+		http.Error(w, "400 input fails unique constraint", http.StatusNotFound)
 	} else {
 		http.Error(w, "500 unable to handle request", http.StatusInternalServerError)
 	}
@@ -72,6 +74,24 @@ func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter
 
 }
 
+func UpdateSpecifiedParams[T models.AllTables](w http.ResponseWriter, r *http.Request, table *T, initCommon models.Common, updatedCommon *models.Common) (error, T) {
+	err := json.NewDecoder(r.Body).Decode(&table)
+	if err != nil {
+		http.Error(w, "400 malformed request", http.StatusBadRequest)
+		return err, *table
+	}
+	if initCommon != *updatedCommon {
+		http.Error(w, "Invalid updates to automatic fields", http.StatusBadRequest)
+		return err, *table
+	}
+	result := db.DB.Debug().Save(&table)
+	if result.Error != nil {
+		DBErrorHandling(result.Error, w)
+		return result.Error, *table
+	}
+	return nil, *table
+}
+
 func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error, T) {
 	if !CheckEmptyString(table) {
 		log.Print("Request contains empty string params")
@@ -86,8 +106,8 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error,
 	return nil, table
 }
 
-func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, Pk uint) error {
-	result := db.DB.Unscoped().Delete(&table, Pk)
+func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, pk uint) error {
+	result := db.DB.Unscoped().Delete(&table, pk)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error
