@@ -111,8 +111,6 @@ func main() {
 func api() chi.Router {
 	r := chi.NewRouter()
 	r.Mount("/users", routes.UsersRoute())
-	r.Mount("/roles", routes.RolesRoute())
-	r.Mount("/doors", routes.DoorsRoute())
 	r.Mount("/auth", routes.WebAuthnRoute())
 	r.Mount("/admin", routes.AdminAuthRoute())
 	r.Mount("/doors", routes.DoorsRoute())
