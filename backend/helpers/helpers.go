@@ -7,7 +7,6 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
-	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -82,7 +81,7 @@ func UpdateSpecifiedParams[T models.AllTables](w http.ResponseWriter, r *http.Re
 	}
 	if initCommon != *updatedCommon {
 		http.Error(w, "Invalid updates to automatic fields", http.StatusBadRequest)
-		return err, *table
+		return errors.New("400"), *table
 	}
 	result := db.DB.Debug().Save(&table)
 	if result.Error != nil {
@@ -94,7 +93,7 @@ func UpdateSpecifiedParams[T models.AllTables](w http.ResponseWriter, r *http.Re
 
 func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error, T) {
 	if !CheckEmptyString(table) {
-		log.Print("Request contains empty string params")
+		http.Error(w, "400 Request contains empty string params", http.StatusBadRequest)
 		return errors.New("400"), table
 	}
 
