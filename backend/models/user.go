@@ -13,7 +13,7 @@ type User struct {
 	Common
 	Name       string `json:"name"`
 	Email      string `gorm:"unique" json:"email"`
-	IsAdmin    bool   `json:"isAdmin,default;False"`
+	IsAdmin    bool   `json:"isAdmin"`
 	WebauthnId []byte `gorm:"serializer:json" json:"webauthnId"`
 }
 
