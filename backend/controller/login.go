@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
-	"os"
 	"time"
 )
 
-var secretKey = []byte(os.Getenv("JWT_SECRET"))
+var secretKey = []byte("secret")
 
 // as per https://medium.com/@cheickzida/golang-implementing-jwt-token-authentication-bba9bfd84d60
 func createToken(user models.User) (string, error) {
