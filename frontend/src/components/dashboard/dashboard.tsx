@@ -26,10 +26,11 @@ export default function Dashboard() {
       const users = await axios.get("/users");
       setUsers(
         users.data.map((user: User) => {
-          user.timeIn = new Date().toLocaleTimeString(); // TODO: parse these from response
+          // TODO: parse these from response, obtain timezone from TZ environment variable
+          user.timeIn = new Date().toLocaleTimeString();
           user.lastDateIn = new Date().toLocaleDateString();
           return user;
-        }),
+        })
       );
     };
     getUsers();
@@ -53,7 +54,7 @@ export default function Dashboard() {
             user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
             user.email.toLowerCase().includes(searchInput.toLowerCase()) ||
             user.timeIn.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.lastDateIn.toLowerCase().includes(searchInput.toLowerCase()),
+            user.lastDateIn.toLowerCase().includes(searchInput.toLowerCase())
         )}
         updateUser={updateUser}
       />
