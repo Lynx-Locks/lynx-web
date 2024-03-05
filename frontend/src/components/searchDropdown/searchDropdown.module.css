@@ -9,9 +9,11 @@
   font-weight: bold;
 }
 
-.selectDropdown {
-  /* padding: 15px 0; */
+.settingsModal {
   margin: 0 8px;
-  /* padding: 0 10px; */
   width: 100%;
+}
+
+.tableModal {
+  padding: 15px 0;
 }

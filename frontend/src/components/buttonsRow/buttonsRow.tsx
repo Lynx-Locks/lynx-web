@@ -86,11 +86,13 @@ export default function ButtonRow() {
         options={emails}
         placeholder="Add Email..."
         subheader="Email"
+        selectDropdown="tableModal"
       />
       <SearchDropdown
         options={employeeRoles}
         placeholder="Select Role..."
         subheader="Role"
+        selectDropdown="tableModal"
         isMulti
       />
       <SubmitButton text="Submit" onClick={() => setNewKeyModal(false)} />
@@ -103,12 +105,14 @@ export default function ButtonRow() {
         options={emails}
         placeholder="Add Email..."
         subheader="Email"
+        selectDropdown="tableModal"
         isMulti
       />
       <SearchDropdown
         options={entrypoints}
         placeholder="Add Entrypoint..."
         subheader="Entrypoints"
+        selectDropdown="tableModal"
         isMulti
       />
       <SubmitButton text="Submit" onClick={() => setNewRoleModal(false)} />

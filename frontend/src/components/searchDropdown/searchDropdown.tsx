@@ -13,11 +13,13 @@ export default function SearchDropdown({
   options,
   placeholder,
   subheader,
+  selectDropdown = "tableModal",
   isMulti = false,
 }: {
   options: Options[];
   placeholder: string;
   subheader: string;
+  selectDropdown: "tableModal" | "settingsModal";
   isMulti?: boolean;
 }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -76,7 +78,7 @@ export default function SearchDropdown({
       <h2 className={styles.subheader}>{subheader}</h2>
       {isMounted && (
         <Select
-          className={styles.selectDropdown}
+          className={styles[selectDropdown]}
           styles={customStyles}
           options={options}
           name={subheader}

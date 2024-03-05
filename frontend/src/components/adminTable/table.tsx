@@ -184,13 +184,12 @@ export default function AdminTable({
                   options={employeeRoles}
                   placeholder="Select Role..."
                   subheader=""
+                  selectDropdown="settingsModal"
                   isMulti
                 />
               </div>
               <div className={styles.settingsButtonGroup}>
-                <button className={styles.settingsButton}>
-                  Revoke Credentials
-                </button>
+                <button className={styles.settingsButton}>Revoke Key</button>
                 <button className={styles.deleteButton}>Delete User</button>
               </div>
               <SubmitButton
