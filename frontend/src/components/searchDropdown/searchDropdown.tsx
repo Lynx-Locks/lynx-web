@@ -2,17 +2,14 @@
 
 import { useEffect, useState } from "react";
 import styles from "./searchDropdown.module.css";
-import Select from "react-select";
-
-interface Options {
-  label: string;
-  value: string;
-}
+import Select, { ActionMeta } from "react-select";
+import { Options, SelectType } from "@/types/selectOptions";
 
 export default function SearchDropdown({
   options,
   placeholder,
   subheader,
+  setSelectedOption,
   selectDropdown = "tableModal",
   isMulti = false,
 }: {
@@ -20,6 +17,7 @@ export default function SearchDropdown({
   placeholder: string;
   subheader: string;
   selectDropdown: "tableModal" | "settingsModal";
+  setSelectedOption: (selectedOption: SelectType) => void;
   isMulti?: boolean;
 }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -84,6 +82,9 @@ export default function SearchDropdown({
           name={subheader}
           placeholder={placeholder}
           isMulti={isMulti}
+          onChange={(selectedOptions: SelectType, _: ActionMeta<Options>) =>
+            setSelectedOption(selectedOptions)
+          }
         />
       )}
     </div>

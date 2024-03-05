@@ -5,13 +5,15 @@ import ButtonsRow from "@/components/buttonsRow/buttonsRow";
 import User from "@/types/user";
 import { useEffect, useState } from "react";
 import axios from "@/axios/client";
+import { SelectType } from "@/types/selectOptions";
 
 export default function Dashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchInput, setSearchInput] = useState("");
 
-  const updateUser = async (user: User) => {
+  const updateUser = async (user: User, keyId: string, roles: SelectType) => {
     // TODO: axios to update user
+    console.log(user, keyId, roles);
     const newUsers = users.map((u) => {
       if (u.id === user.id) {
         return user;
@@ -47,7 +49,12 @@ export default function Dashboard() {
           setSearchInput={setSearchInput}
         />
       </div>
-      <ButtonsRow />
+      <ButtonsRow
+        emails={users.map((user) => ({
+          label: user.email,
+          value: String(user.id),
+        }))}
+      />
       <AdminTable
         users={users.filter(
           (user) =>

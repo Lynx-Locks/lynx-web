@@ -13,13 +13,14 @@ import Modal from "@/components/modal/modal";
 import { SubmitButton } from "@/components/button/button";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 import { employeeRoles } from "@/constants/roles";
+import { SelectType } from "@/types/selectOptions";
 
 export default function AdminTable({
   users,
   updateUser,
 }: {
   users: User[];
-  updateUser: (user: User) => void;
+  updateUser: (user: User, keyId: string, roles: SelectType) => void;
 }) {
   const [settingsUser, setSettingsUser] = useState<User | null>(null);
   const [columnHeaders, setColumnHeaders] = useState([
@@ -41,6 +42,8 @@ export default function AdminTable({
     },
   ]);
   const [sortedUsers, setSortedUsers] = useState(users);
+  const [selectedRoleOption, setSelectedRoleOption] =
+    useState<SelectType>(null);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -66,7 +69,7 @@ export default function AdminTable({
     setSettingsUser(sortedUsers[idx]);
   };
 
-  const closeModal = (_: boolean) => {
+  const closeModal = () => {
     setSettingsUser(null);
   };
 
@@ -92,6 +95,21 @@ export default function AdminTable({
     value: string,
   ) => {
     setSettingsUser({ ...user, [key]: value });
+  };
+
+  const handleSubmitSettings = () => {
+    // TODO: add key id
+    updateUser(settingsUser!, "", selectedRoleOption);
+    // TODO: uncomment this
+    // setSettingsUser(null);
+  };
+
+  const handleDeleteUser = () => {
+    // TODO: handle delete user
+  };
+
+  const handleRevokeKey = () => {
+    // TODO: handle revoke key
   };
 
   return (
@@ -148,7 +166,7 @@ export default function AdminTable({
       )}
       {settingsUser && (
         <Modal
-          setShowModal={closeModal}
+          closeModal={closeModal}
           title={`Settings for ${settingsUser.name}`}
           content={
             <div className={styles.settingsModal}>
@@ -179,25 +197,34 @@ export default function AdminTable({
                     )
                   }
                 />
+                {/* TODO: add a dropdown so the user can select which key they want to choose (maybe just display by public key) */}
                 <div className={styles.settingsInputLabel}>Roles:</div>
                 <SearchDropdown
                   options={employeeRoles}
                   placeholder="Select Role..."
                   subheader=""
+                  setSelectedOption={setSelectedRoleOption}
                   selectDropdown="settingsModal"
                   isMulti
                 />
               </div>
               <div className={styles.settingsButtonGroup}>
-                <button className={styles.settingsButton}>Revoke Key</button>
-                <button className={styles.deleteButton}>Delete User</button>
+                <button
+                  className={styles.settingsButton}
+                  onClick={handleRevokeKey}
+                >
+                  Revoke Key
+                </button>
+                <button
+                  className={styles.deleteButton}
+                  onClick={handleDeleteUser}
+                >
+                  Delete User
+                </button>
               </div>
               <SubmitButton
                 text="Submit Changes"
-                onClick={() => {
-                  updateUser(settingsUser);
-                  setSettingsUser(null);
-                }}
+                onClick={handleSubmitSettings}
               />
             </div>
           }

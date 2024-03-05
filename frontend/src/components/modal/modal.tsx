@@ -3,19 +3,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 
 export default function Modal({
-  setShowModal,
+  closeModal,
   content,
   title,
 }: {
-  setShowModal: (showModal: boolean) => void;
+  closeModal: () => void;
   title: string;
   content: JSX.Element;
 }) {
   return (
-    <div className={styles.modalContainer} onClick={() => setShowModal(false)}>
+    <div className={styles.modalContainer} onClick={closeModal}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <span className={styles.close} onClick={() => setShowModal(false)}>
+          <span className={styles.close} onClick={closeModal}>
             <FontAwesomeIcon icon={faX} size="xs" />
           </span>
           <h1>{title}</h1>
