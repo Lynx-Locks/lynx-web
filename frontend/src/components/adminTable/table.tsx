@@ -89,7 +89,7 @@ export default function AdminTable({
   const handleSettingsTextChange = (
     user: User,
     key: "name" | "email",
-    value: string
+    value: string,
   ) => {
     setSettingsUser({ ...user, [key]: value });
   };
@@ -162,7 +162,7 @@ export default function AdminTable({
                     handleSettingsTextChange(
                       settingsUser,
                       "name",
-                      e.target.value
+                      e.target.value,
                     )
                   }
                 />
@@ -175,7 +175,7 @@ export default function AdminTable({
                     handleSettingsTextChange(
                       settingsUser,
                       "email",
-                      e.target.value
+                      e.target.value,
                     )
                   }
                 />
