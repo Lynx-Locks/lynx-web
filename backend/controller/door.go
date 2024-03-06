@@ -19,16 +19,14 @@ func GetAllDoors(w http.ResponseWriter, _ *http.Request) {
 
 func UpdateDoor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	door := models.Door{}
+	err := json.NewDecoder(r.Body).Decode(&door)
 
-	err, dId := helpers.ParseInt(w, r, "doorId")
 	if err != nil {
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	err, door := helpers.GetFirstTable(w, models.Door{}, models.Common{Id: dId})
-	if err != nil {
-		return
-	}
-	err, door = helpers.UpdateSpecifiedParams(w, r, &door, door.Common, &door.Common)
+	err, door = helpers.UpdateObject(w, door)
 	if err != nil {
 		return
 	}
@@ -41,10 +39,8 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	var role models.Door
 	err := json.NewDecoder(r.Body).Decode(&role)
 	if err != nil {
-		http.Error(w, "400 malformed request", http.StatusBadRequest)
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	// essentially reset if the user inputted anything to common as it should not be editable
-	role.Common = models.Common{}
 	err, user := helpers.CreateNewRecord(w, role)
 
 	if err != nil {
@@ -63,9 +59,9 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = db.DB.Debug().Unscoped().Model(&models.Door{Common: models.Common{Id: dId}}).Association("Roles").Unscoped().Clear()
+	err = db.DB.Unscoped().Model(&models.Door{Id: dId}).Association("Roles").Unscoped().Clear()
 	if err != nil {
-		http.Error(w, "500 unable to delete associations", http.StatusInternalServerError)
+		http.Error(w, "Unable to delete associations", http.StatusInternalServerError)
 		return
 	}
 

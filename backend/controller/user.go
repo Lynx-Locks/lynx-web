@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"api/db"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -22,7 +23,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uId})
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
 	if err != nil {
 		return
 	}
@@ -31,16 +32,14 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	user := models.User{}
+	err := json.NewDecoder(r.Body).Decode(&user)
 
-	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	err, user := helpers.GetFirstTable(w, models.User{}, models.Common{Id: uId})
-	if err != nil {
-		return
-	}
-	err, user = helpers.UpdateSpecifiedParams(w, r, &user, user.Common, &user.Common)
+	err, user = helpers.UpdateObject(w, user)
 	if err != nil {
 		return
 	}
@@ -72,8 +71,6 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "400 malformed request", http.StatusBadRequest)
 	}
-	// essentially reset if the user inputted anything to common ass it should not be editable
-	user.Common = models.Common{}
 	err, user = helpers.CreateNewRecord(w, user)
 	if err != nil {
 		return
@@ -92,4 +89,67 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
+}
+
+func ReplaceRoleAssociations(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	err, uId := helpers.ParseInt(w, r, "userId")
+	if err != nil {
+		return
+	}
+	roleIds := []uint{}
+	err = json.NewDecoder(r.Body).Decode(&roleIds)
+	if err != nil {
+		http.Error(w, "Malformed roleIds", http.StatusBadRequest)
+		return
+	}
+
+	if len(roleIds) == 0 {
+		http.Error(w, "Missing role ids", http.StatusBadRequest)
+		return
+	}
+	roles := []models.Role{}
+	results := db.DB.Where(&roleIds).Find(&roles)
+	if results.RowsAffected != int64(len(roleIds)) {
+		http.Error(w, "One or more invalid door id/s", http.StatusBadRequest)
+		return
+	}
+
+	credentials := []models.Credential{}
+	db.DB.Find(&credentials, "user_id = ?", uId)
+	for _, credential := range credentials {
+		err = db.DB.Model(&credential).Association("Roles").Replace(&roles)
+		if err != nil {
+			http.Error(w, "Failed to add one or more roles", http.StatusInternalServerError)
+			helpers.DBErrorHandling(err, w)
+			return
+		}
+		helpers.JsonWriter(w, &credential)
+	}
+
+}
+
+func GetRoleAssociations(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	err, uId := helpers.ParseInt(w, r, "userId")
+	if err != nil {
+		return
+	}
+	credentials := []models.Credential{}
+	db.DB.Find(&credentials, "user_id = ?", uId)
+	allRoles := []models.Role{}
+	for _, credential := range credentials {
+		roles := []models.Role{}
+		err = db.DB.Model(&credential).Association("Roles").Find(&roles)
+		if err != nil {
+			http.Error(w, "Failed to get associations for one or more roles", http.StatusInternalServerError)
+			helpers.DBErrorHandling(err, w)
+
+			return
+		}
+		allRoles = append(allRoles, roles...)
+
+	}
+	allRoles = helpers.RemoveDuplicates(allRoles)
+	helpers.JsonWriter(w, &allRoles)
 }
