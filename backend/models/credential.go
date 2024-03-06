@@ -5,7 +5,6 @@ import (
 )
 
 type Credential struct {
-	Common
 	WebauthnId      []byte `gorm:"serializer:json;primaryKey" json:"webauthnId"`
 	UserId          uint   `json:"userId"`
 	User            User

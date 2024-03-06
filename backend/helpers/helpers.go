@@ -37,23 +37,23 @@ func CheckEmptyString(s interface{}) bool {
 }
 func DBErrorHandling(error error, w http.ResponseWriter) {
 	if errors.Is(error, gorm.ErrRecordNotFound) {
-		http.Error(w, "404 record not found", http.StatusNotFound)
+		http.Error(w, "Record not found", http.StatusNotFound)
 	} else if errors.Is(error, gorm.ErrDuplicatedKey) {
-		http.Error(w, "400 input fails unique constraint", http.StatusNotFound)
+		http.Error(w, "Input fails unique constraint", http.StatusNotFound)
 	} else {
-		http.Error(w, "500 unable to handle request", http.StatusInternalServerError)
+		http.Error(w, "Unable to handle request", http.StatusInternalServerError)
 	}
 }
 
 func JsonWriter(w http.ResponseWriter, table interface{}) {
 	errJson := json.NewEncoder(w).Encode(&table)
 	if errJson != nil {
-		http.Error(w, "500 unable to encode response", http.StatusInternalServerError)
+		http.Error(w, "Unable to encode response", http.StatusInternalServerError)
 	}
 }
 
 func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) (error, []T) {
-	result := db.DB.Omit("Doors").Find(&table)
+	result := db.DB.Find(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error, table
@@ -73,27 +73,35 @@ func GetFirstTable[T models.AllTables, P models.AllTables](w http.ResponseWriter
 
 }
 
-func UpdateSpecifiedParams[T models.AllTables](w http.ResponseWriter, r *http.Request, table *T, initCommon models.Common, updatedCommon *models.Common) (error, T) {
-	err := json.NewDecoder(r.Body).Decode(&table)
-	if err != nil {
-		http.Error(w, "400 malformed request", http.StatusBadRequest)
-		return err, *table
+func UpdateObject[T models.AllTables](w http.ResponseWriter, table T) (error, T) {
+	if table.GetId() == 0 {
+		http.Error(w, "Cannot update without Id", http.StatusBadRequest)
+		return errors.New("400"), table
 	}
-	if initCommon != *updatedCommon {
-		http.Error(w, "Invalid updates to automatic fields", http.StatusBadRequest)
-		return errors.New("400"), *table
+	if !CheckEmptyString(table) {
+		http.Error(w, "Request contains empty string params", http.StatusBadRequest)
+		return errors.New("400"), table
 	}
-	result := db.DB.Debug().Save(&table)
+	result := db.DB.Save(&table)
+
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
-		return result.Error, *table
+		return result.Error, table
 	}
-	return nil, *table
+	if result.RowsAffected == 0 {
+		http.Error(w, "Record not found", http.StatusNotFound)
+		return errors.New("404"), table
+	}
+	return nil, table
 }
 
 func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error, T) {
+	if table.GetId() != 0 {
+		http.Error(w, "Cannot create with Id", http.StatusBadRequest)
+		return errors.New("400"), table
+	}
 	if !CheckEmptyString(table) {
-		http.Error(w, "400 Request contains empty string params", http.StatusBadRequest)
+		http.Error(w, "Request contains empty string params", http.StatusBadRequest)
 		return errors.New("400"), table
 	}
 
@@ -112,7 +120,7 @@ func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, pk uint) err
 		return result.Error
 	}
 	if result.RowsAffected < 1 {
-		http.Error(w, "404 record not found", http.StatusNotFound)
+		http.Error(w, "Record not found", http.StatusNotFound)
 		return errors.New("404")
 	}
 	return nil
@@ -121,8 +129,22 @@ func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, pk uint) err
 func ParseInt(w http.ResponseWriter, r *http.Request, key string) (error, uint) {
 	uId, err := strconv.ParseUint(chi.URLParam(r, key), 10, 32)
 	if err != nil {
-		http.Error(w, "400 failed integer parsing", http.StatusBadRequest)
+		http.Error(w, "Failed integer parsing", http.StatusBadRequest)
 		return errors.New("400"), 0
 	}
 	return nil, uint(uId)
+}
+
+func RemoveDuplicates[T models.AllTables](input []T) []T {
+	encountered := map[uint]bool{}
+	result := []T{}
+
+	for _, value := range input {
+		if encountered[value.GetId()] == false {
+			result = append(result, value)
+			encountered[value.GetId()] = true
+		}
+	}
+
+	return result
 }

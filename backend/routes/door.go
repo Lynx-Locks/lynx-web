@@ -9,7 +9,7 @@ func DoorsRoute() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", controller.GetAllDoors)
 	r.Post("/", controller.CreateDoor)
-	r.Patch("/{doorId}", controller.UpdateDoor)
+	r.Put("/", controller.UpdateDoor)
 	r.Delete("/{doorId}", controller.DeleteDoor)
 	return r
 }

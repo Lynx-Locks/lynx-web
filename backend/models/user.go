@@ -10,12 +10,14 @@ import (
 )
 
 type User struct {
-	Common
+	Id         uint   `json:"id"`
 	Name       string `json:"name"`
 	Email      string `gorm:"unique" json:"email"`
-	IsAdmin    bool   `json:"isAdmin"`
+	IsAdmin    bool   `gorm:"default:false" json:"isAdmin"`
 	WebauthnId []byte `gorm:"serializer:json" json:"webauthnId"`
 }
+
+func (user User) GetId() uint { return user.Id }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	webauthnId, err := uuid.NewUUID()
