@@ -19,9 +19,11 @@ import Loader from "@/components/loader/loader";
 export default function AdminTable({
   users,
   updateUser,
+  deleteUser,
 }: {
   users: User[];
-  updateUser: (user: User, keyId: string, roles: SelectType) => void;
+  updateUser: (user: User, roles: SelectType) => void;
+  deleteUser: (user: User) => Promise<void>;
 }) {
   const [settingsUser, setSettingsUser] = useState<User | null>(null);
   const [columnHeaders, setColumnHeaders] = useState([
@@ -113,18 +115,21 @@ export default function AdminTable({
   };
 
   const handleSubmitSettings = () => {
-    // TODO: add key id
-    updateUser(settingsUser!, "", selectedRoleOption);
-    // TODO: uncomment this
-    // setSettingsUser(null);
+    updateUser(settingsUser!, selectedRoleOption);
+    // TODO: uncomment this when working
+    // closeModal();
   };
 
   const handleDeleteUser = () => {
-    // TODO: handle delete user
+    if (confirm("Are you sure you want to delete this user?") && settingsUser) {
+      deleteUser(settingsUser).then(() => closeModal());
+    }
   };
 
   const handleRevokeKey = () => {
-    // TODO: handle revoke key
+    if (confirm("Are you sure you want to revoke this user's key?")) {
+      // TODO: need endpoint to revoke key
+    }
   };
 
   return (
@@ -213,7 +218,6 @@ export default function AdminTable({
                     )
                   }
                 />
-                {/* TODO: add a dropdown so the user can select which key they want to choose (maybe just display by public key) */}
                 <div className={styles.settingsInputLabel}>Roles:</div>
                 <SearchDropdown
                   options={roles}
