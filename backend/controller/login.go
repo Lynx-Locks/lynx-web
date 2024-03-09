@@ -60,10 +60,8 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the session data stored from the function above
-	sessionData := models.SessionData{
-		UserId: user.WebAuthnID(),
-	}
-	result := db.DB.First(&sessionData)
+	sessionData := models.SessionData{}
+	result := db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Take(&sessionData)
 	if result.Error == nil {
 		result = db.DB.Delete(&sessionData)
 	}

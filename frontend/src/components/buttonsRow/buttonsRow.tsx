@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./buttonsRow.module.css";
 import { AddButton, SubmitButton } from "@/components/button/button";
 import Modal from "@/components/modal/modal";
@@ -8,24 +8,41 @@ import SearchDropdown from "../searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
 import { getRoleOptions } from "@/data/roles";
 import { getDoorOptions } from "@/data/doors";
+import axios from "@/axios/client";
+import User from "@/types/user";
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 export default function ButtonRow({
-  emails,
+  users,
+  setUsers,
 }: {
-  emails: { label: string; value: string }[];
+  users: User[];
+  setUsers: Dispatch<SetStateAction<User[]>>;
 }) {
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [newRoleModal, setNewRoleModal] = useState(false);
   const [newUserModal, setNewUserModal] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  const [newUser, setNewUser] = useState<{ name: string; email: string }>({
+    name: "",
+    email: "",
+  });
+  const [newRole, setNewRole] = useState<{ name: string }>({
+    name: "",
+  });
   const [selectedEmailOption, setSelectedEmailOption] =
     useState<SelectType>(null);
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
+  const [selectedDoorOption, setSelectedDoorOption] =
+    useState<SelectType>(null);
   const [roles, setRoles] = useState<Options[]>([]);
   const [doors, setDoors] = useState<Options[]>([]);
+
+  const emails = users.map((user) => ({
+    label: user.email,
+    value: user.id.toString(),
+  }));
 
   useEffect(() => {
     async function fetchRoles() {
@@ -64,41 +81,84 @@ export default function ButtonRow({
     setNewKeyModal(false);
     setNewUserModal(false);
     setNewRoleModal(false);
+    setNewUser({ name: "", email: "" });
+    setNewRole({ name: "" });
     setSelectedEmailOption(null);
     setSelectedRoleOption(null);
   };
 
-  const handleModalSubmit = () => {
-    console.log(selectedEmailOption, selectedRoleOption);
-    if (newKeyModal) {
-      // handle adding new key
+  const handleModalSubmit = async () => {
+    console.log(newKeyModal, newUser);
+    if (newKeyModal && selectedEmailOption) {
+      // Send email for user to register a key
+      await axios.post(`/users/register`, {
+        // @ts-ignore
+        email: selectedEmailOption.label,
+      });
     } else if (newRoleModal) {
       // handle adding new role
+      await axios.post("/roles", {
+        name: newRole.name,
+        users: Array.isArray(selectedEmailOption)
+          ? selectedEmailOption.map((email: Options) => ({
+              id: parseInt(email.value),
+            }))
+          : [],
+        doors: Array.isArray(selectedDoorOption)
+          ? selectedDoorOption.map((door: Options) => ({
+              id: parseInt(door.value),
+            }))
+          : [],
+      });
     } else if (newUserModal) {
       // handle adding new user
-      if (emailRegex.test(userEmail)) {
-        // TODO: add user & send email
+      if (emailRegex.test(newUser.email)) {
+        const userResp = await axios.post("/users", {
+          name: newUser.name,
+          email: newUser.email,
+          roles: Array.isArray(selectedRoleOption)
+            ? selectedRoleOption.map((role: Options) => ({
+                id: parseInt(role.value),
+              }))
+            : [],
+        });
+
+        const user = userResp.data;
+        // Save user to state
+        setUsers([...users, user]);
+
+        // Send email for user to register a key
+        await axios.post(`/users/register`, {
+          email: newUser.email,
+        });
       }
     }
-    // TODO: uncomment these lines when the functionality is implemented
-    // setSelectedEmailOption(null);
-    // setSelectedRoleOption(null);
-    // setNewKeyModal(false);
+
+    setSelectedEmailOption(null);
+    setSelectedRoleOption(null);
+    setNewKeyModal(false);
   };
 
   const newUserModalContent = (
     <div>
+      <h2 className={styles.subheader}>Name</h2>
+      <input
+        className={styles.modalInput}
+        type="text"
+        value={newUser.name}
+        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+      />
       <h2 className={styles.subheader}>Email</h2>
       <input
         className={styles.modalInput}
         type="text"
-        value={userEmail}
-        onChange={(e) => setUserEmail(e.target.value)}
+        value={newUser.email}
+        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
       />
       <SearchDropdown
         options={roles}
         placeholder="Select Role(s)..."
-        subheader="Role"
+        subheader="Roles"
         selectDropdown="tableModal"
         setSelectedOption={setSelectedRoleOption}
         isMulti
@@ -116,24 +176,23 @@ export default function ButtonRow({
         selectDropdown="tableModal"
         setSelectedOption={setSelectedEmailOption}
       />
-      <SearchDropdown
-        options={roles}
-        placeholder="Select Role..."
-        subheader="Role"
-        selectDropdown="tableModal"
-        setSelectedOption={setSelectedRoleOption}
-        isMulti
-      />
       <SubmitButton text="Submit" onClick={handleModalSubmit} />
     </div>
   );
 
   const newRoleModalContent = (
     <div>
+      <h2 className={styles.subheader}>Name</h2>
+      <input
+        className={styles.modalInput}
+        type="text"
+        value={newRole.name}
+        onChange={(e) => setNewRole({ name: e.target.value })}
+      />
       <SearchDropdown
         options={emails}
-        placeholder="Add Email..."
-        subheader="Email"
+        placeholder="Add Emails..."
+        subheader="Emails"
         selectDropdown="tableModal"
         setSelectedOption={setSelectedEmailOption}
         isMulti
@@ -143,7 +202,7 @@ export default function ButtonRow({
         placeholder="Add Entrypoint..."
         subheader="Entrypoints"
         selectDropdown="tableModal"
-        setSelectedOption={setSelectedRoleOption}
+        setSelectedOption={setSelectedDoorOption}
         isMulti
       />
       <SubmitButton text="Submit" onClick={handleModalSubmit} />

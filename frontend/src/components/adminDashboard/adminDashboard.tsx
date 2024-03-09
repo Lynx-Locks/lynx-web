@@ -1,4 +1,6 @@
-import styles from "./dashboard.module.css";
+"use client";
+
+import styles from "./adminDashboard.module.css";
 import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
 import ButtonsRow from "@/components/buttonsRow/buttonsRow";
@@ -7,7 +9,7 @@ import { useEffect, useState } from "react";
 import axios from "@/axios/client";
 import { SelectType } from "@/types/selectOptions";
 
-export default function Dashboard() {
+export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchInput, setSearchInput] = useState("");
 
@@ -49,12 +51,7 @@ export default function Dashboard() {
           setSearchInput={setSearchInput}
         />
       </div>
-      <ButtonsRow
-        emails={users.map((user) => ({
-          label: user.email,
-          value: String(user.id),
-        }))}
-      />
+      <ButtonsRow users={users} setUsers={setUsers} />
       <AdminTable
         users={users.filter(
           (user) =>

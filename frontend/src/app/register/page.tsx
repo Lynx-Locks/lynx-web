@@ -42,12 +42,12 @@ export default function RegisterUser() {
     LoadingStatus.Nil,
   );
   const [yubiKeySerial, setYubiKeySerial] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function registerPasskey() {
     const token = searchParams.get("token");
 
     // Decode token & check validity
-    // TODO: verify token is valid in backend during registerRequest
     try {
       // parse YubiKey OTP
       let yubiKeyId;
@@ -78,6 +78,7 @@ export default function RegisterUser() {
       }
     } catch (error) {
       console.error(error);
+      setErrorMessage((error as Error).message);
       setLoadingStatus(LoadingStatus.Error);
     }
   }
@@ -107,8 +108,11 @@ export default function RegisterUser() {
       )}
       {loadingStatus === LoadingStatus.Error && (
         <div>
-          Error. Something went wrong with your request. Please contact your
-          administrator.
+          <p>
+            Error. Something went wrong with your request. Please contact your
+            administrator:
+          </p>
+          <p>{errorMessage}</p>
         </div>
       )}
     </div>

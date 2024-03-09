@@ -18,7 +18,7 @@ export default function Navbar({ name }: { name: string }) {
       </div>
       <div className={styles.navRight}>
         <p className={styles.navUser}>{name}</p>
-        <button className={styles.navLogout} onClick={() => handleLogout()}>
+        <button className={styles.navLogout} onClick={handleLogout}>
           Logout
         </button>
       </div>

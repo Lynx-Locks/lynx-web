@@ -42,13 +42,18 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	user := models.User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
+	reqUser := models.User{}
+	err := json.NewDecoder(r.Body).Decode(&reqUser)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	ids := helpers.GetAllIdsFromList(user.Roles)
+	ids := helpers.GetAllIdsFromList(reqUser.Roles)
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: reqUser.Id})
+	if err != nil {
+		http.Error(w, "Invalid User", http.StatusBadRequest)
+		return
+	}
 	roles := []models.Role{}
 	if len(ids) != 0 {
 		res := db.DB.Find(&roles, ids)
@@ -61,6 +66,12 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		user.Roles = roles
+	}
+	if reqUser.Email != "" {
+		user.Email = reqUser.Email
+	}
+	if reqUser.Name != "" {
+		user.Name = reqUser.Name
 	}
 
 	err, user = helpers.UpdateObject(w, user)
@@ -172,12 +183,16 @@ func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 
 func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	email := r.URL.Query().Get("email")
-	if email == "" {
-		http.Error(w, "Email parameter is required", http.StatusBadRequest)
-		return
+	reqBody := struct {
+		Email string `json:"email"`
+	}{}
+
+	err := json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
+
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: reqBody.Email})
 	if err != nil {
 		http.Error(w, "Invalid user email", http.StatusBadRequest)
 		return
@@ -193,6 +208,7 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	w.WriteHeader(200)
 }
 
 func sendEmail(user models.User, token uuid.UUID) error {
