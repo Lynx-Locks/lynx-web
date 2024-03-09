@@ -41,7 +41,7 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err, _ = helpers.CreateNewRecord(w, door)
+	err, door = helpers.CreateNewRecord(w, door)
 
 	if err != nil {
 		return
