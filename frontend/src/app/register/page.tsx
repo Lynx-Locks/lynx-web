@@ -58,7 +58,7 @@ export default function RegisterUser() {
           <input
             className={styles.textInput}
             type="text"
-            placeholder="Yubikey Serial Number (leave blank if not familiar to you)"
+            placeholder="Yubikey Serial Number (leave blank if unfamiliar to you)"
             value={yubikeySerial}
             onChange={(e) => setYubikeySerial(e.target.value)}
           />
