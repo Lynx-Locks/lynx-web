@@ -25,6 +25,10 @@ export default function SearchDropdown({
   useEffect(() => setIsMounted(true), []);
 
   const customStyles = {
+    input: (base: any) => ({
+      ...base,
+      color: "rgb(var(--foreground-rgb))",
+    }),
     control: (base: any) => ({
       ...base,
       backgroundColor: "rgb(var(--background-rgb))",

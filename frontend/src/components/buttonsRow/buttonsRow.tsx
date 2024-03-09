@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./buttonsRow.module.css";
 import { AddButton, SubmitButton } from "@/components/button/button";
 import Modal from "@/components/modal/modal";
 import SearchDropdown from "../searchDropdown/searchDropdown";
-import { employeeRoles } from "@/constants/roles";
-import { entrypoints } from "@/constants/entrypoints";
-import { SelectType } from "@/types/selectOptions";
+import { Options, SelectType } from "@/types/selectOptions";
+import { getRoleOptions } from "@/data/roles";
+import { getDoorOptions } from "@/data/doors";
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -24,6 +24,23 @@ export default function ButtonRow({
     useState<SelectType>(null);
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
+  const [roles, setRoles] = useState<Options[]>([]);
+  const [doors, setDoors] = useState<Options[]>([]);
+
+  useEffect(() => {
+    async function fetchRoles() {
+      const roles = await getRoleOptions();
+      setRoles(roles);
+    }
+
+    async function fetchDoors() {
+      const doors = await getDoorOptions();
+      setDoors(doors);
+    }
+
+    fetchRoles();
+    fetchDoors();
+  }, []);
 
   const buttons = [
     {
@@ -79,7 +96,7 @@ export default function ButtonRow({
         onChange={(e) => setUserEmail(e.target.value)}
       />
       <SearchDropdown
-        options={employeeRoles}
+        options={roles}
         placeholder="Select Role(s)..."
         subheader="Role"
         selectDropdown="tableModal"
@@ -100,7 +117,7 @@ export default function ButtonRow({
         setSelectedOption={setSelectedEmailOption}
       />
       <SearchDropdown
-        options={employeeRoles}
+        options={roles}
         placeholder="Select Role..."
         subheader="Role"
         selectDropdown="tableModal"
@@ -122,7 +139,7 @@ export default function ButtonRow({
         isMulti
       />
       <SearchDropdown
-        options={entrypoints}
+        options={doors}
         placeholder="Add Entrypoint..."
         subheader="Entrypoints"
         selectDropdown="tableModal"

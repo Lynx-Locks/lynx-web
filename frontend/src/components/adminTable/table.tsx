@@ -12,8 +12,8 @@ import { useEffect, useState } from "react";
 import Modal from "@/components/modal/modal";
 import { SubmitButton } from "@/components/button/button";
 import SearchDropdown from "../searchDropdown/searchDropdown";
-import { employeeRoles } from "@/constants/roles";
-import { SelectType } from "@/types/selectOptions";
+import { Options, SelectType } from "@/types/selectOptions";
+import { getRoleOptions } from "@/data/roles";
 
 export default function AdminTable({
   users,
@@ -44,6 +44,16 @@ export default function AdminTable({
   const [sortedUsers, setSortedUsers] = useState(users);
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
+  const [roles, setRoles] = useState<Options[]>([]);
+
+  useEffect(() => {
+    async function fetchRoles() {
+      const roles = await getRoleOptions();
+      setRoles(roles);
+    }
+
+    fetchRoles();
+  }, []);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -200,7 +210,7 @@ export default function AdminTable({
                 {/* TODO: add a dropdown so the user can select which key they want to choose (maybe just display by public key) */}
                 <div className={styles.settingsInputLabel}>Roles:</div>
                 <SearchDropdown
-                  options={employeeRoles}
+                  options={roles}
                   placeholder="Select Role..."
                   subheader=""
                   setSelectedOption={setSelectedRoleOption}
