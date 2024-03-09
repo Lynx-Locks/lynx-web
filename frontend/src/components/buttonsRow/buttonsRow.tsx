@@ -9,6 +9,8 @@ import { employeeRoles } from "@/constants/roles";
 import { entrypoints } from "@/constants/entrypoints";
 import { SelectType } from "@/types/selectOptions";
 
+const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+
 export default function ButtonRow({
   emails,
 }: {
@@ -16,6 +18,8 @@ export default function ButtonRow({
 }) {
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [newRoleModal, setNewRoleModal] = useState(false);
+  const [newUserModal, setNewUserModal] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [selectedEmailOption, setSelectedEmailOption] =
     useState<SelectType>(null);
   const [selectedRoleOption, setSelectedRoleOption] =
@@ -24,11 +28,16 @@ export default function ButtonRow({
   const buttons = [
     {
       id: 1,
+      name: "New User",
+      onClick: () => setNewUserModal(true),
+    },
+    {
+      id: 2,
       name: "New Key",
       onClick: () => setNewKeyModal(true),
     },
     {
-      id: 2,
+      id: 3,
       name: "New Role",
       onClick: () => setNewRoleModal(true),
     },
@@ -36,6 +45,7 @@ export default function ButtonRow({
 
   const handleModalClose = () => {
     setNewKeyModal(false);
+    setNewUserModal(false);
     setNewRoleModal(false);
     setSelectedEmailOption(null);
     setSelectedRoleOption(null);
@@ -47,12 +57,38 @@ export default function ButtonRow({
       // handle adding new key
     } else if (newRoleModal) {
       // handle adding new role
+    } else if (newUserModal) {
+      // handle adding new user
+      if (emailRegex.test(userEmail)) {
+        // TODO: add user & send email
+      }
     }
     // TODO: uncomment these lines when the functionality is implemented
     // setSelectedEmailOption(null);
     // setSelectedRoleOption(null);
     // setNewKeyModal(false);
   };
+
+  const newUserModalContent = (
+    <div>
+      <h2 className={styles.subheader}>Email</h2>
+      <input
+        className={styles.modalInput}
+        type="text"
+        value={userEmail}
+        onChange={(e) => setUserEmail(e.target.value)}
+      />
+      <SearchDropdown
+        options={employeeRoles}
+        placeholder="Select Role(s)..."
+        subheader="Role"
+        selectDropdown="tableModal"
+        setSelectedOption={setSelectedRoleOption}
+        isMulti
+      />
+      <SubmitButton text="Submit" onClick={handleModalSubmit} />
+    </div>
+  );
 
   const newKeyModalContent = (
     <div>
@@ -102,6 +138,13 @@ export default function ButtonRow({
       {buttons.map(({ id, name, onClick }) => (
         <AddButton key={id} text={name} onClick={() => onClick()} />
       ))}
+      {newUserModal && (
+        <Modal
+          closeModal={handleModalClose}
+          title="New User"
+          content={newUserModalContent}
+        />
+      )}
       {newKeyModal && (
         <Modal
           closeModal={handleModalClose}
