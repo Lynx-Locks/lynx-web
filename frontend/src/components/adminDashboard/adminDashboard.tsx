@@ -13,15 +13,25 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchInput, setSearchInput] = useState("");
 
-  const updateUser = async (user: User, keyId: string, roles: SelectType) => {
-    // TODO: axios to update user
-    console.log(user, keyId, roles);
+  const updateUser = async (user: User, roles: SelectType) => {
+    const newUserResp = await axios.put(`/users/${user.id}`, {
+      name: user.name,
+      email: user.email,
+      roles: Array.isArray(roles) && roles.map((r) => r.value),
+    });
+    const newUser = newUserResp.data;
     const newUsers = users.map((u) => {
-      if (u.id === user.id) {
+      if (u.id === newUser.id) {
         return user;
       }
       return u;
     });
+    setUsers(newUsers);
+  };
+
+  const deleteUser = async (user: User) => {
+    axios.delete(`/users/${user.id}`);
+    const newUsers = users.filter((u) => u.id !== user.id);
     setUsers(newUsers);
   };
 
@@ -61,6 +71,7 @@ export default function AdminDashboard() {
             user.lastDateIn.toLowerCase().includes(searchInput.toLowerCase()),
         )}
         updateUser={updateUser}
+        deleteUser={deleteUser}
       />
     </div>
   );
