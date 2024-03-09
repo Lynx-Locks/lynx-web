@@ -36,17 +36,17 @@ func UpdateDoor(w http.ResponseWriter, r *http.Request) {
 
 func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var role models.Door
-	err := json.NewDecoder(r.Body).Decode(&role)
+	var door models.Door
+	err := json.NewDecoder(r.Body).Decode(&door)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err, user := helpers.CreateNewRecord(w, role)
+	err, _ = helpers.CreateNewRecord(w, door)
 
 	if err != nil {
 		return
 	}
-	helpers.JsonWriter(w, user)
+	helpers.JsonWriter(w, door)
 }
 
 func DeleteDoor(w http.ResponseWriter, r *http.Request) {
