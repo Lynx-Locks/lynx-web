@@ -15,6 +15,7 @@ export default function RegisterUser() {
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
     LoadingStatus.Nil,
   );
+  const [yubikeySerial, setYubikeySerial] = useState("");
 
   async function registerPasskey() {
     setLoadingStatus(LoadingStatus.Loading);
@@ -23,7 +24,9 @@ export default function RegisterUser() {
     // Decode token & check validity
     // TODO: verify token is valid in backend during registerRequest
     try {
-      const resp = await axios.post(`/auth/register/request/${token}`);
+      const resp = await axios.post(`/auth/register/request/${token}`, {
+        yubikeySerial,
+      });
       // Do webauthn stuff
       const options: PublicKeyCredentialCreationOptionsJSON = resp.data;
       // Prompt user to generate a passkey
@@ -45,10 +48,21 @@ export default function RegisterUser() {
   return (
     <div className={styles.container}>
       {loadingStatus === LoadingStatus.Nil && (
-        <SubmitButton
-          onClick={() => registerPasskey()}
-          text="Create a New Passkey"
-        />
+        <div>
+          <div className={styles.registerButton}>
+            <SubmitButton
+              onClick={() => registerPasskey()}
+              text="Create a New Passkey"
+            />
+          </div>
+          <input
+            className={styles.textInput}
+            type="text"
+            placeholder="Yubikey Serial Number (leave blank if not familiar to you)"
+            value={yubikeySerial}
+            onChange={(e) => setYubikeySerial(e.target.value)}
+          />
+        </div>
       )}
       {loadingStatus === LoadingStatus.Loading && <Loader />}
       {loadingStatus === LoadingStatus.Success && (

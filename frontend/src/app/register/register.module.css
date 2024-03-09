@@ -7,3 +7,20 @@
   padding: 20px 10px;
   min-height: 80vh;
 }
+
+.registerButton {
+  margin-bottom: 50px;
+}
+
+.textInput {
+  width: 550px;
+  padding: 0 10px;
+  border: 1px solid rgba(var(--foreground-rgb), 0.5);
+  background-color: rgb(var(--background-rgb));
+  border-radius: 4px;
+  height: 40px;
+}
+
+.textInput::placeholder {
+  text-align: center; 
+}
