@@ -18,6 +18,7 @@ export default function AuthorizeUser() {
 
   async function loginWithPasskey() {
     setLoadingStatus(LoadingStatus.Loading);
+    const token = searchParams.get("token");
 
     try {
       const resp = await axios.post(`/auth/authorize/request`);
@@ -26,6 +27,7 @@ export default function AuthorizeUser() {
       // Prompt user to user passkey
       const credential = await startAuthentication(options);
       // verify the credential
+      // TODO: send door_id to ensure user has door access
       const verifyResp = await axios.post(
         `/auth/authorize/response/${btoa(options.challenge)}`, // bas64 encode the challenge because it will not parse chars like '-' and '_'
         {
