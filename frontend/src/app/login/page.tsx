@@ -47,7 +47,7 @@ const Login = () => {
       });
 
       const user = userResp.data;
-      const response = await axios.post(`/auth/signin/request/${user.id}`);
+      const response = await axios.post(`/admin/login/request/${user.id}`);
       const options: PublicKeyCredentialRequestOptionsJSON = response.data;
       // Prompt user to user passkey
       const credential = await startAuthentication(options);
