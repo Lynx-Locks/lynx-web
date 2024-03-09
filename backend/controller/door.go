@@ -67,3 +67,17 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 }
+
+func OpenDoor(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	err, dId := helpers.ParseInt(w, r, "doorId")
+	if err != nil {
+		return
+	}
+	_, hasAccess := models.DoorUnlocked[dId]
+	if hasAccess {
+		w.WriteHeader(200)
+	} else {
+		http.Error(w, "Door not unlocked", http.StatusUnauthorized)
+	}
+}

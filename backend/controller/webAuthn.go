@@ -12,6 +12,7 @@ import (
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // https://developers.google.com/codelabs/passkey-form-autofill
@@ -272,9 +273,44 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errJson := json.NewEncoder(w).Encode("Login Success")
+	err, userRoles := GetAndReturnRoleAssociationsById(w, user.Id)
+	if err != nil {
+		http.Error(w, "Could not get roles for user", http.StatusInternalServerError)
+	}
+	doorId := uint(1)
+	hasAccess := false
+	for _, role := range userRoles {
+		doors := []models.Door{}
+		err = db.DB.Model(&role).Association("Doors").Find(&doors)
+		if err != nil {
+			helpers.DBErrorHandling(err, w)
+			http.Error(w, "Could not get doors for user", http.StatusInternalServerError)
+			return
+		}
+		for _, door := range doors {
+			if door.Id == doorId {
+				hasAccess = true
+				break
+			}
+		}
+		if hasAccess == true {
+			break
+		}
+	}
+	if hasAccess == false {
+		http.Error(w, "User does not have access to this door", http.StatusBadRequest)
+		return
+	}
+	errJson := json.NewEncoder(w).Encode("Login Success, opening door")
 	if errJson != nil {
 		http.Error(w, "Could not return results", http.StatusInternalServerError)
 		return
 	}
+	go unlockDoor(doorId)
+}
+
+func unlockDoor(doorId uint) {
+	models.DoorUnlocked[doorId] = true
+	time.Sleep(10 * time.Second)
+	delete(models.DoorUnlocked, doorId)
 }
