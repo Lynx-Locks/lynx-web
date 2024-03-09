@@ -13,7 +13,7 @@ import Modal from "@/components/modal/modal";
 import { SubmitButton } from "@/components/button/button";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
-import { getRoleOptions } from "@/data/roles";
+import { getRoleOptions, getUserRoles } from "@/data/roles";
 import Loader from "@/components/loader/loader";
 
 export default function AdminTable({
@@ -76,8 +76,12 @@ export default function AdminTable({
     setSortedUsers(newUsers);
   }, [columnHeaders, setSortedUsers, users]);
 
-  const handleClickSettings = (idx: number) => {
-    setSettingsUser(sortedUsers[idx]);
+  const handleClickSettings = async (idx: number) => {
+    const user = sortedUsers[idx];
+    const roles = await getUserRoles(user.id);
+
+    setSelectedRoleOption(roles);
+    setSettingsUser(user);
   };
 
   const closeModal = () => {
