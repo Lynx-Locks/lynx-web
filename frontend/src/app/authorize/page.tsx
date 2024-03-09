@@ -18,21 +18,20 @@ export default function AuthorizeUser() {
 
   async function loginWithPasskey() {
     setLoadingStatus(LoadingStatus.Loading);
-    const token = searchParams.get("token");
-
-    // TODO: decode token to get door_id & check if token is valid
 
     try {
-      const resp = await axios.post(`/auth/signin/request/${token}`);
+      const resp = await axios.post(`/auth/authorize/request`);
       // Do webauthn stuff
       const options: PublicKeyCredentialRequestOptionsJSON = resp.data;
       // Prompt user to user passkey
       const credential = await startAuthentication(options);
       // verify the credential
-      const verifyResp = await axios.post(`/auth/signin/response/${token}`, {
-        ...credential,
-        challenge: options.challenge,
-      });
+      const verifyResp = await axios.post(
+        `/auth/authorize/response/${btoa(options.challenge)}`, // bas64 encode the challenge because it will not parse chars like '-' and '_'
+        {
+          ...credential,
+        },
+      );
 
       if (verifyResp.status === 200) {
         setLoadingStatus(LoadingStatus.Success);

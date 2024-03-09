@@ -7,6 +7,7 @@ import (
 
 func AdminAuthRoute() chi.Router {
 	r := chi.NewRouter()
-	r.Post("/login/{userId}", controller.LoginHandler)
+	r.Post("/login/request/{userId}", controller.LoginRequest)
+	r.Post("/login/{userId}", controller.LoginResponse)
 	return r
 }
