@@ -3,6 +3,8 @@
   border-radius: 10px;
   margin: 10px 0;
   padding: 10px;
+  max-height: 500px;
+  overflow: auto;
 }
 
 .table {
@@ -10,8 +12,12 @@
 }
 
 .tableHeader {
+  position: sticky;
+  top: -10px;
   text-align: left;
   border-bottom: 1px solid rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-rgb));
+  height: 50px;
 }
 
 .tableCell {
