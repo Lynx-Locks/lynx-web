@@ -104,7 +104,6 @@ func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 	}
 	helpers.JsonWriter(w, &role)
 }
-
 func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, rId := helpers.ParseInt(w, r, "roleId")

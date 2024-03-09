@@ -8,3 +8,5 @@ type Door struct {
 }
 
 func (door Door) GetId() uint { return door.Id }
+
+var DoorUnlocked = map[uint]bool{}
