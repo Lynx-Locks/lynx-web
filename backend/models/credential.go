@@ -7,6 +7,7 @@ import (
 type Credential struct {
 	Id              []byte        `gorm:"serializer:json;primaryKey" json:"id"`
 	UserId          uint          `json:"userId"`
+	User            User          `json:"user,omitempty"`
 	PublicKey       []byte        `gorm:"serializer:json" json:"publicKey"`
 	Expiration      uint          `json:"expiration"` // unix timestamp
 	LatestAccess    time.Time     `json:"latestAccess"`

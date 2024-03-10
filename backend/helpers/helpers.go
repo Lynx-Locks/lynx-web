@@ -127,12 +127,12 @@ func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, pk uint) err
 }
 
 func ParseInt(w http.ResponseWriter, r *http.Request, key string) (error, uint) {
-	uId, err := strconv.ParseUint(chi.URLParam(r, key), 10, 32)
+	intKey, err := strconv.ParseUint(chi.URLParam(r, key), 10, 32)
 	if err != nil {
 		http.Error(w, "Failed integer parsing", http.StatusBadRequest)
 		return errors.New("400"), 0
 	}
-	return nil, uint(uId)
+	return nil, uint(intKey)
 }
 
 func RemoveDuplicates[T models.AllTables](input []T) []T {

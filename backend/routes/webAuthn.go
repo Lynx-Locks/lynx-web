@@ -11,6 +11,6 @@ func WebAuthnRoute() chi.Router {
 	r.Post("/register/request/{userId}", controller.RegisterRequest)
 	r.Post("/register/response/{userId}", controller.RegisterResponse)
 	r.Post("/authorize/request", controller.AuthorizeRequest)
-	r.Post("/authorize/response/{challenge}", controller.AuthorizeResponse)
+	r.Post("/authorize/response/{doorId}/{challenge}", controller.AuthorizeResponse)
 	return r
 }
