@@ -68,9 +68,18 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user models.User
+
 	err := json.NewDecoder(r.Body).Decode(&user)
+	roles := user.Roles
+	for i, _ := range roles {
+		res := db.DB.First(&roles[i])
+		if res.Error != nil {
+			http.Error(w, "One or more invalid roles entered", http.StatusBadRequest)
+			return
+		}
+	}
 	if err != nil {
-		http.Error(w, "400 malformed request", http.StatusBadRequest)
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
 	err, user = helpers.CreateNewRecord(w, user)
 	if err != nil {
@@ -146,6 +155,22 @@ func GetAndReturnRoleAssociationsById(w http.ResponseWriter, uId uint) (error, [
 	}
 	return nil, helpers.RemoveDuplicates(allRoles)
 }
+func GetCredAssociations(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	err, uId := helpers.ParseInt(w, r, "userId")
+	if err != nil {
+		return
+	}
+	user := models.User{Id: uId}
+	creds := []models.Credential{}
+	err = db.DB.Model(&user).Association("Credentials").Find(&creds)
+	if err != nil {
+		helpers.DBErrorHandling(err, w)
+		return
+	}
+	helpers.JsonWriter(w, &creds)
+
+}
 
 func GetRoleAssociations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -153,6 +178,12 @@ func GetRoleAssociations(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err, allRoles := GetAndReturnRoleAssociationsById(w, uId)
-	helpers.JsonWriter(w, &allRoles)
+	user := models.User{Id: uId}
+	roles := []models.Role{}
+	err = db.DB.Model(&user).Association("Roles").Find(&roles)
+	if err != nil {
+		helpers.DBErrorHandling(err, w)
+		return
+	}
+	helpers.JsonWriter(w, &roles)
 }

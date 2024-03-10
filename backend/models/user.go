@@ -10,11 +10,13 @@ import (
 )
 
 type User struct {
-	Id         uint   `json:"id"`
-	Name       string `json:"name"`
-	Email      string `gorm:"unique" json:"email"`
-	IsAdmin    bool   `gorm:"default:false" json:"isAdmin"`
-	WebauthnId []byte `gorm:"serializer:json" json:"webauthnId"`
+	Id          uint         `json:"id"`
+	Name        string       `json:"name"`
+	Email       string       `gorm:"unique" json:"email"`
+	IsAdmin     bool         `gorm:"default:false" json:"isAdmin"`
+	WebauthnId  []byte       `gorm:"serializer:json" json:"webauthnId"`
+	Roles       []Role       `json:"roles,omitempty" gorm:"many2many:user_role;"`
+	Credentials []Credential `json:"credentials,omitempty"`
 }
 
 func (user User) GetId() uint { return user.Id }
@@ -68,7 +70,7 @@ func (user User) WebAuthnCredentials() []webauthn.Credential {
 			transport = append(transport, protocol.AuthenticatorTransport(tp))
 		}
 		credentialsFinal = append(credentialsFinal, webauthn.Credential{
-			ID:              cred.WebauthnId,
+			ID:              cred.Id,
 			PublicKey:       cred.PublicKey,
 			AttestationType: cred.AttestationType,
 			Transport:       transport,

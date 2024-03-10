@@ -5,10 +5,8 @@ import (
 )
 
 type Credential struct {
-	WebauthnId      []byte `gorm:"serializer:json;primaryKey" json:"webauthnId"`
-	UserId          uint   `json:"userId"`
-	User            User
-	Roles           []Role        `gorm:"many2many:key_role;"`
+	Id              []byte        `gorm:"serializer:json;primaryKey" json:"id"`
+	UserId          uint          `json:"userId"`
 	PublicKey       []byte        `gorm:"serializer:json" json:"publicKey"`
 	Expiration      uint          `json:"expiration"` // unix timestamp
 	LatestAccess    time.Time     `json:"latestAccess"`

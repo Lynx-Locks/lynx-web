@@ -43,7 +43,7 @@ func SaveDBCredential(w http.ResponseWriter, credential *webauthn2.Credential) e
 	}
 
 	dbCredential := models.Credential{
-		WebauthnId:      credential.ID,
+		Id:              credential.ID,
 		PublicKey:       credential.PublicKey,
 		AttestationType: credential.AttestationType,
 		Transport:       transports,
@@ -156,8 +156,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	// Add public key to DB
 	dbCredential := models.Credential{
 		UserId:          user.Id,
-		Roles:           nil, // TODO: use activeTokens table to find roles
-		WebauthnId:      credential.ID,
+		Id:              credential.ID,
 		PublicKey:       credential.PublicKey,
 		AttestationType: credential.AttestationType,
 		Transport:       transports,
