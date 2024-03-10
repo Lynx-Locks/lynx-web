@@ -225,6 +225,10 @@ func AuthorizeRequest(w http.ResponseWriter, r *http.Request) {
 func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	err, dId := helpers.ParseInt(w, r, "doorId")
+	if err != nil {
+		return
+	}
 	// Get the session
 	challenge, _ := base64.StdEncoding.DecodeString(chi.URLParam(r, "challenge"))
 
@@ -249,7 +253,6 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		UserVerification:     sessionData.UserVerification,
 		Extensions:           sessionData.Extensions,
 	}
-
 	getUser := webauthn2.DiscoverableUserHandler(func(rawId []byte, userHandle []byte) (webauthn2.User, error) {
 		user := models.User{
 			WebauthnId: userHandle,
@@ -266,38 +269,32 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not finish log in", http.StatusInternalServerError)
 		return
 	}
+	//err = SaveDBCredential(w, credential)
+	//if err != nil {
+	//	http.Error(w, "Could not finish log in", http.StatusInternalServerError)
+	//	return
+	//}
 
-	err = SaveDBCredential(w, credential)
-	if err != nil {
+	user := models.User{}
+	creds := models.Credential{Id: credential.ID}
+	res := db.DB.First(&creds)
+	if res.Error != nil {
+		http.Error(w, "Could retrieve credentials", http.StatusInternalServerError)
 		return
 	}
-
-	err, userRoles := GetAndReturnRoleAssociationsById(w, user.Id)
-	if err != nil {
-		http.Error(w, "Could not get roles for user", http.StatusInternalServerError)
-	}
-	doorId := uint(1)
+	db.DB.Model(&creds).Association("User").Find(&user)
+	roles := []models.Role{}
+	db.DB.Model(&user).Association("Roles").Find(&roles)
+	doors := []models.Door{}
+	db.DB.Distinct("id").Model(&roles).Association("Doors").Find(&doors)
 	hasAccess := false
-	for _, role := range userRoles {
-		doors := []models.Door{}
-		err = db.DB.Model(&role).Association("Doors").Find(&doors)
-		if err != nil {
-			helpers.DBErrorHandling(err, w)
-			http.Error(w, "Could not get doors for user", http.StatusInternalServerError)
-			return
-		}
-		for _, door := range doors {
-			if door.Id == doorId {
-				hasAccess = true
-				break
-			}
-		}
-		if hasAccess == true {
-			break
+	for _, curDoor := range doors {
+		if curDoor.Id == dId {
+			hasAccess = true
 		}
 	}
 	if hasAccess == false {
-		http.Error(w, "User does not have access to this door", http.StatusBadRequest)
+		http.Error(w, "User does not have access to door", http.StatusBadRequest)
 		return
 	}
 	errJson := json.NewEncoder(w).Encode("Login Success, opening door")
@@ -305,11 +302,11 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not return results", http.StatusInternalServerError)
 		return
 	}
-	go unlockDoor(doorId)
+	go unlockDoor(dId)
 }
 
 func unlockDoor(doorId uint) {
 	models.DoorUnlocked[doorId] = true
-	time.Sleep(10 * time.Second)
+	time.Sleep(3 * time.Second)
 	delete(models.DoorUnlocked, doorId)
 }
