@@ -15,17 +15,27 @@ export default function RegisterUser() {
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
     LoadingStatus.Nil,
   );
-  const [yubikeySerial, setYubikeySerial] = useState("");
+  const [yubiKeySerial, setYubiKeySerial] = useState("");
 
   async function registerPasskey() {
-    setLoadingStatus(LoadingStatus.Loading);
     const token = searchParams.get("token");
 
     // Decode token & check validity
     // TODO: verify token is valid in backend during registerRequest
     try {
+      // parse YubiKey OTP
+      let yubiKeyId;
+      if (yubiKeySerial.length) {
+        if (yubiKeySerial.length !== 44) {
+          alert("Invalid YubiKey OTP");
+          return;
+        }
+        yubiKeyId = yubiKeySerial.slice(0, 12);
+      }
+
+      setLoadingStatus(LoadingStatus.Loading);
       const resp = await axios.post(`/auth/register/request/${token}`, {
-        yubikeySerial,
+        yubiKeyId,
       });
       // Do webauthn stuff
       const options: PublicKeyCredentialCreationOptionsJSON = resp.data;
@@ -58,9 +68,9 @@ export default function RegisterUser() {
           <input
             className={styles.textInput}
             type="text"
-            placeholder="Yubikey Serial Number (leave blank if unfamiliar to you)"
-            value={yubikeySerial}
-            onChange={(e) => setYubikeySerial(e.target.value)}
+            placeholder="Paste YubiKey OTP (leave blank for passkeys)"
+            value={yubiKeySerial}
+            onChange={(e) => setYubiKeySerial(e.target.value)}
           />
         </div>
       )}
