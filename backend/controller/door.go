@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"api/db"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -55,16 +54,10 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = helpers.DeleteByPk(w, models.Door{}, dId)
+	err = helpers.DeleteObjandAssociationsByPk(w, models.Door{Id: dId})
 	if err != nil {
 		return
 	}
-	err = db.DB.Unscoped().Model(&models.Door{Id: dId}).Association("Roles").Unscoped().Clear()
-	if err != nil {
-		http.Error(w, "Unable to delete associations", http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(200)
 }
 
@@ -80,4 +73,5 @@ func OpenDoor(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "Door not unlocked", http.StatusUnauthorized)
 	}
+	delete(models.DoorUnlocked, dId)
 }

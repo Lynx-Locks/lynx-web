@@ -254,10 +254,12 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		Extensions:           sessionData.Extensions,
 	}
 	getUser := webauthn2.DiscoverableUserHandler(func(rawId []byte, userHandle []byte) (webauthn2.User, error) {
-		user := models.User{
-			WebauthnId: userHandle,
+		webId, err := json.Marshal(userHandle)
+		if err != nil {
+			return models.User{}, errors.New(err.Error())
 		}
-		result := db.DB.First(&user)
+		user := models.User{}
+		result := db.DB.Where("webauthn_id = '" + string(webId) + "'").First(&user)
 		if result.Error != nil {
 			return models.User{}, errors.New(result.Error.Error())
 		}
@@ -279,7 +281,7 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	creds := models.Credential{Id: credential.ID}
 	res := db.DB.First(&creds)
 	if res.Error != nil {
-		http.Error(w, "Could retrieve credentials", http.StatusInternalServerError)
+		http.Error(w, "Could retrieve credentials ", http.StatusInternalServerError)
 		return
 	}
 	db.DB.Model(&creds).Association("User").Find(&user)
