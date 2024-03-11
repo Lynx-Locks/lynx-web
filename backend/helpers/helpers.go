@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -113,8 +114,12 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error,
 	return nil, table
 }
 
-func DeleteByPk[T models.AllTables](w http.ResponseWriter, table T, pk uint) error {
-	result := db.DB.Unscoped().Delete(&table, pk)
+func DeleteObjandAssociationsByPk[T models.AllTables](w http.ResponseWriter, table T) error {
+	if table.GetId() == 0 {
+		http.Error(w, "User Id not set correctly", http.StatusInternalServerError)
+		return errors.New("400")
+	}
+	result := db.DB.Unscoped().Select(clause.Associations).Delete(&table)
 	if result.Error != nil {
 		DBErrorHandling(result.Error, w)
 		return result.Error

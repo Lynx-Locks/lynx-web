@@ -41,6 +41,14 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
+	doors := role.Doors
+	for i, _ := range doors {
+		res := db.DB.First(&doors[i])
+		if res.Error != nil {
+			http.Error(w, "One or more invalid doors entered", http.StatusBadRequest)
+			return
+		}
+	}
 	err, role = helpers.CreateNewRecord(w, role)
 	if err != nil {
 		return
@@ -54,13 +62,8 @@ func DeleteRole(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = helpers.DeleteByPk(w, models.Role{}, rId)
+	err = helpers.DeleteObjandAssociationsByPk(w, models.Role{Id: rId})
 	if err != nil {
-		return
-	}
-	err = db.DB.Unscoped().Model(&models.Role{Id: rId}).Association("Doors").Unscoped().Clear()
-	if err != nil {
-		http.Error(w, "500 unable to delete association/s", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(200)

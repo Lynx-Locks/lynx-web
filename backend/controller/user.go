@@ -5,7 +5,7 @@ import (
 	"api/helpers"
 	"api/models"
 	"encoding/json"
-	"errors"
+	"log"
 	"net/http"
 )
 
@@ -15,6 +15,7 @@ func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		return
 	}
+	log.Println(users)
 	helpers.JsonWriter(w, users)
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {
@@ -35,13 +36,25 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
-
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
+	roles := user.Roles
+	for i, _ := range roles {
+		res := db.DB.First(&roles[i])
+		if res.Error != nil {
+			http.Error(w, "One or more invalid roles entered", http.StatusBadRequest)
+			return
+		}
+	}
 	err, user = helpers.UpdateObject(w, user)
 	if err != nil {
+		return
+	}
+	err = db.DB.Debug().Model(&user).Association("Roles").Replace(&roles)
+	if err != nil {
+		http.Error(w, "Failed to remove role difference", http.StatusInternalServerError)
 		return
 	}
 	helpers.JsonWriter(w, user)
@@ -94,67 +107,13 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = helpers.DeleteByPk(w, models.User{}, uId)
+	err = helpers.DeleteObjandAssociationsByPk(w, models.User{Id: uId})
 	if err != nil {
 		return
 	}
 	w.WriteHeader(200)
 }
 
-func ReplaceRoleAssociations(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	err, uId := helpers.ParseInt(w, r, "userId")
-	if err != nil {
-		return
-	}
-	roleIds := []uint{}
-	err = json.NewDecoder(r.Body).Decode(&roleIds)
-	if err != nil {
-		http.Error(w, "Malformed roleIds", http.StatusBadRequest)
-		return
-	}
-
-	if len(roleIds) == 0 {
-		http.Error(w, "Missing role ids", http.StatusBadRequest)
-		return
-	}
-	roles := []models.Role{}
-	results := db.DB.Where(&roleIds).Find(&roles)
-	if results.RowsAffected != int64(len(roleIds)) {
-		http.Error(w, "One or more invalid door id/s", http.StatusBadRequest)
-		return
-	}
-
-	credentials := []models.Credential{}
-	db.DB.Find(&credentials, "user_id = ?", uId)
-	for _, credential := range credentials {
-		err = db.DB.Model(&credential).Association("Roles").Replace(&roles)
-		if err != nil {
-			http.Error(w, "Failed to add one or more roles", http.StatusInternalServerError)
-			helpers.DBErrorHandling(err, w)
-			return
-		}
-		helpers.JsonWriter(w, &credential)
-	}
-
-}
-
-func GetAndReturnRoleAssociationsById(w http.ResponseWriter, uId uint) (error, []models.Role) {
-	credentials := []models.Credential{}
-	db.DB.Find(&credentials, "user_id = ?", uId)
-	allRoles := []models.Role{}
-	for _, credential := range credentials {
-		roles := []models.Role{}
-		err := db.DB.Model(&credential).Association("Roles").Find(&roles)
-		if err != nil {
-			http.Error(w, "Failed to get associations for one or more roles", http.StatusInternalServerError)
-			helpers.DBErrorHandling(err, w)
-			return errors.New("500"), nil
-		}
-		allRoles = append(allRoles, roles...)
-	}
-	return nil, helpers.RemoveDuplicates(allRoles)
-}
 func GetCredAssociations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
