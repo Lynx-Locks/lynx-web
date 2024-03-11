@@ -5,7 +5,6 @@ import (
 	"api/helpers"
 	"api/models"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -15,7 +14,6 @@ func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		return
 	}
-	log.Println(users)
 	helpers.JsonWriter(w, users)
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {
