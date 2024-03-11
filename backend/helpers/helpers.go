@@ -140,16 +140,10 @@ func ParseInt(w http.ResponseWriter, r *http.Request, key string) (error, uint) 
 	return nil, uint(intKey)
 }
 
-func RemoveDuplicates[T models.AllTables](input []T) []T {
-	encountered := map[uint]bool{}
-	result := []T{}
-
-	for _, value := range input {
-		if encountered[value.GetId()] == false {
-			result = append(result, value)
-			encountered[value.GetId()] = true
-		}
+func GetAllIdsFromList[T models.AllTables](structList []T) []uint {
+	var list []uint
+	for _, element := range structList {
+		list = append(list, element.GetId())
 	}
-
-	return result
+	return list
 }

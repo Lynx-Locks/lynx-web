@@ -61,7 +61,7 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func OpenDoor(w http.ResponseWriter, r *http.Request) {
+func IsDoorOpen(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, dId := helpers.ParseInt(w, r, "doorId")
 	if err != nil {

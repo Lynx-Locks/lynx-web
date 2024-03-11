@@ -13,7 +13,7 @@ func UsersRoute() chi.Router {
 	r.Put("/", controller.UpdateUser)
 	r.Post("/", controller.CreateUser)
 	r.Delete("/{userId}", controller.DeleteUser)
-	r.Get("/{userId}/roles", controller.GetRoleAssociations)
-	r.Get("/{userId}/creds", controller.GetCredAssociations)
+	r.Get("/{userId}/roles", controller.GetUserRoles)
+	r.Get("/{userId}/creds", controller.GetUserCreds)
 	return r
 }
