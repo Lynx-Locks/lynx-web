@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -155,8 +156,8 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 
 	// Add public key to DB
 	dbCredential := models.Credential{
-		UserId:          user.Id,
 		Id:              credential.ID,
+		UserId:          user.Id,
 		PublicKey:       credential.PublicKey,
 		AttestationType: credential.AttestationType,
 		Transport:       transports,
@@ -268,6 +269,10 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not finish log in", http.StatusInternalServerError)
 		return
 	}
+
+	// The below code is some logic from https://github.com/go-webauthn/webauthn
+	// This was commented out because when logging in without passing user explicitly it sets the user to 0
+	// In addition it did not seem to be updating anything
 	//err = SaveDBCredential(w, credential)
 	//if err != nil {
 	//	http.Error(w, "Could not finish log in", http.StatusInternalServerError)
@@ -278,7 +283,7 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	creds := models.Credential{Id: credential.ID}
 	res := db.DB.First(&creds)
 	if res.Error != nil {
-		http.Error(w, "Could retrieve credentials ", http.StatusInternalServerError)
+		http.Error(w, "Could retrieve credential", http.StatusInternalServerError)
 		return
 	}
 	db.DB.Model(&creds).Association("User").Find(&user)
@@ -286,16 +291,12 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	db.DB.Model(&user).Association("Roles").Find(&roles)
 	doors := []models.Door{}
 	db.DB.Distinct("id").Model(&roles).Association("Doors").Find(&doors)
-	hasAccess := false
-	for _, curDoor := range doors {
-		if curDoor.Id == dId {
-			hasAccess = true
-		}
-	}
-	if hasAccess == false {
+	idx := slices.IndexFunc(doors, func(d models.Door) bool { return d.Id == dId })
+	if idx == -1 {
 		http.Error(w, "User does not have access to door", http.StatusBadRequest)
 		return
 	}
+
 	errJson := json.NewEncoder(w).Encode("Login Success, opening door")
 	if errJson != nil {
 		http.Error(w, "Could not return results", http.StatusInternalServerError)

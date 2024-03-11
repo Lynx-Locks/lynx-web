@@ -16,7 +16,12 @@ func Connect() {
 	if err != nil {
 		panic("failed to create data directory")
 	}
-	db, err := gorm.Open(sqlite.Open("data/lynx-web.db"), &gorm.Config{TranslateError: true, Logger: logger.Default.LogMode(logger.Info)})
+	db := &gorm.DB{}
+	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		db, err = gorm.Open(sqlite.Open("data/lynx-web.db"), &gorm.Config{TranslateError: true})
+	} else {
+		db, err = gorm.Open(sqlite.Open("data/lynx-web.db"), &gorm.Config{TranslateError: true, Logger: logger.Default.LogMode(logger.Info)})
+	}
 	if err != nil {
 		panic("failed to connect database")
 	}

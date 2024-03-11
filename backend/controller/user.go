@@ -38,19 +38,26 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	roles := user.Roles
-	for i, _ := range roles {
-		res := db.DB.First(&roles[i])
+	ids := helpers.GetAllIdsFromList(user.Roles)
+	roles := []models.Role{}
+	if len(ids) != 0 {
+		res := db.DB.Find(&roles, ids)
 		if res.Error != nil {
-			http.Error(w, "One or more invalid roles entered", http.StatusBadRequest)
+			helpers.DBErrorHandling(res.Error, w)
 			return
 		}
+		if len(roles) != len(ids) {
+			http.Error(w, "One or more invalid roles", http.StatusBadRequest)
+			return
+		}
+		user.Roles = roles
 	}
+
 	err, user = helpers.UpdateObject(w, user)
 	if err != nil {
 		return
 	}
-	err = db.DB.Debug().Model(&user).Association("Roles").Replace(&roles)
+	err = db.DB.Model(&user).Association("Roles").Replace(&roles)
 	if err != nil {
 		http.Error(w, "Failed to remove role difference", http.StatusInternalServerError)
 		return
@@ -81,17 +88,25 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
 	err := json.NewDecoder(r.Body).Decode(&user)
-	roles := user.Roles
-	for i, _ := range roles {
-		res := db.DB.First(&roles[i])
-		if res.Error != nil {
-			http.Error(w, "One or more invalid roles entered", http.StatusBadRequest)
-			return
-		}
-	}
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
+
+	ids := helpers.GetAllIdsFromList(user.Roles)
+	if len(ids) != 0 {
+		roles := []models.Role{}
+		res := db.DB.Find(&roles, ids)
+		if res.Error != nil {
+			helpers.DBErrorHandling(res.Error, w)
+			return
+		}
+		if len(roles) != len(ids) {
+			http.Error(w, "One or more invalid roles", http.StatusBadRequest)
+			return
+		}
+		user.Roles = roles
+	}
+
 	err, user = helpers.CreateNewRecord(w, user)
 	if err != nil {
 		return
@@ -112,7 +127,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func GetCredAssociations(w http.ResponseWriter, r *http.Request) {
+func GetUserCreds(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
@@ -129,7 +144,7 @@ func GetCredAssociations(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetRoleAssociations(w http.ResponseWriter, r *http.Request) {
+func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
