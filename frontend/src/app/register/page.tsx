@@ -10,6 +10,32 @@ import LoadingStatus from "@/types/loadingStatus";
 import styles from "./register.module.css";
 import Loader from "@/components/loader/loader";
 
+const modhex = {
+  c: "0",
+  b: "1",
+  d: "2",
+  e: "3",
+  f: "4",
+  g: "5",
+  h: "6",
+  i: "7",
+  j: "8",
+  k: "9",
+  l: "a",
+  n: "b",
+  r: "c",
+  t: "d",
+  u: "e",
+  v: "f",
+};
+
+function modhexToHex(input: string): string {
+  return input
+    .split("")
+    .map((char) => (modhex as Record<string, string>)[char] || char)
+    .join("");
+}
+
 export default function RegisterUser() {
   const searchParams = useSearchParams();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
@@ -30,7 +56,7 @@ export default function RegisterUser() {
           alert("Invalid YubiKey OTP");
           return;
         }
-        yubiKeyId = yubiKeySerial.slice(0, 12);
+        yubiKeyId = parseInt(modhexToHex(yubiKeySerial.slice(0, 12)), 16);
       }
 
       setLoadingStatus(LoadingStatus.Loading);
