@@ -253,13 +253,10 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		UserVerification:     sessionData.UserVerification,
 		Extensions:           sessionData.Extensions,
 	}
+
 	getUser := webauthn2.DiscoverableUserHandler(func(rawId []byte, userHandle []byte) (webauthn2.User, error) {
-		webId, err := json.Marshal(userHandle)
-		if err != nil {
-			return models.User{}, errors.New(err.Error())
-		}
 		user := models.User{}
-		result := db.DB.Where("webauthn_id = '" + string(webId) + "'").First(&user)
+		result := db.DB.Where(models.User{WebauthnId: userHandle}).Take(&user)
 		if result.Error != nil {
 			return models.User{}, errors.New(result.Error.Error())
 		}
