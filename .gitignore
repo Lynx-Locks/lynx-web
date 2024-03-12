@@ -2,3 +2,4 @@
 .vscode
 backend/data
 *.db
+.env

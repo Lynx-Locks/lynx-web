@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
 	"os"
@@ -50,13 +51,18 @@ func init() {
 func main() {
 	var origins []string
 	var clientDomain string
+	if value, ok := os.LookupEnv("NODE_ENV"); !ok || value != "production" {
+		err := godotenv.Load("../.env")
+		if err != nil {
+			panic("Error loading .env file")
+		}
+	}
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
 		if domain, ok := os.LookupEnv("CLIENT_DOMAIN"); ok {
 			clientDomain = domain
 			origins = []string{fmt.Sprintf("https://%s*", domain)}
 		} else {
-			clientDomain = "app.lynx-locks.com"
-			origins = []string{"https://app.lynx-locks.com*"}
+			panic("Missing client domain")
 		}
 	} else {
 		origins = []string{"http://localhost:3000*"}
