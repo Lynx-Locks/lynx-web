@@ -116,7 +116,7 @@ func CreateNewRecord[T models.AllTables](w http.ResponseWriter, table T) (error,
 
 func DeleteObjandAssociationsByPk[T models.AllTables](w http.ResponseWriter, table T) error {
 	if table.GetId() == 0 {
-		http.Error(w, "User Id not set correctly", http.StatusInternalServerError)
+		http.Error(w, "Id not set correctly", http.StatusInternalServerError)
 		return errors.New("400")
 	}
 	result := db.DB.Unscoped().Select(clause.Associations).Delete(&table)

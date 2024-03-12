@@ -10,30 +10,38 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
+	"github.com/google/uuid"
+	"gorm.io/gorm/clause"
 	"net/http"
 	"slices"
-	"strconv"
 	"time"
 )
 
 // https://developers.google.com/codelabs/passkey-form-autofill
 
-func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User, valid bool) {
-	valid = true
-	id, err := strconv.ParseUint(chi.URLParam(r, "userId"), 10, 32)
+func GetUserAndToken(w http.ResponseWriter, r *http.Request) (user models.User, activeToken models.ActiveTokens, valid bool) {
+	token, err := uuid.Parse(chi.URLParam(r, "token"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		valid = false
-		return
+		return user, activeToken, false
+	}
+	activeToken = models.ActiveTokens{Id: token}
+
+	res := db.DB.First(&activeToken)
+	if res.Error != nil {
+		http.Error(w, "Unable to validate as existing token", http.StatusUnauthorized)
+		return user, activeToken, false
+	}
+	if time.Now().Unix() > activeToken.ExpiryDate {
+		http.Error(w, "Token has expired", http.StatusUnauthorized)
+		return user, activeToken, false
+	}
+	err = db.DB.Model(&activeToken).Association("User").Find(&user)
+	if err != nil {
+		http.Error(w, "Unable to get a user from token", http.StatusInternalServerError)
+		return user, activeToken, false
 	}
 
-	result := db.DB.First(&user, id)
-	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
-		valid = false
-	}
-
-	return
+	return user, activeToken, true
 }
 
 func SaveDBCredential(w http.ResponseWriter, credential *webauthn2.Credential) error {
@@ -75,7 +83,7 @@ func SaveDBCredential(w http.ResponseWriter, credential *webauthn2.Credential) e
 func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	user, valid := GetUserByUrlParam(w, r)
+	user, _, valid := GetUserAndToken(w, r)
 	if !valid {
 		return
 	}
@@ -115,7 +123,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	user, valid := GetUserByUrlParam(w, r)
+	user, activeToken, valid := GetUserAndToken(w, r)
 	if !valid {
 		return
 	}
@@ -181,7 +189,11 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: delete token from activeTokens table
+	result = db.DB.Unscoped().Select(clause.Associations).Delete(&activeToken)
+	if result.Error != nil {
+		http.Error(w, "Failed to delete active token", http.StatusInternalServerError)
+		return
+	}
 
 	errJson := json.NewEncoder(w).Encode("Registration Success")
 	if errJson != nil {
