@@ -62,7 +62,7 @@ func main() {
 			clientDomain = domain
 			origins = []string{fmt.Sprintf("https://%s*", domain)}
 		} else {
-			panic("Missing client domain")
+			panic("Missing CLIENT_DOMAIN environment variable")
 		}
 	} else {
 		origins = []string{"http://localhost:3000*"}

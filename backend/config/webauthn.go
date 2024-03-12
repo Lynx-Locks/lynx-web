@@ -19,8 +19,7 @@ func init() {
 			id = domain
 			origins = []string{fmt.Sprintf("https://%s", domain)}
 		} else {
-			id = "app.lynx-locks.com"
-			origins = []string{"https://app.lynx-locks.com"}
+			panic("Missing CLIENT_DOMAIN environment variable")
 		}
 	} else {
 		id = "localhost"

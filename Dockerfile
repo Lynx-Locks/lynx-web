@@ -53,6 +53,8 @@ ENV NODE_ENV=production
 COPY --from=builder /frontend/out /static
 # Import compiled binary
 COPY --from=backend /lynx-backend /lynx-backend
+# Import email template
+COPY --from=backend /backend/html/emailTemplate.html /html/emailTemplate.html
 # Import the root ca-certificates (required for Let's Encrypt)
 COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
