@@ -60,11 +60,26 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the session data stored from the function above
+<<<<<<< HEAD
+	sessionData := models.SessionData{}
+	result := db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Take(&sessionData)
+=======
+<<<<<<< HEAD
+	sessionData := models.SessionData{
+		UserId: user.WebAuthnID(),
+	}
+	result := db.DB.First(&sessionData)
+>>>>>>> 0890bf3 (WIP backend authentication issues)
+	if result.Error == nil {
+		result = db.DB.Delete(&sessionData)
+	}
+=======
 	sessionData := models.SessionData{}
 	result := db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Take(&sessionData)
 	if result.Error == nil {
 		result = db.DB.Delete(&sessionData)
 	}
+>>>>>>> fd0e002 (WIP backend authentication issues)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return
