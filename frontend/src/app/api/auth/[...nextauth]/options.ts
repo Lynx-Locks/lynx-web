@@ -16,34 +16,13 @@ export const options: NextAuthOptions = {
 				},
 			},
 			async authorize(credentials, _req) {
-				const userResp = await axios.get("/users", {
+				const userResp = await axios.get("/users/login", {
 					params: {
 						email: credentials?.email,
 					},
 				});
-	
-				return userResp.data;
-				// try {
-				// 	const user = userResp.data;
-				// 	const response = await axios.post(`/login/request/${user.id}`);
-				// 	const options: PublicKeyCredentialRequestOptionsJSON = response.data;
-				// 	// Prompt user to user passkey
-				// 	const credential = await startAuthentication(options);
-				// 	// verify the credential
-				// 	const verifyResp = await axios.post(`/login/${user.id}`, {
-				// 		...credential,
-				// 		challenge: options.challenge,
-				// 	});
-		
-				// 	if (verifyResp.status === 200) {
-				// 		return user;
-				// 	} else {
-				// 		throw new Error("Error validating credentials. Please try again.");
-				// 	}
-				// } catch (error) {
-				// 	console.error("Login error: ", error);
-				// }
-				// return null;
+				const user = userResp.data;
+				return user;
 			}
 		}
 		)
