@@ -17,7 +17,7 @@ export default withAuth(
     callbacks: {
       authorized: ({ token }) => !!token,
     },
-		// Must match with /api/auth/[...nextauth]/options.ts
+    // Must match with /api/auth/[...nextauth]/options.ts
     pages: {
       signIn: "/login",
       signOut: "/login",
