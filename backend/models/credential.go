@@ -6,6 +6,7 @@ import (
 
 type Credential struct {
 	Id              []byte        `gorm:"serializer:json;primaryKey" json:"id"`
+	YubiKeyId       *uint         `gorm:"unique" json:"yubiKeyId,omitempty"`
 	UserId          uint          `json:"userId"`
 	User            User          `json:"user,omitempty"`
 	PublicKey       []byte        `gorm:"serializer:json" json:"publicKey"`

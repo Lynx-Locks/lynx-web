@@ -9,8 +9,9 @@ import (
 func WebAuthnRoute() chi.Router {
 	r := chi.NewRouter()
 	r.Post("/register/request/{token}", controller.RegisterRequest)
-	r.Post("/register/response/{token}", controller.RegisterResponse)
+	r.Post("/register/response/{token}/{yubiKeyId}", controller.RegisterResponse)
 	r.Post("/authorize/request", controller.AuthorizeRequest)
 	r.Post("/authorize/response/{doorId}/{challenge}", controller.AuthorizeResponse)
+	r.Get("/authorize/{doorId}/{yubiKeyId}", controller.GetYubiKeyDoorAccess)
 	return r
 }

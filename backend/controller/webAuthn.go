@@ -154,17 +154,36 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//yubikey should be only type passed as transport empty or nfc
+	isYubi := false
 
 	// save credentials
 	transports := make([]string, 0)
 	for _, val := range credential.Transport {
 		transports = append(transports, string(val))
+		if val == "nfc" {
+			isYubi = true
+		}
+	}
+	if len(transports) == 0 {
+		isYubi = true
+	}
+
+	var yubiKeyId *uint
+	if isYubi {
+		err, uintId := helpers.ParseInt(w, r, "yubiKeyId")
+		yubiKeyId = &uintId
+		if err != nil {
+			http.Error(w, "Yubikey id is required for yubikey registration", http.StatusBadRequest)
+			return
+		}
 	}
 
 	// Add public key to DB
 	dbCredential := models.Credential{
 		Id:              credential.ID,
 		UserId:          user.Id,
+		YubiKeyId:       yubiKeyId,
 		PublicKey:       credential.PublicKey,
 		AttestationType: credential.AttestationType,
 		Transport:       transports,
@@ -290,20 +309,13 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	user := models.User{}
-	creds := models.Credential{Id: credential.ID}
-	res := db.DB.First(&creds)
+	cred := models.Credential{Id: credential.ID}
+	res := db.DB.First(&cred)
 	if res.Error != nil {
 		http.Error(w, "Could retrieve credential", http.StatusInternalServerError)
 		return
 	}
-	db.DB.Model(&creds).Association("User").Find(&user)
-	roles := []models.Role{}
-	db.DB.Model(&user).Association("Roles").Find(&roles)
-	doors := []models.Door{}
-	db.DB.Distinct("id").Model(&roles).Association("Doors").Find(&doors)
-	idx := slices.IndexFunc(doors, func(d models.Door) bool { return d.Id == dId })
-	if idx == -1 {
+	if !credHasDoorAccess(cred, dId) {
 		http.Error(w, "User does not have access to door", http.StatusBadRequest)
 		return
 	}
@@ -314,6 +326,44 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	go unlockDoor(dId)
+}
+
+func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
+	err, dId := helpers.ParseInt(w, r, "doorId")
+	if err != nil {
+		return
+	}
+	err, yubiKeyId := helpers.ParseInt(w, r, "yubiKeyId")
+	if err != nil {
+		http.Error(w, "Yubikey id is required", http.StatusBadRequest)
+		return
+	}
+	cred := models.Credential{}
+	res := db.DB.Where(models.Credential{YubiKeyId: &yubiKeyId}).First(&cred)
+	if res.Error != nil {
+		http.Error(w, "Could not find associated record with yubikey", http.StatusBadRequest)
+		helpers.DBErrorHandling(res.Error, w)
+		return
+	}
+	if !credHasDoorAccess(cred, dId) {
+		http.Error(w, "User does not have access to door", http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(200)
+}
+
+func credHasDoorAccess(cred models.Credential, dId uint) bool {
+	user := models.User{}
+	db.DB.Model(&cred).Association("User").Find(&user)
+	roles := []models.Role{}
+	db.DB.Model(&user).Association("Roles").Find(&roles)
+	doors := []models.Door{}
+	db.DB.Distinct("id").Model(&roles).Association("Doors").Find(&doors)
+	idx := slices.IndexFunc(doors, func(d models.Door) bool { return d.Id == dId })
+	if idx == -1 {
+		return false
+	}
+	return true
 }
 
 func unlockDoor(doorId uint) {
