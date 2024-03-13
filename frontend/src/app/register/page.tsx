@@ -60,18 +60,19 @@ export default function RegisterUser() {
       }
 
       setLoadingStatus(LoadingStatus.Loading);
-      const resp = await axios.post(`/auth/register/request/${token}`, {
-        yubiKeyId,
-      });
+      const resp = await axios.post(`/auth/register/request/${token}`);
       // Do webauthn stuff
       const options: PublicKeyCredentialCreationOptionsJSON = resp.data;
       // Prompt user to generate a passkey
       const credential = await startRegistration(options);
       // send public key to backend
-      const status = await axios.post(`/auth/register/response/${token}`, {
-        ...credential,
-        challenge: options.challenge,
-      });
+      const status = await axios.post(
+        `/auth/register/response/${token}/${yubiKeyId}`,
+        {
+          ...credential,
+          challenge: options.challenge,
+        },
+      );
       if (status.status === 200) {
         setLoadingStatus(LoadingStatus.Success);
       }
