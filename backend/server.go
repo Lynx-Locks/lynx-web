@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +21,13 @@ import (
 // See https://github.com/go-chi/chi for documentation
 
 func init() {
+	if value, ok := os.LookupEnv("NODE_ENV"); !ok || value != "production" {
+		err := godotenv.Load("../.env")
+		if err != nil {
+			panic("Error loading .env file")
+		}
+	}
+
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
 		// List of all BAKED environment variables to replace.
 		// If the given env variable is not present on runtime, the preset is used as default.
@@ -51,12 +60,6 @@ func init() {
 func main() {
 	var origins []string
 	var clientDomain string
-	if value, ok := os.LookupEnv("NODE_ENV"); !ok || value != "production" {
-		err := godotenv.Load("../.env")
-		if err != nil {
-			panic("Error loading .env file")
-		}
-	}
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
 		if domain, ok := os.LookupEnv("CLIENT_DOMAIN"); ok {
 			clientDomain = domain
@@ -76,7 +79,19 @@ func main() {
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	}))
 	config.Connect()
-	FileServer(r, "/", http.Dir("./static"))
+
+	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		FileServer(r, "/", http.Dir("./static"))
+	} else {
+		target := "http://frontend:3000"
+		targetURL, _ := url.Parse(target)
+		proxy := httputil.NewSingleHostReverseProxy(targetURL)
+
+		r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+			proxy.ServeHTTP(w, r)
+		})
+	}
+
 	r.Mount("/api", api())
 
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
