@@ -4,47 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lynx Locks Account Key Registration</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            max-width: 600px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        .button:hover {
-            color: #800080;
-        }
-    </style>
 </head>
-<body>
-<div class="container">
-    <p>A request was recently made to register a new key on your Lynx Locks account.</p>
-    <p>Please use the below link to add your passkey/yubikey:</p>
-    <a href={{.Link}} class="button">Add Your Key</a>
-    <p>If you believe this to be an error, contact your administrator.</p>
-</div>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #ffffff; color: #000000;">
+<style>
+    @media only screen and (max-width: 600px) {
+        .desktop-only {
+            border: none !important;
+        }
+    }
+</style>
+
+<!--[if (gte mso 9)|(IE)]>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center">
+    <tr>
+        <td>
+<![endif]-->
+<table class="desktop-only" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; border: 2px solid #000000; border-collapse: collapse;">
+    <tr>
+        <td style="padding-left: 30px; margin-left: 5px;">
+            <h1 style="font-weight: bold; color: #000000;">Key registration request for Lynx Locks</h1>
+            <p style="color: #000000; margin-bottom: 20px;">Hi, {{.Name}}, please use the below link to add a key to your Lynx Locks account.</p>
+            <p style="color: #000000; margin-bottom: 20px;">Be sure to use it on a device capable of registering passkeys or a YubiKey!</p>
+            <a href="{{.Link}}" style="display: inline-block; background-color: rgb(242, 155, 4); color: #000000; text-decoration: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; font-size: 16px;">Add Your Key</a>
+            <p style="color: #000000; margin-top: 20px;">If you believe this to be an error, contact your administrator.</p>
+        </td>
+    </tr>
+</table>
+<!--[if (gte mso 9)|(IE)]>
+</td>
+</tr>
+</table>
+<![endif]-->
 </body>
 </html>
