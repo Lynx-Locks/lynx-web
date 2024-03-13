@@ -15,6 +15,8 @@ services:
     build:
       context: .
       target: backend
+      args:
+        - dev=true
     volumes:
       - ./backend/:/backend/
     ports:

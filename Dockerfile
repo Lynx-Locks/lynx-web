@@ -1,13 +1,19 @@
 # Backend
 FROM golang:1.21-alpine AS backend
+ARG dev
 
 RUN apk --no-cache add build-base ca-certificates
+
+# Will copy .env if it exists (for dev), but will not fail the build if it does not (for prod)
+COPY .env* /
 
 WORKDIR /backend
 
 COPY backend .
 RUN go mod download
-RUN go build -ldflags "-linkmode external -extldflags -static" -o /lynx-backend
+RUN if [[ -z "$dev" ]] ; \
+    then echo "prod" && go build -ldflags "-linkmode external -extldflags -static" -o /lynx-backend ; \
+    else echo "dev" && go build -o /lynx-backend ; fi  # A bit faster
 
 EXPOSE 5001
 CMD ["/lynx-backend"]
