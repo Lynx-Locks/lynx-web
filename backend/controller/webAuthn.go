@@ -315,7 +315,8 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could retrieve credential", http.StatusInternalServerError)
 		return
 	}
-	if !credHasDoorAccess(cred, dId) {
+	hasAccess, user := credHasDoorAccess(cred, dId)
+	if !hasAccess {
 		http.Error(w, "User does not have access to door", http.StatusBadRequest)
 		return
 	}
@@ -325,7 +326,7 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not return results", http.StatusInternalServerError)
 		return
 	}
-	go unlockDoor(dId)
+	go unlockDoor(dId, user.Id)
 }
 
 func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
@@ -345,14 +346,22 @@ func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(res.Error, w)
 		return
 	}
-	if !credHasDoorAccess(cred, dId) {
+	hasAccess, user := credHasDoorAccess(cred, dId)
+	if !(hasAccess) {
 		http.Error(w, "User does not have access to door", http.StatusBadRequest)
 		return
 	}
+
+	err = UpdateLastTimeIn(w, user.Id)
+	if err != nil {
+		http.Error(w, "Unable to update last time in", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(200)
 }
 
-func credHasDoorAccess(cred models.Credential, dId uint) bool {
+func credHasDoorAccess(cred models.Credential, dId uint) (bool, models.User) {
 	user := models.User{}
 	db.DB.Model(&cred).Association("User").Find(&user)
 	roles := []models.Role{}
@@ -361,13 +370,13 @@ func credHasDoorAccess(cred models.Credential, dId uint) bool {
 	db.DB.Distinct("id").Model(&roles).Association("Doors").Find(&doors)
 	idx := slices.IndexFunc(doors, func(d models.Door) bool { return d.Id == dId })
 	if idx == -1 {
-		return false
+		return false, models.User{}
 	}
-	return true
+	return true, user
 }
 
-func unlockDoor(doorId uint) {
-	models.DoorUnlocked[doorId] = true
+func unlockDoor(doorId uint, uId uint) {
+	models.DoorUnlocked[doorId] = uId
 	time.Sleep(3 * time.Second)
 	delete(models.DoorUnlocked, doorId)
 }

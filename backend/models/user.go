@@ -17,6 +17,7 @@ type User struct {
 	WebauthnId  []byte       `gorm:"serializer:json" json:"webauthnId"`
 	Roles       []Role       `json:"roles,omitempty" gorm:"many2many:user_role;"`
 	Credentials []Credential `json:"credentials,omitempty"`
+	LastTimeIn  int64        `json:"lastTimeIn,omitempty"`
 }
 
 func (user User) GetId() uint { return user.Id }
