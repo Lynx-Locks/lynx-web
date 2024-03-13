@@ -30,6 +30,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect

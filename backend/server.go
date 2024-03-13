@@ -141,7 +141,8 @@ func api() chi.Router {
 	r := chi.NewRouter()
 	r.Mount("/users", routes.UsersRoute())
 	r.Mount("/auth", routes.WebAuthnRoute())
-	r.Mount("/admin", routes.AdminAuthRoute())
+	r.Mount("/login", routes.LoginRoute())
+	r.Mount("/logout", routes.LogoutRoute())
 	r.Mount("/doors", routes.DoorsRoute())
 	r.Mount("/roles", routes.RolesRoute())
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
