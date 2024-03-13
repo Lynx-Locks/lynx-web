@@ -40,6 +40,7 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&role)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
+		return
 	}
 	doorIds := helpers.GetAllIdsFromList(role.Doors)
 	if len(doorIds) != 0 {
@@ -95,21 +96,23 @@ func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	doorIDs := []uint{}
-	err = json.NewDecoder(r.Body).Decode(&doorIDs)
+	doorIds := struct {
+		DoorIds []uint `json:"doorIds"`
+	}{}
+	err = json.NewDecoder(r.Body).Decode(&doorIds)
 	if err != nil {
 		http.Error(w, "Malformed doorIDs", http.StatusBadRequest)
 		return
 	}
 	doors := []models.Door{}
 
-	if len(doorIDs) == 0 {
+	if len(doorIds.DoorIds) == 0 {
 		http.Error(w, "Missing door ids", http.StatusBadRequest)
 		return
 	}
-	results := db.DB.Where(&doorIDs).Find(&doors)
+	results := db.DB.Where(&doorIds.DoorIds).Find(&doors)
 
-	if results.RowsAffected != int64(len(doorIDs)) {
+	if results.RowsAffected != int64(len(doorIds.DoorIds)) {
 		http.Error(w, "One or more invalid door id/s", http.StatusBadRequest)
 		return
 	}

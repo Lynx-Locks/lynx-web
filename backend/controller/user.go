@@ -42,13 +42,18 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	user := models.User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
+	reqUser := models.User{}
+	err := json.NewDecoder(r.Body).Decode(&reqUser)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	ids := helpers.GetAllIdsFromList(user.Roles)
+	ids := helpers.GetAllIdsFromList(reqUser.Roles)
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: reqUser.Id})
+	if err != nil {
+		http.Error(w, "Invalid User", http.StatusBadRequest)
+		return
+	}
 	roles := []models.Role{}
 	if len(ids) != 0 {
 		res := db.DB.Find(&roles, ids)
@@ -62,17 +67,23 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		}
 		user.Roles = roles
 	}
+	if reqUser.Email != "" {
+		user.Email = reqUser.Email
+	}
+	if reqUser.Name != "" {
+		user.Name = reqUser.Name
+	}
 
-	err, user = helpers.UpdateObject(w, user)
+	err, reqUser = helpers.UpdateObject(w, user)
 	if err != nil {
 		return
 	}
-	err = db.DB.Model(&user).Association("Roles").Replace(&roles)
+	err = db.DB.Model(&reqUser).Association("Roles").Replace(&roles)
 	if err != nil {
 		http.Error(w, "Failed to remove role difference", http.StatusInternalServerError)
 		return
 	}
-	helpers.JsonWriter(w, user)
+	helpers.JsonWriter(w, reqUser)
 
 }
 
