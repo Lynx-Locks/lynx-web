@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/auth"
 	"api/config"
 	"api/helpers"
 	"api/routes"
@@ -8,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/jwtauth"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
@@ -26,6 +28,12 @@ func init() {
 		if err != nil {
 			panic("Error loading .env file")
 		}
+	}
+
+	if value, ok := os.LookupEnv("JWT_SECRET"); ok {
+		auth.TokenAuth = jwtauth.New("HS256", []byte(value), nil)
+	} else {
+		panic("JWT_SECRET environment variable not set")
 	}
 
 	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {

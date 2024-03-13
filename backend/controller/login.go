@@ -1,35 +1,16 @@
 package controller
 
 import (
+	"api/auth"
 	"api/config"
 	"api/db"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"net/http"
-	"time"
 )
-
-var secretKey = []byte("secret")
-
-// as per https://medium.com/@cheickzida/golang-implementing-jwt-token-authentication-bba9bfd84d60
-func createToken(user models.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"email":   user.Email,
-			"isAdmin": user.IsAdmin,
-			"exp":     time.Now().Add(time.Hour * 24).Unix(),
-		})
-
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
-}
 
 func LoginRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -112,24 +93,29 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		token, err := createToken(user)
-
 		if err != nil {
 			http.Error(w, "Could not generate validation token", http.StatusInternalServerError)
 			return
 		}
 
-		payload := struct {
-			Token string `json:"token"`
-		}{
-			token,
-		}
-
-		errJson := json.NewEncoder(w).Encode(payload)
-		if errJson != nil {
-			http.Error(w, "Could not return results", http.StatusInternalServerError)
+		sessionId, _ := uuid.NewUUID()
+		_, tokenString, err := auth.TokenAuth.Encode(map[string]interface{}{
+			"sessionId": sessionId.String(),
+			"userId":    user.Id,
+			"isAdmin":   user.IsAdmin,
+		})
+		if err != nil {
+			http.Error(w, "Could create token", http.StatusInternalServerError)
 			return
 		}
+		cookie := http.Cookie{
+			Name:  "token",
+			Value: tokenString,
+			Path:  "/",
+		}
+		http.SetCookie(w, &cookie)
+		auth.ActiveSessions[sessionId.String()] = true
+		w.WriteHeader(200)
 	} else {
 		http.Error(w, "User not admin", http.StatusUnauthorized)
 	}
