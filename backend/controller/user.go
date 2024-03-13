@@ -15,6 +15,7 @@ import (
 	"net/smtp"
 	"os"
 	"strconv"
+	"time"
 )
 
 func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
@@ -256,4 +257,19 @@ func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User
 	}
 
 	return
+}
+
+func UpdateLastTimeIn(w http.ResponseWriter, uId uint) error {
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
+	if err != nil {
+		return err
+	}
+	curTime := time.Now().Unix()
+	user.LastTimeIn = curTime
+	err, user = helpers.UpdateObject(w, user)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

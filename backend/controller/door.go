@@ -67,11 +67,17 @@ func IsDoorOpen(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	_, hasAccess := models.DoorUnlocked[dId]
-	if hasAccess {
-		w.WriteHeader(200)
-	} else {
+	uId, hasAccess := models.DoorUnlocked[dId]
+	if !hasAccess {
 		http.Error(w, "Door not unlocked", http.StatusUnauthorized)
+		return
+	}
+
+	err = UpdateLastTimeIn(w, uId)
+	if err != nil {
+		http.Error(w, "Unable to update last time in", http.StatusInternalServerError)
+		return
 	}
 	delete(models.DoorUnlocked, dId)
+	w.WriteHeader(200)
 }
