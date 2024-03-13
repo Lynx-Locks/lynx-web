@@ -1,5 +1,4 @@
-"use client";
-import Dashboard from "@/components/dashboard/dashboard";
+import AdminDashboard from "@/components/adminDashboard/adminDashboard";
 import Navbar from "@/components/navbar/navbar";
 import { useEffect, useState } from "react";
 

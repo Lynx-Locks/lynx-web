@@ -14,6 +14,7 @@ import { SubmitButton } from "@/components/button/button";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
 import { getRoleOptions } from "@/data/roles";
+import Loader from "@/components/loader/loader";
 
 export default function AdminTable({
   users,
@@ -124,55 +125,56 @@ export default function AdminTable({
 
   return (
     <div className={styles.tableContainer}>
-      <table className={styles.table} border={1} rules="rows">
-        <thead className={styles.tableHeader}>
-          <tr>
-            <th className={styles.tableCell}>
-              <input type="checkbox" />
-            </th>
-            {columnHeaders.map((header, idx) => (
-              <th key={idx} className={styles.tableCell}>
-                <p className={styles.columnHeader}>{header.name}</p>
-                <button onClick={() => handleSort(idx)}>
-                  {header.sort === "asc" ? (
-                    <FontAwesomeIcon icon={faCaretUp} size="lg" />
-                  ) : (
-                    <FontAwesomeIcon icon={faCaretDown} size="lg" />
-                  )}
-                </button>
-              </th>
-            ))}
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {sortedUsers.map((user, idx) => (
-            <tr
-              key={user.id}
-              className={
-                idx < users.length - 1 ? styles.tableRow : styles.tableLastRow
-              }
-            >
-              <td className={styles.tableCell}>
+      {sortedUsers.length === 0 ? (
+        <Loader />
+      ) : (
+        <table className={styles.table} border={1} rules="rows">
+          <thead className={styles.tableHeader}>
+            <tr>
+              <th className={styles.tableCell}>
                 <input type="checkbox" />
-              </td>
-              <td className={styles.tableCell}>{user.name}</td>
-              <td className={styles.tableCell}>{user.email}</td>
-              <td className={styles.tableCell}>{user.timeIn}</td>
-              <td className={styles.tableCell}>{user.lastDateIn}</td>
-              <td>
-                <FontAwesomeIcon
-                  className={styles.settingsIcon}
-                  icon={faGear}
-                  onClick={() => handleClickSettings(idx)}
-                />
-              </td>
+              </th>
+              {columnHeaders.map((header, idx) => (
+                <th key={idx} className={styles.tableCell}>
+                  <p className={styles.columnHeader}>{header.name}</p>
+                  <button onClick={() => handleSort(idx)}>
+                    {header.sort === "asc" ? (
+                      <FontAwesomeIcon icon={faCaretUp} size="lg" />
+                    ) : (
+                      <FontAwesomeIcon icon={faCaretDown} size="lg" />
+                    )}
+                  </button>
+                </th>
+              ))}
+              <th />
             </tr>
-          ))}
-        </tbody>
-      </table>
-      {sortedUsers.length === 0 && (
-        <h1 className={styles.emptyTable}>Could not display any users</h1>
+          </thead>
+          <tbody>
+            {sortedUsers.map((user, idx) => (
+              <tr
+                key={user.id}
+                className={
+                  idx < users.length - 1 ? styles.tableRow : styles.tableLastRow
+                }
+              >
+                <td className={styles.tableCell}>
+                  <input type="checkbox" />
+                </td>
+                <td className={styles.tableCell}>{user.name}</td>
+                <td className={styles.tableCell}>{user.email}</td>
+                <td className={styles.tableCell}>{user.timeIn}</td>
+                <td className={styles.tableCell}>{user.lastDateIn}</td>
+                <td>
+                  <FontAwesomeIcon
+                    className={styles.settingsIcon}
+                    icon={faGear}
+                    onClick={() => handleClickSettings(idx)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
       {settingsUser && (
         <Modal
