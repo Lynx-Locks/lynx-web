@@ -1,4 +1,5 @@
 "use client";
+import Dashboard from "@/components/dashboard/dashboard";
 import Navbar from "@/components/navbar/navbar";
 import { useEffect, useState } from "react";
 
@@ -13,7 +14,7 @@ export default function Home() {
   return (
     <div>
       <Navbar name={name} />
-      User portal
+      <Dashboard />
     </div>
   );
 }

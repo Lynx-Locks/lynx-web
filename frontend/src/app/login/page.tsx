@@ -6,7 +6,6 @@ import axios from "@/axios/client";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import jwt from "jsonwebtoken";
 
 const isValidEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
@@ -14,29 +13,7 @@ const Login = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [loggedIn, setLoggedIn] = useState<boolean>(true);
   const referrer = searchParams.get("token");
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      try {
-        const user = jwt.verify(token, "secret");
-        if (typeof user == "object" && user.isAdmin && user.email) {
-          // Redirect to dashboard
-          router.push("/");
-        } else {
-          setLoggedIn(false);
-        }
-      } catch (error) {
-        console.error("Token error: ", error);
-        localStorage.removeItem("token");
-      }
-    } else {
-      setLoggedIn(false);
-    }
-  }, [router]);
 
   const handleLogin = async () => {
     try {
@@ -47,21 +24,23 @@ const Login = () => {
       });
 
       const user = userResp.data;
-      const response = await axios.post(`/admin/login/request/${user.id}`);
+      const response = await axios.post(`/login/request/${user.id}`);
       const options: PublicKeyCredentialRequestOptionsJSON = response.data;
       // Prompt user to user passkey
       const credential = await startAuthentication(options);
       // verify the credential
-      const verifyResp = await axios.post(`/admin/login/${user.id}`, {
+      const verifyResp = await axios.post(`/login/${user.id}`, {
         ...credential,
         challenge: options.challenge,
       });
 
-      const { token } = verifyResp.data;
-      if (verifyResp.status === 200 && token) {
-        localStorage.setItem("token", token);
+      if (verifyResp.status === 200) {
+        // We can set any non-private user info in local storage to avoid addition requests
+        localStorage.setItem("name", user.name);
         if (referrer) {
           router.push(referrer);
+        } else if (user.isAdmin) {
+          router.push("/admin/");
         } else {
           router.push("/");
         }
@@ -74,9 +53,7 @@ const Login = () => {
     }
   };
 
-  return loggedIn ? (
-    <div />
-  ) : (
+  return (
     <div className={styles.container}>
       <h2 className={styles.loginTitle}>Login</h2>
       <div className={styles.inputGroup}>
