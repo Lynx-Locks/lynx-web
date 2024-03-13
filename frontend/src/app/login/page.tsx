@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./login.module.css";
 import axios from "@/axios/client";
 import { startAuthentication } from "@simplewebauthn/browser";
@@ -10,9 +10,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 const isValidEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
 const Login = () => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const [email, setEmail] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const referrer = searchParams.get("token");
 
   const handleLogin = async () => {
