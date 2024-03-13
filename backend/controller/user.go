@@ -189,13 +189,13 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(result.Error, w)
 		return
 	}
-	err = sendEmail(user.Email, token)
+	err = sendEmail(user, token)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func sendEmail(email string, token uuid.UUID) error {
+func sendEmail(user models.User, token uuid.UUID) error {
 	sender, ok := os.LookupEnv("HOST_EMAIL_ADDRESS")
 	if !ok {
 		return errors.New("Could not get host email address")
@@ -224,8 +224,10 @@ func sendEmail(email string, token uuid.UUID) error {
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	body.Write([]byte(fmt.Sprintf("Subject: %s \n%s\n\n", subject, mimeHeaders)))
 	t.Execute(&body, struct {
+		Name string
 		Link string
 	}{
+		Name: user.Name,
 		Link: link[0],
 	})
 
@@ -234,7 +236,7 @@ func sendEmail(email string, token uuid.UUID) error {
 	smtpPort := "587"
 	auth := smtp.PlainAuth("", sender, password, smtpHost)
 
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{email}, body.Bytes())
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{user.Email}, body.Bytes())
 	if err != nil {
 		return err
 	}
