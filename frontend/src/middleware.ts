@@ -6,11 +6,6 @@ export const config = { matcher: ["/", "/admin"] }
 
 export default withAuth(
 	function middleware(request: NextRequestWithAuth) {
-		console.log(request.nextUrl.pathname);
-		console.log(request.nextauth.token);
-
-		debugger;
-
 		if (request.nextUrl.pathname.startsWith("/admin") && !request.nextauth.token?.isAdmin) {
 			return NextResponse.rewrite(new URL("/denied", request.url));
 		}
