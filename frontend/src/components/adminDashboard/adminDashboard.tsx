@@ -4,7 +4,7 @@ import styles from "./adminDashboard.module.css";
 import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
 import ButtonsRow from "@/components/buttonsRow/buttonsRow";
-import User from "@/types/user";
+import type { User } from "next-auth";
 import { useEffect, useState } from "react";
 import axios from "@/axios/client";
 import { SelectType } from "@/types/selectOptions";
