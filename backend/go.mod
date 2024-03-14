@@ -32,7 +32,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.9.3
 	github.com/x448/float16 v0.8.4 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.0
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
