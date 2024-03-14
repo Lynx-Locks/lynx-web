@@ -1,5 +1,7 @@
 # Backend
 FROM golang:1.21-alpine AS backend
+ENV IS_DOCKER=true
+
 ARG dev
 
 RUN apk --no-cache add build-base ca-certificates

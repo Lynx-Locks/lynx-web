@@ -76,7 +76,7 @@ func main() {
 			panic("Missing CLIENT_DOMAIN environment variable")
 		}
 	} else {
-		origins = []string{"http://localhost:3000*"}
+		origins = []string{"http://localhost:3000*", "http://localhost:5001*"}
 	}
 
 	r := chi.NewRouter()
@@ -88,17 +88,28 @@ func main() {
 	}))
 	config.Connect()
 
-	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
-		FileServer(r, "/", http.Dir("./static"))
-	} else {
-		target := "http://frontend:3000"
-		targetURL, _ := url.Parse(target)
-		proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	// Admin only
+	r.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(auth.TokenAuth))
+		r.Use(auth.VerifyAdmin)
 
-		r.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-			proxy.ServeHTTP(w, r)
-		})
-	}
+		ServeFrontendRoute(r, "/admin/")
+	})
+
+	// User only
+	r.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(auth.TokenAuth))
+		r.Use(auth.VerifyUser)
+
+		ServeFrontendRoute(r, "/")
+	})
+
+	// Public
+	r.Group(func(r chi.Router) {
+		ServeFrontendRoute(r, "/*")
+	})
 
 	r.Mount("/api", api())
 
@@ -154,16 +165,6 @@ func api() chi.Router {
 // FileServer conveniently sets up a http.FileServer handler to serve
 // static files from a http.FileSystem.
 func FileServer(r chi.Router, path string, root http.FileSystem) {
-	if strings.ContainsAny(path, "{}*") {
-		panic("FileServer does not permit any URL parameters.")
-	}
-
-	if path != "/" && path[len(path)-1] != '/' {
-		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
-		path += "/"
-	}
-	path += "*"
-
 	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
 		rctx := chi.RouteContext(r.Context())
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
@@ -198,4 +199,24 @@ func replaceVarsInFile(filePath string, vars []envVar) error {
 	}
 
 	return nil
+}
+
+func ServeFrontendRoute(r chi.Router, route string) {
+	if value, ok := os.LookupEnv("NODE_ENV"); ok && value == "production" {
+		fsRoute := strings.TrimSuffix(strings.TrimSuffix(route, "*"), "/")
+		FileServer(r, route, http.Dir("./static"+fsRoute))
+	} else {
+		var target string
+		if _, ok := os.LookupEnv("IS_DOCKER"); ok {
+			target = "http://frontend:3000" // Docker requires hostname
+		} else {
+			target = "http://localhost:3000"
+		}
+		targetURL, _ := url.Parse(target)
+		proxy := httputil.NewSingleHostReverseProxy(targetURL)
+
+		r.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
+			proxy.ServeHTTP(w, r)
+		})
+	}
 }

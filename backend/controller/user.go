@@ -212,7 +212,7 @@ func sendEmail(email string, token uuid.UUID) error {
 			panic("Missing client domain")
 		}
 	} else {
-		baseUrl = []string{"http://localhost:3000"}
+		baseUrl = []string{"http://localhost:5001"}
 	}
 	link := []string{fmt.Sprintf("%s/register/?token=%s", baseUrl[0], token.String())}
 	t, err := template.ParseFiles("./html/emailTemplate.html")
