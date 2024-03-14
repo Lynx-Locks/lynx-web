@@ -58,7 +58,7 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	w.WriteHeader(200)
+	helpers.JsonWriter(w, "Delete Successful")
 }
 
 func IsDoorOpen(w http.ResponseWriter, r *http.Request) {
@@ -79,5 +79,5 @@ func IsDoorOpen(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	delete(models.DoorUnlocked, dId)
-	w.WriteHeader(200)
+	helpers.JsonWriter(w, "Door unlocked")
 }
