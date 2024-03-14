@@ -57,13 +57,19 @@ export default function AdminTable({
       const first = sortBy?.sort === "asc" ? a : b;
       const second = sortBy?.sort === "asc" ? b : a;
       if (sortBy?.name === "Last Time In") {
-        return first.timeIn && second.timeIn
-          ? first.timeIn.localeCompare(second.timeIn)
-          : -1;
+        return (
+          (first.timeIn &&
+            second.timeIn &&
+            first.timeIn.localeCompare(second.timeIn)) ||
+          (sortBy?.sort === "asc" ? 1 : -1)
+        );
       } else if (sortBy?.name === "Date") {
-        return first.lastDateIn && second.lastDateIn
-          ? first.lastDateIn.localeCompare(second.lastDateIn)
-          : -1;
+        return (
+          (first.lastDateIn &&
+            second.lastDateIn &&
+            first.lastDateIn.localeCompare(second.lastDateIn)) ||
+          (sortBy?.sort === "asc" ? 1 : -1)
+        );
       } else if (sortBy?.name === "Email") {
         return first.email.localeCompare(second.email);
       } else if (sortBy?.name === "Name") {
