@@ -15,6 +15,7 @@ func UsersRoute() chi.Router {
 	r.Delete("/{userId}", controller.DeleteUser)
 	r.Get("/{userId}/roles", controller.GetUserRoles)
 	r.Get("/{userId}/creds", controller.GetUserCreds)
+	r.Delete("/{userId}/creds", controller.DeleteUserCreds)
 	r.Post("/register", controller.SendRegistrationEmail)
 	return r
 }

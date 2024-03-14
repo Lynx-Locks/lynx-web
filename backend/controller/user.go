@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"gorm.io/gorm/clause"
 	"html/template"
 	"net/http"
 	"net/smtp"
@@ -163,6 +164,24 @@ func GetUserCreds(w http.ResponseWriter, r *http.Request) {
 	}
 	helpers.JsonWriter(w, &creds)
 
+}
+
+func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	err, uId := helpers.ParseInt(w, r, "userId")
+	if err != nil {
+		return
+	}
+	creds := []models.Credential{}
+	res := db.DB.Unscoped().Select(clause.Associations).Where(models.Credential{UserId: uId}).Delete(&creds)
+	if res.Error != nil {
+		helpers.DBErrorHandling(res.Error, w)
+		return
+	}
+	if res.RowsAffected < 1 {
+		http.Error(w, "No credentials found, either user has none or user does not exist", http.StatusNotFound)
+		return
+	}
 }
 
 func GetUserRoles(w http.ResponseWriter, r *http.Request) {
