@@ -74,16 +74,16 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		user.Name = reqUser.Name
 	}
 
-	err, reqUser = helpers.UpdateObject(w, user)
+	err, user = helpers.UpdateObject(w, user)
 	if err != nil {
 		return
 	}
-	err = db.DB.Model(&reqUser).Association("Roles").Replace(&roles)
+	err = db.DB.Model(&user).Association("Roles").Replace(&roles)
 	if err != nil {
 		http.Error(w, "Failed to remove role difference", http.StatusInternalServerError)
 		return
 	}
-	helpers.JsonWriter(w, reqUser)
+	helpers.JsonWriter(w, user)
 
 }
 
