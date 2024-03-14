@@ -38,32 +38,21 @@ export default function ButtonRow({
     useState<SelectType>(null);
   const [roles, setRoles] = useState<Options[]>([]);
   const [doors, setDoors] = useState<Options[]>([]);
+  const [disabled, setDisabled] = useState(false);
 
   const emails = users.map((user) => ({
     label: user.email,
     value: user.id.toString(),
   }));
 
-  useEffect(() => {
-    async function fetchRoles() {
-      const roles = await getRoleOptions();
-      setRoles(roles);
-    }
-
-    async function fetchDoors() {
-      const doors = await getDoorOptions();
-      setDoors(doors);
-    }
-
-    fetchRoles();
-    fetchDoors();
-  }, []);
-
   const buttons = [
     {
       id: 1,
       name: "New User",
-      onClick: () => setNewUserModal(true),
+      onClick: async () => {
+        setRoles(await getRoleOptions());
+        setNewUserModal(true);
+      },
     },
     {
       id: 2,
@@ -73,7 +62,10 @@ export default function ButtonRow({
     {
       id: 3,
       name: "New Role",
-      onClick: () => setNewRoleModal(true),
+      onClick: async () => {
+        setDoors(await getDoorOptions());
+        setNewRoleModal(true);
+      },
     },
   ];
 
@@ -88,7 +80,7 @@ export default function ButtonRow({
   };
 
   const handleModalSubmit = async () => {
-    console.log(newKeyModal, newUser);
+    setDisabled(true);
     if (newKeyModal && selectedEmailOption) {
       // Send email for user to register a key
       await axios.post(`/users/register`, {
@@ -97,7 +89,7 @@ export default function ButtonRow({
       });
     } else if (newRoleModal) {
       // handle adding new role
-      await axios.post("/roles", {
+      const rolesResp = await axios.post("/roles", {
         name: newRole.name,
         users: Array.isArray(selectedEmailOption)
           ? selectedEmailOption.map((email: Options) => ({
@@ -110,6 +102,8 @@ export default function ButtonRow({
             }))
           : [],
       });
+      const role = rolesResp.data;
+      setRoles([...roles, { label: role.name, value: role.id.toString() }]);
     } else if (newUserModal) {
       // handle adding new user
       if (emailRegex.test(newUser.email)) {
@@ -136,7 +130,13 @@ export default function ButtonRow({
 
     setSelectedEmailOption(null);
     setSelectedRoleOption(null);
+    setSelectedDoorOption(null);
     setNewKeyModal(false);
+    setNewRoleModal(false);
+    setNewUserModal(false);
+    setDisabled(false);
+    setNewUser({ name: "", email: "" });
+    setNewRole({ name: "" });
   };
 
   const newUserModalContent = (
@@ -163,7 +163,11 @@ export default function ButtonRow({
         setSelectedOption={setSelectedRoleOption}
         isMulti
       />
-      <SubmitButton text="Submit" onClick={handleModalSubmit} />
+      <SubmitButton
+        disabled={disabled}
+        text="Submit"
+        onClick={handleModalSubmit}
+      />
     </div>
   );
 
@@ -176,7 +180,11 @@ export default function ButtonRow({
         selectDropdown="tableModal"
         setSelectedOption={setSelectedEmailOption}
       />
-      <SubmitButton text="Submit" onClick={handleModalSubmit} />
+      <SubmitButton
+        disabled={disabled}
+        text="Submit"
+        onClick={handleModalSubmit}
+      />
     </div>
   );
 
@@ -205,7 +213,11 @@ export default function ButtonRow({
         setSelectedOption={setSelectedDoorOption}
         isMulti
       />
-      <SubmitButton text="Submit" onClick={handleModalSubmit} />
+      <SubmitButton
+        disabled={disabled}
+        text="Submit"
+        onClick={handleModalSubmit}
+      />
     </div>
   );
 

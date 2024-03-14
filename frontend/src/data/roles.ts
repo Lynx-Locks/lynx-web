@@ -6,6 +6,8 @@ export const getRoleOptions = async (): Promise<Options[]> => {
   const resp = await axios.get("/roles");
   const roles: Role[] = resp.data;
 
+  console.log(resp.data);
+
   return roles.map((r) => ({
     label: r.name,
     value: r.id.toString(),
@@ -16,6 +18,8 @@ export const getRoleOptions = async (): Promise<Options[]> => {
 export const getUserRoles = async (userId: number): Promise<Options[]> => {
   const resp = await axios.get(`/users/${userId}/roles`);
   const roles: Role[] = resp.data;
+
+  console.log(roles);
 
   return roles.map((r) => ({
     label: r.name,

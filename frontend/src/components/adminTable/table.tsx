@@ -47,16 +47,8 @@ export default function AdminTable({
   const [sortedUsers, setSortedUsers] = useState(users);
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
+  const [defaultRoles, setDefaultRoles] = useState<Options[]>([]);
   const [roles, setRoles] = useState<Options[]>([]);
-
-  useEffect(() => {
-    async function fetchRoles() {
-      const roles = await getRoleOptions();
-      setRoles(roles);
-    }
-
-    fetchRoles();
-  }, []);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -65,9 +57,13 @@ export default function AdminTable({
       const first = sortBy?.sort === "asc" ? a : b;
       const second = sortBy?.sort === "asc" ? b : a;
       if (sortBy?.name === "Last Time In") {
-        return first.timeIn.localeCompare(second.timeIn);
+        return first.timeIn && second.timeIn
+          ? first.timeIn.localeCompare(second.timeIn)
+          : -1;
       } else if (sortBy?.name === "Date") {
-        return first.lastDateIn.localeCompare(second.lastDateIn);
+        return first.lastDateIn && second.lastDateIn
+          ? first.lastDateIn.localeCompare(second.lastDateIn)
+          : -1;
       } else if (sortBy?.name === "Email") {
         return first.email.localeCompare(second.email);
       } else if (sortBy?.name === "Name") {
@@ -80,9 +76,8 @@ export default function AdminTable({
 
   const handleClickSettings = async (idx: number) => {
     const user = sortedUsers[idx];
-    const roles = await getUserRoles(user.id);
-
-    setSelectedRoleOption(roles);
+    setDefaultRoles(await getUserRoles(user.id));
+    setRoles(await getRoleOptions());
     setSettingsUser(user);
   };
 
@@ -116,8 +111,7 @@ export default function AdminTable({
 
   const handleSubmitSettings = () => {
     updateUser(settingsUser!, selectedRoleOption);
-    // TODO: uncomment this when working
-    // closeModal();
+    closeModal();
   };
 
   const handleDeleteUser = () => {
@@ -171,8 +165,8 @@ export default function AdminTable({
                 </td>
                 <td className={styles.tableCell}>{user.name}</td>
                 <td className={styles.tableCell}>{user.email}</td>
-                <td className={styles.tableCell}>{user.timeIn}</td>
-                <td className={styles.tableCell}>{user.lastDateIn}</td>
+                <td className={styles.tableCell}>{user.timeIn || "N/A"}</td>
+                <td className={styles.tableCell}>{user.lastDateIn || "N/A"}</td>
                 <td>
                   <FontAwesomeIcon
                     className={styles.settingsIcon}
@@ -220,8 +214,9 @@ export default function AdminTable({
                 />
                 <div className={styles.settingsInputLabel}>Roles:</div>
                 <SearchDropdown
+                  defaultValue={defaultRoles}
                   options={roles}
-                  placeholder="Select Role..."
+                  placeholder="Select Role(s)..."
                   subheader=""
                   setSelectedOption={setSelectedRoleOption}
                   selectDropdown="settingsModal"
