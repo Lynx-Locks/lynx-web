@@ -45,44 +45,32 @@ COPY frontend .
 EXPOSE 3000
 CMD npm run dev
 
-FROM base AS production
-ENV NODE_ENV=production
-
-# WORKDIR in docker container
-WORKDIR /frontend
+# Frontend Static Build
+FROM base AS builder
+ARG NEXT_PUBLIC_API_BASE_URL=BAKED_API_BASE_URL
 
 COPY --from=base /frontend/node_modules ./node_modules
 COPY frontend .
+RUN npm run build
 
-EXPOSE 3000
-CMD npm run start
+# Production
+FROM scratch as prod
+ENV NODE_ENV=production
 
-# Frontend Static Build
-#FROM base AS builder
-#ARG NEXT_PUBLIC_API_BASE_URL=BAKED_API_BASE_URL
-#
-#COPY --from=base /frontend/node_modules ./node_modules
-#COPY frontend .
-#RUN npm run build
-#
-## Production
-#FROM scratch as prod
-#ENV NODE_ENV=production
-#
-## Import static frontend
-#COPY --from=builder /frontend/out /static
-## Import compiled binary
-#COPY --from=backend /lynx-backend /lynx-backend
-## Import email template
-#COPY --from=backend /backend/html/emailTemplate.html /html/emailTemplate.html
-## Import the root ca-certificates (required for Let's Encrypt)
-#COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-#
-#EXPOSE 443
-#EXPOSE 80
-#
-## Mount the certificate cache directory as a volume to avoid Let's Encrypt rate limits
-#VOLUME ["/cert-cache"]
-#
-## Run the compiled binary
-#CMD ["/lynx-backend"]
+# Import static frontend
+COPY --from=builder /frontend/out /static
+# Import compiled binary
+COPY --from=backend /lynx-backend /lynx-backend
+# Import email template
+COPY --from=backend /backend/html/emailTemplate.html /html/emailTemplate.html
+# Import the root ca-certificates (required for Let's Encrypt)
+COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+EXPOSE 443
+EXPOSE 80
+
+# Mount the certificate cache directory as a volume to avoid Let's Encrypt rate limits
+VOLUME ["/cert-cache"]
+
+# Run the compiled binary
+CMD ["/lynx-backend"]
