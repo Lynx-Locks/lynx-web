@@ -1,6 +1,6 @@
 "use client";
 
-import type { User } from "next-auth";
+import User from "@/types/user";
 import styles from "./table.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
