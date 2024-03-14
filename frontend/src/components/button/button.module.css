@@ -19,3 +19,9 @@
   border-radius: 10px;
   color: black;
 }
+
+.submitButton:disabled,
+.submitButton[disabled]{
+  background-color: #cccccc;
+  color: #666666;
+}

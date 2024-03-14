@@ -4,6 +4,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 type ButtonProps = {
   text: string;
+  disabled?: boolean;
   onClick?: () => void;
 };
 
@@ -15,9 +16,13 @@ export function AddButton({ text, onClick }: ButtonProps) {
   );
 }
 
-export function SubmitButton({ text, onClick }: ButtonProps) {
+export function SubmitButton({ disabled, text, onClick }: ButtonProps) {
   return (
-    <button className={styles.submitButton} onClick={onClick}>
+    <button
+      disabled={disabled}
+      className={styles.submitButton}
+      onClick={onClick}
+    >
       {text}
     </button>
   );
