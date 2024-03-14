@@ -208,6 +208,7 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	w.WriteHeader(200)
 }
 
 func sendEmail(user models.User, token uuid.UUID) error {
