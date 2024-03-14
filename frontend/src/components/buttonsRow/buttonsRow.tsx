@@ -50,6 +50,7 @@ export default function ButtonRow({
       id: 1,
       name: "New User",
       onClick: async () => {
+        setDisabled(false);
         setRoles(await getRoleOptions());
         setNewUserModal(true);
       },
@@ -57,12 +58,16 @@ export default function ButtonRow({
     {
       id: 2,
       name: "New Key",
-      onClick: () => setNewKeyModal(true),
+      onClick: () => {
+        setDisabled(false);
+        setNewKeyModal(true);
+      },
     },
     {
       id: 3,
       name: "New Role",
       onClick: async () => {
+        setDisabled(false);
         setDoors(await getDoorOptions());
         setNewRoleModal(true);
       },
