@@ -41,19 +41,33 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	ids := helpers.GetAllIdsFromList(role.Doors)
-	if len(ids) != 0 {
+	doorIds := helpers.GetAllIdsFromList(role.Doors)
+	if len(doorIds) != 0 {
 		doors := []models.Door{}
-		res := db.DB.Find(&doors, ids)
+		res := db.DB.Find(&doors, doorIds)
 		if res.Error != nil {
 			helpers.DBErrorHandling(res.Error, w)
 			return
 		}
-		if len(doors) != len(ids) {
+		if len(doors) != len(doorIds) {
 			http.Error(w, "One or more invalid roles", http.StatusBadRequest)
 			return
 		}
 		role.Doors = doors
+	}
+	userIds := helpers.GetAllIdsFromList(role.Users)
+	if len(userIds) != 0 {
+		users := []models.User{}
+		res := db.DB.Find(&users, userIds)
+		if res.Error != nil {
+			helpers.DBErrorHandling(res.Error, w)
+			return
+		}
+		if len(users) != len(userIds) {
+			http.Error(w, "One or more invalid users", http.StatusBadRequest)
+			return
+		}
+		role.Users = users
 	}
 	err, role = helpers.CreateNewRecord(w, role)
 	if err != nil {

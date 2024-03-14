@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from "./buttonsRow.module.css";
 import { AddButton, SubmitButton } from "@/components/button/button";
 import Modal from "@/components/modal/modal";
@@ -9,13 +9,16 @@ import { Options, SelectType } from "@/types/selectOptions";
 import { getRoleOptions } from "@/data/roles";
 import { getDoorOptions } from "@/data/doors";
 import axios from "@/axios/client";
+import User from "@/types/user";
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 export default function ButtonRow({
-  emails,
+  users,
+  setUsers,
 }: {
-  emails: { label: string; value: string }[];
+  users: User[];
+  setUsers: Dispatch<SetStateAction<User[]>>;
 }) {
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [newRoleModal, setNewRoleModal] = useState(false);
@@ -35,6 +38,11 @@ export default function ButtonRow({
     useState<SelectType>(null);
   const [roles, setRoles] = useState<Options[]>([]);
   const [doors, setDoors] = useState<Options[]>([]);
+
+  const emails = users.map((user) => ({
+    label: user.email,
+    value: user.id.toString(),
+  }));
 
   useEffect(() => {
     async function fetchRoles() {
@@ -80,19 +88,26 @@ export default function ButtonRow({
   };
 
   const handleModalSubmit = async () => {
-    console.log(selectedEmailOption, selectedRoleOption);
-    if (newKeyModal) {
-      // TODO: handle adding new key (call email workflow to send email to user to register key)
+    console.log(newKeyModal, newUser);
+    if (newKeyModal && selectedEmailOption) {
+      // Send email for user to register a key
+      await axios.post(`/users/register`, {
+        // @ts-ignore
+        email: selectedEmailOption.label,
+      });
     } else if (newRoleModal) {
       // handle adding new role
-      // TODO: verify this flow is correct once user <-> role relationship is implemented
       await axios.post("/roles", {
         name: newRole.name,
         users: Array.isArray(selectedEmailOption)
-          ? selectedEmailOption.map((email: Options) => parseInt(email.value))
+          ? selectedEmailOption.map((email: Options) => ({
+              id: parseInt(email.value),
+            }))
           : [],
         doors: Array.isArray(selectedDoorOption)
-          ? selectedDoorOption.map((door: Options) => parseInt(door.value))
+          ? selectedDoorOption.map((door: Options) => ({
+              id: parseInt(door.value),
+            }))
           : [],
       });
     } else if (newUserModal) {
@@ -102,29 +117,26 @@ export default function ButtonRow({
           name: newUser.name,
           email: newUser.email,
           roles: Array.isArray(selectedRoleOption)
-            ? selectedRoleOption.map((role: Options) => parseInt(role.value))
+            ? selectedRoleOption.map((role: Options) => ({
+                id: parseInt(role.value),
+              }))
             : [],
         });
 
         const user = userResp.data;
+        // Save user to state
+        setUsers([...users, user]);
 
-        // TODO: this should be part of posting to users
-        const rolesResp = await axios.post(`/users/${user.id}/roles`, {
-          roleIds: Array.isArray(selectedRoleOption)
-            ? selectedRoleOption.map((role: Options) => parseInt(role.value))
-            : [],
+        // Send email for user to register a key
+        await axios.post(`/users/register`, {
+          email: newUser.email,
         });
-
-        // TODO: save user to state
-
-        // TODO: send email for user to register a key
       }
     }
 
-    // TODO: uncomment these lines when the functionality is implemented
-    // setSelectedEmailOption(null);
-    // setSelectedRoleOption(null);
-    // setNewKeyModal(false);
+    setSelectedEmailOption(null);
+    setSelectedRoleOption(null);
+    setNewKeyModal(false);
   };
 
   const newUserModalContent = (

@@ -49,12 +49,7 @@ export default function Dashboard() {
           setSearchInput={setSearchInput}
         />
       </div>
-      <ButtonsRow
-        emails={users.map((user) => ({
-          label: user.email,
-          value: String(user.id),
-        }))}
-      />
+      <ButtonsRow users={users} setUsers={setUsers} />
       <AdminTable
         users={users.filter(
           (user) =>
