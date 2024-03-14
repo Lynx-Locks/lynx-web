@@ -1,4 +1,3 @@
-"use client";
 import NavLogo from "@/components/navLogo/navLogo";
 import styles from "./navbar.module.css";
 import { useRouter } from "next/navigation";
