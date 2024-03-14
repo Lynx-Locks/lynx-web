@@ -172,8 +172,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	creds := []models.Credential{}
-	res := db.DB.Unscoped().Select(clause.Associations).Where(models.Credential{UserId: uId}).Delete(&creds)
+	res := db.DB.Unscoped().Select(clause.Associations).Where(models.Credential{UserId: uId}).Delete(&[]models.Credential{})
 	if res.Error != nil {
 		helpers.DBErrorHandling(res.Error, w)
 		return
