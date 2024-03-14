@@ -70,7 +70,7 @@ func SaveDBCredential(w http.ResponseWriter, credential *webauthn2.Credential) e
 		},
 	}
 
-	result := db.DB.Save(&dbCredential)
+	result := db.DB.Updates(&dbCredential)
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
 		return errors.New("could not save credentials")
