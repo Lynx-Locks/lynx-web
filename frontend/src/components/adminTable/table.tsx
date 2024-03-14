@@ -15,6 +15,7 @@ import SearchDropdown from "../searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
 import { getRoleOptions, getUserRoles } from "@/data/roles";
 import Loader from "@/components/loader/loader";
+import axios from "@/axios/client";
 
 export default function AdminTable({
   users,
@@ -126,9 +127,12 @@ export default function AdminTable({
     }
   };
 
-  const handleRevokeKey = () => {
-    if (confirm("Are you sure you want to revoke this user's key?")) {
-      // TODO: need endpoint to revoke key
+  const handleRevokeKey = async () => {
+    if (confirm("Are you sure you want to revoke this user's keys?")) {
+      const resp = await axios.delete(`/users/${settingsUser?.id}/cred`);
+      if (resp.status === 200) {
+        alert("Keys revoked successfully");
+      }
     }
   };
 
