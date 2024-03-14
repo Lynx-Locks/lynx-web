@@ -1,8 +1,10 @@
-import AdminDashboard from "@/components/adminDashboard/adminDashboard";
+"use client";
+
+import Dashboard from "@/components/adminDashboard/adminDashboard";
 import Navbar from "@/components/navbar/navbar";
 import { useEffect, useState } from "react";
 
-export default function Home() {
+export default function Admin() {
   const [name, setName] = useState<string>("");
   useEffect(() => {
     if (localStorage.getItem("name")) {

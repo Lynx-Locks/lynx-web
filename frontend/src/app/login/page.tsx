@@ -11,8 +11,8 @@ const isValidEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const referrer = searchParams.get("token");
 
   const handleLogin = async () => {
