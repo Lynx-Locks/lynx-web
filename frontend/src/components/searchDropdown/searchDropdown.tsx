@@ -6,6 +6,7 @@ import Select, { ActionMeta } from "react-select";
 import { Options, SelectType } from "@/types/selectOptions";
 
 export default function SearchDropdown({
+  defaultValue,
   options,
   placeholder,
   subheader,
@@ -13,6 +14,7 @@ export default function SearchDropdown({
   selectDropdown = "tableModal",
   isMulti = false,
 }: {
+  defaultValue?: Options[];
   options: Options[];
   placeholder: string;
   subheader: string;
@@ -80,6 +82,7 @@ export default function SearchDropdown({
       <h2 className={styles.subheader}>{subheader}</h2>
       {isMounted && (
         <Select
+          defaultValue={defaultValue}
           className={styles[selectDropdown]}
           styles={customStyles}
           options={options}

@@ -13,15 +13,17 @@ import Modal from "@/components/modal/modal";
 import { SubmitButton } from "@/components/button/button";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
-import { getRoleOptions } from "@/data/roles";
+import { getRoleOptions, getUserRoles } from "@/data/roles";
 import Loader from "@/components/loader/loader";
 
 export default function AdminTable({
   users,
   updateUser,
+  deleteUser,
 }: {
   users: User[];
-  updateUser: (user: User, keyId: string, roles: SelectType) => void;
+  updateUser: (user: User, roles: SelectType) => void;
+  deleteUser: (user: User) => Promise<void>;
 }) {
   const [settingsUser, setSettingsUser] = useState<User | null>(null);
   const [columnHeaders, setColumnHeaders] = useState([
@@ -45,16 +47,8 @@ export default function AdminTable({
   const [sortedUsers, setSortedUsers] = useState(users);
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
+  const [defaultRoles, setDefaultRoles] = useState<Options[]>([]);
   const [roles, setRoles] = useState<Options[]>([]);
-
-  useEffect(() => {
-    async function fetchRoles() {
-      const roles = await getRoleOptions();
-      setRoles(roles);
-    }
-
-    fetchRoles();
-  }, []);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -63,9 +57,19 @@ export default function AdminTable({
       const first = sortBy?.sort === "asc" ? a : b;
       const second = sortBy?.sort === "asc" ? b : a;
       if (sortBy?.name === "Last Time In") {
-        return first.timeIn.localeCompare(second.timeIn);
+        return (
+          (first.timeIn &&
+            second.timeIn &&
+            first.timeIn.localeCompare(second.timeIn)) ||
+          (sortBy?.sort === "asc" ? 1 : -1)
+        );
       } else if (sortBy?.name === "Date") {
-        return first.lastDateIn.localeCompare(second.lastDateIn);
+        return (
+          (first.lastDateIn &&
+            second.lastDateIn &&
+            first.lastDateIn.localeCompare(second.lastDateIn)) ||
+          (sortBy?.sort === "asc" ? 1 : -1)
+        );
       } else if (sortBy?.name === "Email") {
         return first.email.localeCompare(second.email);
       } else if (sortBy?.name === "Name") {
@@ -76,8 +80,11 @@ export default function AdminTable({
     setSortedUsers(newUsers);
   }, [columnHeaders, setSortedUsers, users]);
 
-  const handleClickSettings = (idx: number) => {
-    setSettingsUser(sortedUsers[idx]);
+  const handleClickSettings = async (idx: number) => {
+    const user = sortedUsers[idx];
+    setDefaultRoles(await getUserRoles(user.id));
+    setRoles(await getRoleOptions());
+    setSettingsUser(user);
   };
 
   const closeModal = () => {
@@ -109,18 +116,20 @@ export default function AdminTable({
   };
 
   const handleSubmitSettings = () => {
-    // TODO: add key id
-    updateUser(settingsUser!, "", selectedRoleOption);
-    // TODO: uncomment this
-    // setSettingsUser(null);
+    updateUser(settingsUser!, selectedRoleOption);
+    closeModal();
   };
 
   const handleDeleteUser = () => {
-    // TODO: handle delete user
+    if (confirm("Are you sure you want to delete this user?") && settingsUser) {
+      deleteUser(settingsUser).then(() => closeModal());
+    }
   };
 
   const handleRevokeKey = () => {
-    // TODO: handle revoke key
+    if (confirm("Are you sure you want to revoke this user's key?")) {
+      // TODO: need endpoint to revoke key
+    }
   };
 
   return (
@@ -162,8 +171,8 @@ export default function AdminTable({
                 </td>
                 <td className={styles.tableCell}>{user.name}</td>
                 <td className={styles.tableCell}>{user.email}</td>
-                <td className={styles.tableCell}>{user.timeIn}</td>
-                <td className={styles.tableCell}>{user.lastDateIn}</td>
+                <td className={styles.tableCell}>{user.timeIn || "N/A"}</td>
+                <td className={styles.tableCell}>{user.lastDateIn || "N/A"}</td>
                 <td>
                   <FontAwesomeIcon
                     className={styles.settingsIcon}
@@ -209,11 +218,11 @@ export default function AdminTable({
                     )
                   }
                 />
-                {/* TODO: add a dropdown so the user can select which key they want to choose (maybe just display by public key) */}
                 <div className={styles.settingsInputLabel}>Roles:</div>
                 <SearchDropdown
+                  defaultValue={defaultRoles}
                   options={roles}
-                  placeholder="Select Role..."
+                  placeholder="Select Role(s)..."
                   subheader=""
                   setSelectedOption={setSelectedRoleOption}
                   selectDropdown="settingsModal"

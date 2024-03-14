@@ -13,11 +13,17 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchInput, setSearchInput] = useState("");
 
-  const updateUser = async (user: User, keyId: string, roles: SelectType) => {
-    // TODO: axios to update user
-    console.log(user, keyId, roles);
+  const updateUser = async (user: User, roles: SelectType) => {
+    const newUserResp = await axios.put(`/users`, {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      roles:
+        Array.isArray(roles) && roles.map((r) => ({ id: parseInt(r.value) })),
+    });
+    const newUser = newUserResp.data;
     const newUsers = users.map((u) => {
-      if (u.id === user.id) {
+      if (u.id === newUser.id) {
         return user;
       }
       return u;
@@ -25,15 +31,25 @@ export default function AdminDashboard() {
     setUsers(newUsers);
   };
 
+  const deleteUser = async (user: User) => {
+    axios.delete(`/users/${user.id}`);
+    const newUsers = users.filter((u) => u.id !== user.id);
+    setUsers(newUsers);
+  };
+
   useEffect(() => {
     const getUsers = async () => {
-      const users = await axios.get("/users");
+      const usersResp = await axios.get("/users");
       setUsers(
-        users.data.map((user: User) => {
-          // TODO: parse these from response, obtain timezone from TZ environment variable
-          user.timeIn = new Date().toLocaleTimeString();
-          user.lastDateIn = new Date().toLocaleDateString();
-          return user;
+        usersResp.data.map((user: User & { lastTimeIn: number }) => {
+          const timeIn = user.lastTimeIn
+            ? new Date(user.lastTimeIn * 1000)
+            : null;
+          return {
+            ...user,
+            timeIn: timeIn && timeIn.toLocaleTimeString(),
+            lastDateIn: timeIn && timeIn.toLocaleDateString(),
+          };
         }),
       );
     };
@@ -57,10 +73,11 @@ export default function AdminDashboard() {
           (user) =>
             user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
             user.email.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.timeIn.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.lastDateIn.toLowerCase().includes(searchInput.toLowerCase()),
+            user.timeIn?.toLowerCase().includes(searchInput.toLowerCase()) ||
+            user.lastDateIn?.toLowerCase().includes(searchInput.toLowerCase()),
         )}
         updateUser={updateUser}
+        deleteUser={deleteUser}
       />
     </div>
   );
