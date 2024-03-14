@@ -63,7 +63,7 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 	sessionData := models.SessionData{}
 	result := db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Take(&sessionData)
 	if result.Error == nil {
-		result = db.DB.Delete(&sessionData)
+		result = db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Delete(&models.SessionData{})
 	}
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)

@@ -132,7 +132,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 	sessionData := models.SessionData{}
 	result := db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Take(&sessionData)
 	if result.Error == nil {
-		result = db.DB.Delete(&sessionData)
+		result = db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Delete(&models.SessionData{})
 	}
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
@@ -264,12 +264,10 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	challenge, _ := base64.StdEncoding.DecodeString(chi.URLParam(r, "challenge"))
 
 	// Get the session data stored from the function above
-	sessionData := models.SessionData{
-		Challenge: string(challenge),
-	}
-	result := db.DB.First(&sessionData)
+	sessionData := models.SessionData{}
+	result := db.DB.Where(models.SessionData{Challenge: string(challenge)}).Take(&sessionData)
 	if result.Error == nil {
-		result = db.DB.Delete(&sessionData)
+		result = db.DB.Where(models.SessionData{Challenge: string(challenge)}).Delete(&models.SessionData{})
 	}
 	if result.Error != nil {
 		helpers.DBErrorHandling(result.Error, w)
@@ -309,8 +307,8 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	cred := models.Credential{Id: credential.ID}
-	res := db.DB.First(&cred)
+	cred := models.Credential{}
+	res := db.DB.Where(models.Credential{Id: credential.ID}).Take(&cred)
 	if res.Error != nil {
 		http.Error(w, "Could retrieve credential", http.StatusInternalServerError)
 		return
