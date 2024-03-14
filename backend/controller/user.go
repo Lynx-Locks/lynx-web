@@ -172,12 +172,16 @@ func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 
 func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	email := r.URL.Query().Get("email")
-	if email == "" {
-		http.Error(w, "Email parameter is required", http.StatusBadRequest)
-		return
+	reqBody := struct {
+		Email string `json:"email"`
+	}{}
+
+	err := json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
+
+	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: reqBody.Email})
 	if err != nil {
 		http.Error(w, "Invalid user email", http.StatusBadRequest)
 		return
