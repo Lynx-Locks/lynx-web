@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/navbar/navbar";
 import { useEffect, useState } from "react";
+import Dashboard from "@/components/userDashboard/userDashboard";
 
 export default function Home() {
   const [name, setName] = useState<string>("");
@@ -14,7 +15,7 @@ export default function Home() {
   return (
     <div>
       <Navbar name={name} />
-      User portal
+      <Dashboard />
     </div>
   );
 }
