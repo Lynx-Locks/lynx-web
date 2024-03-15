@@ -21,8 +21,8 @@ func VerifyAdmin(next http.Handler) http.Handler {
 		}
 
 		if token == nil || jwt.Validate(token) != nil || claims == nil {
-			log.Error("invalid token in jwt")
-			http.Error(w, "invalid token", 401)
+			log.WithField("status", http.StatusUnauthorized).Error("invalid jwt token")
+			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
 
@@ -32,7 +32,8 @@ func VerifyAdmin(next http.Handler) http.Handler {
 
 		isAdmin, ok := claims["isAdmin"]
 		if !ok || !isAdmin.(bool) {
-			http.Error(w, "user not admin", 401)
+			log.WithField("status", http.StatusUnauthorized).Warn("user is not admin")
+			http.Redirect(w, r, "/denied", http.StatusSeeOther)
 			return
 		}
 
@@ -52,8 +53,8 @@ func VerifyUser(next http.Handler) http.Handler {
 		}
 
 		if token == nil || jwt.Validate(token) != nil || claims == nil {
-			log.Error("invalid token in jwt")
-			http.Error(w, "invalid token", 401)
+			log.WithField("status", http.StatusUnauthorized).Error("invalid jwt token")
+			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
 
@@ -69,9 +70,9 @@ func VerifyUser(next http.Handler) http.Handler {
 func verifySession(w http.ResponseWriter, r *http.Request, claims map[string]interface{}) bool {
 	sessionId, ok := claims["sessionId"]
 	if !ok {
-		log.Error("sessionId missing in jwt")
+		log.WithField("status", http.StatusUnauthorized).Error("sessionId missing in jwt")
 		ClearCookie(w)
-		http.Error(w, http.StatusText(401), 401)
+		http.Error(w, http.StatusText(401), http.StatusUnauthorized)
 		return false
 	}
 	if _, ok := ActiveSessions[sessionId.(string)]; !ok {
