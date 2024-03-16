@@ -9,6 +9,9 @@ import { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
 import { SubmitButton } from "@/components/button/button";
 import styles from "./authorize.module.css";
 import Loader from "@/components/loader/loader";
+import SuccessMessage from "@/components/successMessage/successMessage";
+import NavLogo from "@/components/navLogo/navLogo";
+import ErrorMessage from "@/components/errorMessage/errorMessage";
 
 export default function AuthorizeUser() {
   const searchParams = useSearchParams();
@@ -46,18 +49,14 @@ export default function AuthorizeUser() {
   return (
     <div className={styles.container}>
       {loadingStatus === LoadingStatus.Nil && (
-        <SubmitButton onClick={() => loginWithPasskey()} text="Log In" />
-      )}
-      {loadingStatus === LoadingStatus.Loading && <Loader />}
-      {loadingStatus === LoadingStatus.Success && (
-        <div>Success. You may now close this window.</div>
-      )}
-      {loadingStatus === LoadingStatus.Error && (
         <div>
-          Error. Something went wrong with your request. Please verify your
-          credentials and contact your administrator if issue persists.
+          <NavLogo size={128} />
+          <SubmitButton onClick={() => loginWithPasskey()} text="Log In" />
         </div>
       )}
+      {loadingStatus === LoadingStatus.Loading && <Loader />}
+      {loadingStatus === LoadingStatus.Success && <SuccessMessage />}
+      {loadingStatus === LoadingStatus.Error && <ErrorMessage />}
     </div>
   );
 }
