@@ -2,7 +2,7 @@ package models
 
 type Door struct {
 	Id          uint   `json:"id"`
-	Name        string `json:"name"`
+	Name        string `json:"name" gorm:"unique"`
 	Description string `json:"description"`
 	Roles       []Role `json:"roles,omitempty" gorm:"many2many:role_door;"`
 }

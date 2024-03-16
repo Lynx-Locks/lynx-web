@@ -1,3 +1,4 @@
+import random
 import requests
 from faker import Faker
 import json
@@ -10,7 +11,7 @@ base_url = "http://localhost:5001/api"
 # Generate and send 100 users
 for _ in range(100):
     name = fake.name()
-    email = fake.email()
+    email = name.replace(" ", "").toLowerCase() + "@example.com"
 
     payload = {
         "name": name,
@@ -24,13 +25,16 @@ for _ in range(100):
     else:
         print(f"Failed to create user {name} with email {email}. Status code: {response.status_code}")
 
-door_names = ["a", "b", "c", "d"]
+door_names = ["Demo Door", "Front Office", "Back Office", "Patio", "IT Room", "Conference Room"]
+door_descs = ["The door in front of you", "Main entrance", "Back entrance", "Outside", "Where the IT magic happens", "Where meetings happen"]
 doors = []
 
-for door_name in door_names:
+
+
+for i in range(len(door_names)):
     payload = {
-        "name": door_name,
-        "description": f"Door {door_name}"
+        "name": door_names[i],
+        "description": door_descs[i]
     }
 
     response = requests.post(f"{base_url}/doors", json=payload)
@@ -39,13 +43,15 @@ for door_name in door_names:
     doors.append(data["id"])
 
     if response.status_code == 200:
-        print(f"Door {door_name} successfully created.")
+        print(f"Door {door_names[i]} successfully created.")
     else:
-        print(f"Failed to create door {door_name}. Status code: {response.status_code}")
+        print(f"Failed to create door {door_names[i]}. Status code: {response.status_code}")
 
 roles = [
+    "Admin",
     "Security",
     "CEO",
+    "Staff",
     "Janitor",
     "Delivery",
     "IT Specialist",
@@ -56,11 +62,14 @@ roles = [
     "Project Manager",
 ]
 
-for role in roles:
-    payload = {
-        "name": role,
-    }
-    response = requests.post(f"{base_url}/roles", json=payload)
+# Function to generate random door IDs
+def generate_door_ids():
+    return [{"id": random.randint(1, 6)} for _ in range(random.randint(1, 4))]  # Random number of doors (1-4)
+
+formatted_roles = [{"name": role, "doors": generate_door_ids()} for role in roles]
+
+for role in formatted_roles:
+    response = requests.post(f"{base_url}/roles", json=role)
 
     data = json.loads(response.content)
 
@@ -68,6 +77,3 @@ for role in roles:
         print(f"Role {role} successfully created.")
     else:
         print(f"Failed to create role {role}. Status code: {response.status_code}")
-    
-    # TODO: add role to doors
-    
