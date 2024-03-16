@@ -1,0 +1,29 @@
+.errorMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 1px solid #f44336;
+  border-radius: 8px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.icon {
+  margin-bottom: 10px;
+}
+
+.text {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.warning {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.close {
+  cursor: pointer;
+}
