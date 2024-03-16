@@ -108,7 +108,7 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 	auth.ActiveSessions[sessionId.String()] = true
-	w.WriteHeader(200)
+	helpers.JsonWriterString(w, "Login Successful")
 }
 
 func LogoutRequest(w http.ResponseWriter, r *http.Request) {
@@ -127,5 +127,5 @@ func LogoutRequest(w http.ResponseWriter, r *http.Request) {
 
 	auth.ClearCookie(w)
 
-	w.WriteHeader(200)
+	helpers.JsonWriterString(w, "Logout Successful")
 }

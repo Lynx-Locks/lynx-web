@@ -213,11 +213,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errJson := json.NewEncoder(w).Encode("Registration Success")
-	if errJson != nil {
-		http.Error(w, "Could not return results", http.StatusInternalServerError)
-		return
-	}
+	helpers.JsonWriterString(w, "Registration Successful")
 }
 
 func AuthorizeRequest(w http.ResponseWriter, r *http.Request) {
@@ -319,11 +315,7 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errJson := json.NewEncoder(w).Encode("Login Success, opening door")
-	if errJson != nil {
-		http.Error(w, "Could not return results", http.StatusInternalServerError)
-		return
-	}
+	helpers.JsonWriterString(w, "Login Success, opening door")
 	go unlockDoor(dId, user.Id)
 }
 
@@ -356,7 +348,7 @@ func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(200)
+	helpers.JsonWriterString(w, "Login Success, opening door")
 }
 
 func credHasDoorAccess(cred models.Credential, dId uint) (bool, models.User) {
