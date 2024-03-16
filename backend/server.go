@@ -106,6 +106,15 @@ func main() {
 		ServeFrontendRoute(r, "/")
 	})
 
+	// Special case - Login
+	r.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(auth.TokenAuth))
+		r.Use(auth.VerifyNotLoggedIn)
+
+		ServeFrontendRoute(r, "/login/")
+	})
+
 	// Public
 	r.Group(func(r chi.Router) {
 		ServeFrontendRoute(r, "/*")
