@@ -2,6 +2,7 @@ package models
 
 import (
 	"api/db"
+	"api/helpers"
 	"errors"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -28,9 +29,15 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 		err = errors.New("can't save invalid data")
 	}
 	u.WebauthnId, err = webauthnId.MarshalBinary() // convert to byte array
+	u.Email = helpers.FormatEmail(u.Email)
 	if err != nil {
 		err = errors.New("can't marshal to binary")
 	}
+	return
+}
+
+func (u *User) BeforeUpdate(tx *gorm.DB) (err error) {
+	u.Email = helpers.FormatEmail(u.Email)
 	return
 }
 

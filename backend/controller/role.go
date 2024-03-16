@@ -2,6 +2,7 @@ package controller
 
 import (
 	"api/db"
+	"api/dbHelpers"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -10,7 +11,7 @@ import (
 
 func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err, roles := helpers.GetAllTable(w, []models.Role{})
+	err, roles := dbHelpers.GetAllTable(w, []models.Role{})
 	if err != nil {
 		return
 	}
@@ -63,12 +64,12 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	doorIds := helpers.GetAllIdsFromList(role.Doors)
+	doorIds := dbHelpers.GetAllIdsFromList(role.Doors)
 	if len(doorIds) != 0 {
 		doors := []models.Door{}
 		res := db.DB.Find(&doors, doorIds)
 		if res.Error != nil {
-			helpers.DBErrorHandling(res.Error, w)
+			dbHelpers.DBErrorHandling(res.Error, w)
 			return
 		}
 		if len(doors) != len(doorIds) {
@@ -77,12 +78,12 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 		}
 		role.Doors = doors
 	}
-	userIds := helpers.GetAllIdsFromList(role.Users)
+	userIds := dbHelpers.GetAllIdsFromList(role.Users)
 	if len(userIds) != 0 {
 		users := []models.User{}
 		res := db.DB.Find(&users, userIds)
 		if res.Error != nil {
-			helpers.DBErrorHandling(res.Error, w)
+			dbHelpers.DBErrorHandling(res.Error, w)
 			return
 		}
 		if len(users) != len(userIds) {
@@ -91,7 +92,7 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 		}
 		role.Users = users
 	}
-	err, role = helpers.CreateNewRecord(w, role)
+	err, role = dbHelpers.CreateNewRecord(w, role)
 	if err != nil {
 		return
 	}
@@ -104,7 +105,7 @@ func DeleteRole(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = helpers.DeleteObjandAssociationsByPk(w, models.Role{Id: rId})
+	err = dbHelpers.DeleteObjandAssociationsByPk(w, models.Role{Id: rId})
 	if err != nil {
 		return
 	}
@@ -138,15 +139,15 @@ func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, role := helpers.GetFirstTable(w, models.Role{}, models.Role{Id: rId})
+	err, role := dbHelpers.GetFirstTable(w, models.Role{}, models.Role{Id: rId})
 	if err != nil {
-		helpers.DBErrorHandling(err, w)
+		dbHelpers.DBErrorHandling(err, w)
 		return
 	}
 
 	err = db.DB.Model(&role).Association("Doors").Replace(&doors)
 	if err != nil {
-		helpers.DBErrorHandling(err, w)
+		dbHelpers.DBErrorHandling(err, w)
 		return
 	}
 	helpers.JsonWriter(w, role)
@@ -161,7 +162,7 @@ func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
 	doors := []models.Door{}
 	err = db.DB.Model(&role).Association("Doors").Find(&doors)
 	if err != nil {
-		helpers.DBErrorHandling(err, w)
+		dbHelpers.DBErrorHandling(err, w)
 		return
 	}
 	helpers.JsonWriter(w, doors)

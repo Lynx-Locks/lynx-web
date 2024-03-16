@@ -2,6 +2,7 @@ package controller
 
 import (
 	"api/db"
+	"api/dbHelpers"
 	"api/helpers"
 	"api/models"
 	"bytes"
@@ -21,7 +22,7 @@ import (
 
 func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err, users := helpers.GetAllTable(w, []models.User{})
+	err, users := dbHelpers.GetAllTable(w, []models.User{})
 	if err != nil {
 		return
 	}
@@ -34,7 +35,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
+	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
 	if err != nil {
 		return
 	}
@@ -49,8 +50,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	ids := helpers.GetAllIdsFromList(reqUser.Roles)
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: reqUser.Id})
+	ids := dbHelpers.GetAllIdsFromList(reqUser.Roles)
+	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Id: reqUser.Id})
 	if err != nil {
 		http.Error(w, "Invalid User", http.StatusBadRequest)
 		return
@@ -59,7 +60,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if len(ids) != 0 {
 		res := db.DB.Find(&roles, ids)
 		if res.Error != nil {
-			helpers.DBErrorHandling(res.Error, w)
+			dbHelpers.DBErrorHandling(res.Error, w)
 			return
 		}
 		if len(roles) != len(ids) {
@@ -75,7 +76,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		user.Name = reqUser.Name
 	}
 
-	err, user = helpers.UpdateObject(w, user)
+	err, user = dbHelpers.UpdateObject(w, user)
 	if err != nil {
 		return
 	}
@@ -96,7 +97,7 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: email})
+	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Email: helpers.FormatEmail(email)})
 	if err != nil {
 		return
 	}
@@ -113,12 +114,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
 
-	ids := helpers.GetAllIdsFromList(user.Roles)
+	ids := dbHelpers.GetAllIdsFromList(user.Roles)
 	if len(ids) != 0 {
 		roles := []models.Role{}
 		res := db.DB.Find(&roles, ids)
 		if res.Error != nil {
-			helpers.DBErrorHandling(res.Error, w)
+			dbHelpers.DBErrorHandling(res.Error, w)
 			return
 		}
 		if len(roles) != len(ids) {
@@ -128,7 +129,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		user.Roles = roles
 	}
 
-	err, user = helpers.CreateNewRecord(w, user)
+	err, user = dbHelpers.CreateNewRecord(w, user)
 	if err != nil {
 		return
 	}
@@ -141,7 +142,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = helpers.DeleteObjandAssociationsByPk(w, models.User{Id: uId})
+	err = dbHelpers.DeleteObjandAssociationsByPk(w, models.User{Id: uId})
 	if err != nil {
 		return
 	}
@@ -158,7 +159,7 @@ func GetUserCreds(w http.ResponseWriter, r *http.Request) {
 	creds := []models.Credential{}
 	err = db.DB.Model(&user).Association("Credentials").Find(&creds)
 	if err != nil {
-		helpers.DBErrorHandling(err, w)
+		dbHelpers.DBErrorHandling(err, w)
 		return
 	}
 	helpers.JsonWriter(w, creds)
@@ -172,7 +173,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 	}
 	res := db.DB.Unscoped().Select(clause.Associations).Where(models.Credential{UserId: uId}).Delete(&[]models.Credential{})
 	if res.Error != nil {
-		helpers.DBErrorHandling(res.Error, w)
+		dbHelpers.DBErrorHandling(res.Error, w)
 		return
 	}
 	if res.RowsAffected < 1 {
@@ -192,7 +193,7 @@ func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 	roles := []models.Role{}
 	err = db.DB.Model(&user).Association("Roles").Find(&roles)
 	if err != nil {
-		helpers.DBErrorHandling(err, w)
+		dbHelpers.DBErrorHandling(err, w)
 		return
 	}
 	helpers.JsonWriter(w, roles)
@@ -209,7 +210,7 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
 
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Email: reqBody.Email})
+	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Email: helpers.FormatEmail(reqBody.Email)})
 	if err != nil {
 		http.Error(w, "Invalid user email", http.StatusBadRequest)
 		return
@@ -218,7 +219,7 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	activeToken := models.ActiveTokens{Id: token, UserId: user.Id}
 	result := db.DB.Create(&activeToken)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 	err = sendEmail(user, token)
@@ -287,7 +288,7 @@ func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User
 
 	result := db.DB.First(&user, id)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		valid = false
 	}
 
@@ -295,13 +296,13 @@ func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User
 }
 
 func UpdateLastTimeIn(w http.ResponseWriter, uId uint) error {
-	err, user := helpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
+	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
 	if err != nil {
 		return err
 	}
 	curTime := time.Now().Unix()
 	user.LastTimeIn = curTime
-	err, user = helpers.UpdateObject(w, user)
+	err, user = dbHelpers.UpdateObject(w, user)
 	if err != nil {
 		return err
 	}
