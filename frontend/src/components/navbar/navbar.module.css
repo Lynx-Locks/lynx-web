@@ -18,13 +18,20 @@
   margin-right: 20px;
 }
 
-.navLogout {
+.navLogout,
+.navLink {
   color: rgb(var(--foreground-rgb));
   padding: 8px 16px;
   border-radius: 4px;
 }
 
-.navLogout:hover {
+.navLink {
+  width: 130px;
+  text-align: center;
+}
+
+.navLogout:hover,
+.navLink:hover {
   color: rgb(var(--background-rgb));
   background-color: rgba(var(--button-rgb), 0.75);
 }
