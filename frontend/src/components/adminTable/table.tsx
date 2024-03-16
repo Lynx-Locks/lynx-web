@@ -129,7 +129,7 @@ export default function AdminTable({
 
   const handleRevokeKey = async () => {
     if (confirm("Are you sure you want to revoke this user's keys?")) {
-      const resp = await axios.delete(`/users/${settingsUser?.id}/cred`);
+      const resp = await axios.delete(`/users/${settingsUser?.id}/creds`);
       if (resp.status === 200) {
         alert("Keys revoked successfully");
       }
@@ -235,7 +235,7 @@ export default function AdminTable({
               </div>
               <div className={styles.settingsButtonGroup}>
                 <button
-                  className={styles.settingsButton}
+                  className={styles.deleteButton}
                   onClick={handleRevokeKey}
                 >
                   Revoke Key
