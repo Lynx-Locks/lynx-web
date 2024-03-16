@@ -2,7 +2,7 @@ package models
 
 type Role struct {
 	Id    uint   `json:"id"`
-	Name  string `json:"name"`
+	Name  string `json:"name" gorm:"unique"`
 	Doors []Door `json:"doors,omitempty" gorm:"many2many:role_door;"`
 	Users []User `json:"users,omitempty" gorm:"many2many:user_role;"`
 }
