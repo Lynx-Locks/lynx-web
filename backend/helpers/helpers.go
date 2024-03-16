@@ -53,6 +53,18 @@ func JsonWriter(w http.ResponseWriter, table interface{}) {
 	}
 }
 
+func JsonWriterString(w http.ResponseWriter, message string) {
+	messageStruct := struct {
+		Message string `json:"message"`
+	}{
+		Message: message,
+	}
+	errJson := json.NewEncoder(w).Encode(&messageStruct)
+	if errJson != nil {
+		http.Error(w, "Unable to encode response", http.StatusInternalServerError)
+	}
+}
+
 func GetAllTable[T models.AllTables](w http.ResponseWriter, table []T) (error, []T) {
 	result := db.DB.Find(&table)
 	if result.Error != nil {
