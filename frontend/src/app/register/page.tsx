@@ -9,6 +9,9 @@ import { SubmitButton } from "@/components/button/button";
 import LoadingStatus from "@/types/loadingStatus";
 import styles from "./register.module.css";
 import Loader from "@/components/loader/loader";
+import NavLogo from "@/components/navLogo/navLogo";
+import SuccessMessage from "@/components/successMessage/successMessage";
+import ErrorMessage from "@/components/errorMessage/errorMessage";
 
 const modhex = {
   c: "0",
@@ -42,7 +45,6 @@ export default function RegisterUser() {
     LoadingStatus.Nil,
   );
   const [yubiKeySerial, setYubiKeySerial] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function registerPasskey() {
     const token = searchParams.get("token");
@@ -78,7 +80,6 @@ export default function RegisterUser() {
       }
     } catch (error) {
       console.error(error);
-      setErrorMessage((error as Error).message);
       setLoadingStatus(LoadingStatus.Error);
     }
   }
@@ -88,6 +89,7 @@ export default function RegisterUser() {
       {loadingStatus === LoadingStatus.Nil && (
         <div>
           <div className={styles.registerButton}>
+            <NavLogo size={128} />
             <SubmitButton
               onClick={() => registerPasskey()}
               text="Create a New Passkey"
@@ -103,16 +105,10 @@ export default function RegisterUser() {
         </div>
       )}
       {loadingStatus === LoadingStatus.Loading && <Loader />}
-      {loadingStatus === LoadingStatus.Success && (
-        <div>Success. You may now close this window.</div>
-      )}
+      {loadingStatus === LoadingStatus.Success && <SuccessMessage />}
       {loadingStatus === LoadingStatus.Error && (
         <div>
-          <p>
-            Error. Something went wrong with your request. Please contact your
-            administrator:
-          </p>
-          <p>{errorMessage}</p>
+          <ErrorMessage />
         </div>
       )}
     </div>

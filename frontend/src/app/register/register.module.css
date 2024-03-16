@@ -9,7 +9,10 @@
 }
 
 .registerButton {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 50px;
+  align-items: center;
 }
 
 .textInput {
