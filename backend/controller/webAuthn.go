@@ -3,6 +3,7 @@ package controller
 import (
 	"api/config"
 	"api/db"
+	"api/dbHelpers"
 	"api/helpers"
 	"api/models"
 	"encoding/base64"
@@ -72,7 +73,7 @@ func SaveDBCredential(w http.ResponseWriter, credential *webauthn2.Credential) e
 
 	result := db.DB.Updates(&dbCredential)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return errors.New("could not save credentials")
 	}
 
@@ -109,7 +110,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 	// store sesion data
 	result := db.DB.Create(&sessionData)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -135,7 +136,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		result = db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Delete(&models.SessionData{})
 	}
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -203,7 +204,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 
 	result = db.DB.Create(&dbCredential)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -238,7 +239,7 @@ func AuthorizeRequest(w http.ResponseWriter, r *http.Request) {
 	// store sesion data
 	result := db.DB.Create(&sessionData)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -266,7 +267,7 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		result = db.DB.Where(models.SessionData{Challenge: string(challenge)}).Delete(&models.SessionData{})
 	}
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -333,7 +334,7 @@ func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
 	res := db.DB.Where(models.Credential{YubiKeyId: &yubiKeyId}).First(&cred)
 	if res.Error != nil {
 		http.Error(w, "Could not find associated record with yubikey", http.StatusBadRequest)
-		helpers.DBErrorHandling(res.Error, w)
+		dbHelpers.DBErrorHandling(res.Error, w)
 		return
 	}
 	hasAccess, user := credHasDoorAccess(cred, dId)

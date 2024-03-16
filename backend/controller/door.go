@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"api/dbHelpers"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -9,7 +10,7 @@ import (
 
 func GetAllDoors(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err, doors := helpers.GetAllTable(w, []models.Door{})
+	err, doors := dbHelpers.GetAllTable(w, []models.Door{})
 	if err != nil {
 		return
 	}
@@ -25,7 +26,7 @@ func UpdateDoor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	err, door = helpers.UpdateObject(w, door)
+	err, door = dbHelpers.UpdateObject(w, door)
 	if err != nil {
 		return
 	}
@@ -39,7 +40,7 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err, door = helpers.CreateNewRecord(w, door)
+	err, door = dbHelpers.CreateNewRecord(w, door)
 
 	if err != nil {
 		return
@@ -53,7 +54,7 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = helpers.DeleteObjandAssociationsByPk(w, models.Door{Id: dId})
+	err = dbHelpers.DeleteObjandAssociationsByPk(w, models.Door{Id: dId})
 	if err != nil {
 		return
 	}

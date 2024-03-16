@@ -4,7 +4,7 @@ import (
 	"api/auth"
 	"api/config"
 	"api/db"
-	"api/helpers"
+	"api/dbHelpers"
 	"api/models"
 	"encoding/json"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
@@ -40,7 +40,7 @@ func LoginRequest(w http.ResponseWriter, r *http.Request) {
 	// store sesion data
 	result := db.DB.Create(&sessionData)
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
@@ -66,7 +66,7 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 		result = db.DB.Where(models.SessionData{UserId: user.WebAuthnID()}).Delete(&models.SessionData{})
 	}
 	if result.Error != nil {
-		helpers.DBErrorHandling(result.Error, w)
+		dbHelpers.DBErrorHandling(result.Error, w)
 		return
 	}
 
