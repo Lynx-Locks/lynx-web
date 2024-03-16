@@ -145,7 +145,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	helpers.JsonWriterString(w, "Delete Successful")
+	helpers.JsonWriter(w, "Delete Successful")
 }
 
 func GetUserCreds(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +179,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No credentials found, either user has none or user does not exist", http.StatusNotFound)
 		return
 	}
-	helpers.JsonWriterString(w, "Delete Successful")
+	helpers.JsonWriter(w, "Delete Successful")
 }
 
 func GetUserRoles(w http.ResponseWriter, r *http.Request) {
@@ -225,7 +225,7 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	helpers.JsonWriterString(w, "Email sent out")
+	helpers.JsonWriter(w, "Email sent out")
 }
 
 func sendEmail(user models.User, token uuid.UUID) error {
