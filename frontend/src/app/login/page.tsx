@@ -36,7 +36,10 @@ const Login = () => {
 
       if (verifyResp.status === 200) {
         // We can set any non-private user info in local storage to avoid addition requests
-        localStorage.setItem("name", user.name);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ name: user.name, isAdmin: user.isAdmin }),
+        );
         if (referrer) {
           router.push(referrer);
         } else if (user.isAdmin) {
