@@ -24,6 +24,12 @@
   height: 40px;
 }
 
+@media screen and (max-width: 600px) {
+  .textInput {
+    width: 80vw;
+  }
+}
+
 .textInput::placeholder {
   text-align: center;
 }
