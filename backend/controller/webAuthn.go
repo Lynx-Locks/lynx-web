@@ -213,7 +213,7 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.JsonWriterString(w, "Registration Successful")
+	helpers.JsonWriter(w, "Registration Successful")
 }
 
 func AuthorizeRequest(w http.ResponseWriter, r *http.Request) {
@@ -315,7 +315,7 @@ func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.JsonWriterString(w, "Login Success, opening door")
+	helpers.JsonWriter(w, "Login Success, opening door")
 	go unlockDoor(dId, user.Id)
 }
 
@@ -348,7 +348,7 @@ func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.JsonWriterString(w, "Login Success, opening door")
+	helpers.JsonWriter(w, "Login Success, opening door")
 }
 
 func credHasDoorAccess(cred models.Credential, dId uint) (bool, models.User) {

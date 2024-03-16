@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
@@ -46,20 +47,16 @@ func DBErrorHandling(error error, w http.ResponseWriter) {
 	}
 }
 
-func JsonWriter(w http.ResponseWriter, table interface{}) {
-	errJson := json.NewEncoder(w).Encode(&table)
-	if errJson != nil {
-		http.Error(w, "Unable to encode response", http.StatusInternalServerError)
+func JsonWriter(w http.ResponseWriter, response interface{}) {
+	log.Println(reflect.TypeOf(response))
+	if reflect.TypeOf(response).Kind() == reflect.String {
+		response = struct {
+			Message string `json:"message"`
+		}{
+			Message: response.(string),
+		}
 	}
-}
-
-func JsonWriterString(w http.ResponseWriter, message string) {
-	messageStruct := struct {
-		Message string `json:"message"`
-	}{
-		Message: message,
-	}
-	errJson := json.NewEncoder(w).Encode(&messageStruct)
+	errJson := json.NewEncoder(w).Encode(&response)
 	if errJson != nil {
 		http.Error(w, "Unable to encode response", http.StatusInternalServerError)
 	}

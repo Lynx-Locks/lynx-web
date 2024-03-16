@@ -86,7 +86,7 @@ func DeleteRole(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	helpers.JsonWriterString(w, "Delete Successful")
+	helpers.JsonWriter(w, "Delete Successful")
 }
 
 func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
