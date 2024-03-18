@@ -6,16 +6,13 @@ import styles from "../modals.module.css";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
 import { SubmitButton } from "@/components/button/button";
-import { getRoleOptions } from "@/data/roles";
 import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
 import React from "react";
 import { AdminContext } from "../layout";
 import { getDoorOptions } from "@/data/doors";
 
-const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-
-export default function NewUserModal() {
+export default function NewRoleModal() {
   const [newRole, setNewRole] = useState<{ name: string }>({
     name: "",
   });
@@ -24,13 +21,9 @@ export default function NewUserModal() {
   const [doors, setDoors] = useState<Options[]>([]);
   const [selectedEmailOption, setSelectedEmailOption] =
     useState<SelectType>(null);
-
-  const [selectedRoleOption, setSelectedRoleOption] =
-    useState<SelectType>(null);
-  const [roles, setRoles] = useState<Options[]>([]);
   const [disabled, setDisabled] = useState(false);
   const router = useRouter();
-  const { users, setUsers } = React.useContext(AdminContext);
+  const { users } = React.useContext(AdminContext);
 
   const emails = users.map((user) => ({
     label: user.email,
@@ -51,7 +44,7 @@ export default function NewUserModal() {
   const handleModalSubmit = async () => {
     setDisabled(true);
     // handle adding new role
-    const rolesResp = await axios.post("/roles", {
+    await axios.post("/roles", {
       name: newRole.name,
       users: Array.isArray(selectedEmailOption)
         ? selectedEmailOption.map((email: Options) => ({
@@ -64,8 +57,6 @@ export default function NewUserModal() {
           }))
         : [],
     });
-    const role = rolesResp.data;
-    setRoles([...roles, { label: role.name, value: role.id.toString() }]);
     router.push("/admin");
   };
 
