@@ -1,32 +1,19 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./buttonsRow.module.css";
 import { AddButton, SubmitButton } from "@/components/button/button";
 import Modal from "@/components/modal/modal";
 import SearchDropdown from "../searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
-import { getRoleOptions } from "@/data/roles";
 import { getDoorOptions } from "@/data/doors";
 import axios from "@/axios/client";
 import User from "@/types/user";
+import { useRouter } from "next/navigation";
 
-const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-
-export default function ButtonRow({
-  users,
-  setUsers,
-}: {
-  users: User[];
-  setUsers: Dispatch<SetStateAction<User[]>>;
-}) {
+export default function ButtonRow({ users }: { users: User[] }) {
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [newRoleModal, setNewRoleModal] = useState(false);
-  const [newUserModal, setNewUserModal] = useState(false);
-  const [newUser, setNewUser] = useState<{ name: string; email: string }>({
-    name: "",
-    email: "",
-  });
   const [newRole, setNewRole] = useState<{ name: string }>({
     name: "",
   });
@@ -39,6 +26,7 @@ export default function ButtonRow({
   const [roles, setRoles] = useState<Options[]>([]);
   const [doors, setDoors] = useState<Options[]>([]);
   const [disabled, setDisabled] = useState(false);
+  const router = useRouter();
 
   const emails = users.map((user) => ({
     label: user.email,
@@ -49,10 +37,8 @@ export default function ButtonRow({
     {
       id: 1,
       name: "New User",
-      onClick: async () => {
-        setDisabled(false);
-        setRoles(await getRoleOptions());
-        setNewUserModal(true);
+      onClick: () => {
+        router.push("/admin/newUserModal");
       },
     },
     {
@@ -76,12 +62,9 @@ export default function ButtonRow({
 
   const handleModalClose = () => {
     setNewKeyModal(false);
-    setNewUserModal(false);
     setNewRoleModal(false);
-    setNewUser({ name: "", email: "" });
     setNewRole({ name: "" });
     setSelectedEmailOption(null);
-    setSelectedRoleOption(null);
   };
 
   const handleModalSubmit = async () => {
@@ -109,72 +92,15 @@ export default function ButtonRow({
       });
       const role = rolesResp.data;
       setRoles([...roles, { label: role.name, value: role.id.toString() }]);
-    } else if (newUserModal) {
-      // handle adding new user
-      if (emailRegex.test(newUser.email)) {
-        const userResp = await axios.post("/users", {
-          name: newUser.name,
-          email: newUser.email,
-          roles: Array.isArray(selectedRoleOption)
-            ? selectedRoleOption.map((role: Options) => ({
-                id: parseInt(role.value),
-              }))
-            : [],
-        });
-
-        const user = userResp.data;
-        // Save user to state
-        setUsers([...users, user]);
-
-        // Send email for user to register a key
-        await axios.post(`/users/register`, {
-          email: newUser.email,
-        });
-      }
     }
 
     setSelectedEmailOption(null);
-    setSelectedRoleOption(null);
     setSelectedDoorOption(null);
     setNewKeyModal(false);
     setNewRoleModal(false);
-    setNewUserModal(false);
     setDisabled(false);
-    setNewUser({ name: "", email: "" });
     setNewRole({ name: "" });
   };
-
-  const newUserModalContent = (
-    <div>
-      <h2 className={styles.subheader}>Name</h2>
-      <input
-        className={styles.modalInput}
-        type="text"
-        value={newUser.name}
-        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-      />
-      <h2 className={styles.subheader}>Email</h2>
-      <input
-        className={styles.modalInput}
-        type="text"
-        value={newUser.email}
-        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-      />
-      <SearchDropdown
-        options={roles}
-        placeholder="Select Role(s)..."
-        subheader="Roles"
-        selectDropdown="tableModal"
-        setSelectedOption={setSelectedRoleOption}
-        isMulti
-      />
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
-    </div>
-  );
 
   const newKeyModalContent = (
     <div>
@@ -231,13 +157,6 @@ export default function ButtonRow({
       {buttons.map(({ id, name, onClick }) => (
         <AddButton key={id} text={name} onClick={() => onClick()} />
       ))}
-      {newUserModal && (
-        <Modal
-          closeModal={handleModalClose}
-          title="New User"
-          content={newUserModalContent}
-        />
-      )}
       {newKeyModal && (
         <Modal
           closeModal={handleModalClose}
