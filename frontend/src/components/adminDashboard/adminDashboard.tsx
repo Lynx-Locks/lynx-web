@@ -59,7 +59,7 @@ export default function AdminDashboard({
       );
     };
     getUsers();
-  }, []);
+  }, [setUsers]);
 
   return (
     <div className={styles.dashboardContainer}>
