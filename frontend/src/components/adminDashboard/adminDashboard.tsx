@@ -72,7 +72,7 @@ export default function AdminDashboard({
           setSearchInput={setSearchInput}
         />
       </div>
-      <ButtonsRow users={users} />
+      <ButtonsRow />
       <AdminTable
         users={users.filter(
           (user) =>
