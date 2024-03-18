@@ -2,7 +2,7 @@
 
 import Modal from "@/components/modal/modal";
 import { useEffect, useState } from "react";
-import styles from "./newUserModal.module.css";
+import styles from "../modals.module.css";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
 import { SubmitButton } from "@/components/button/button";
@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
 import React from "react";
 import { AdminContext } from "../layout";
-import User from "@/types/user";
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
