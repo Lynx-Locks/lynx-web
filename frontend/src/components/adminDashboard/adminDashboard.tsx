@@ -5,12 +5,17 @@ import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
 import ButtonsRow from "@/components/buttonsRow/buttonsRow";
 import User from "@/types/user";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "@/axios/client";
 import { SelectType } from "@/types/selectOptions";
 
-export default function AdminDashboard() {
-  const [users, setUsers] = useState<User[]>([]);
+export default function AdminDashboard({
+  users,
+  setUsers,
+}: {
+  users: User[];
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+}) {
   const [searchInput, setSearchInput] = useState("");
 
   const updateUser = async (user: User, roles: SelectType) => {
@@ -67,7 +72,7 @@ export default function AdminDashboard() {
           setSearchInput={setSearchInput}
         />
       </div>
-      <ButtonsRow users={users} setUsers={setUsers} />
+      <ButtonsRow users={users} />
       <AdminTable
         users={users.filter(
           (user) =>
