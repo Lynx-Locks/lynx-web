@@ -31,7 +31,6 @@ func UpdateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	helpers.JsonWriter(w, role)
-
 }
 
 func CreateRole(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +127,7 @@ func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(err, w)
 		return
 	}
-	helpers.JsonWriter(w, &role)
+	helpers.JsonWriter(w, role)
 }
 func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -143,5 +142,5 @@ func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(err, w)
 		return
 	}
-	helpers.JsonWriter(w, &doors)
+	helpers.JsonWriter(w, doors)
 }

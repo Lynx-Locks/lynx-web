@@ -67,6 +67,27 @@ func VerifyUser(next http.Handler) http.Handler {
 	})
 }
 
+func VerifyNotLoggedIn(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token, claims, err := jwtauth.FromContext(r.Context())
+
+		if err == nil && token != nil && jwt.Validate(token) == nil && claims != nil && verifySession(w, r, claims) {
+			if isAdmin, ok := claims["isAdmin"]; ok && isAdmin.(bool) {
+				log.WithField("status", http.StatusSeeOther).Info("admin already logged in")
+				http.Redirect(w, r, "/admin", http.StatusSeeOther)
+				return
+			} else {
+				log.WithField("status", http.StatusSeeOther).Info("user already logged in")
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+				return
+			}
+		}
+
+		// Token is authenticated, pass it through
+		next.ServeHTTP(w, r)
+	})
+}
+
 func verifySession(w http.ResponseWriter, r *http.Request, claims map[string]interface{}) bool {
 	sessionId, ok := claims["sessionId"]
 	if !ok {

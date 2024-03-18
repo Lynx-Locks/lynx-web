@@ -46,8 +46,16 @@ func DBErrorHandling(error error, w http.ResponseWriter) {
 	}
 }
 
-func JsonWriter(w http.ResponseWriter, table interface{}) {
-	errJson := json.NewEncoder(w).Encode(&table)
+func JsonWriter(w http.ResponseWriter, response interface{}) {
+	switch response.(type) {
+	case string:
+		response = struct {
+			Message string `json:"message"`
+		}{
+			Message: response.(string),
+		}
+	}
+	errJson := json.NewEncoder(w).Encode(&response)
 	if errJson != nil {
 		http.Error(w, "Unable to encode response", http.StatusInternalServerError)
 	}

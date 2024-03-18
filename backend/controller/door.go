@@ -30,7 +30,6 @@ func UpdateDoor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	helpers.JsonWriter(w, door)
-
 }
 
 func CreateDoor(w http.ResponseWriter, r *http.Request) {

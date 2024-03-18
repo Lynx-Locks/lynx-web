@@ -85,7 +85,6 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	helpers.JsonWriter(w, user)
-
 }
 
 func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +101,7 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.JsonWriter(w, &user)
+	helpers.JsonWriter(w, user)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -162,8 +161,7 @@ func GetUserCreds(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(err, w)
 		return
 	}
-	helpers.JsonWriter(w, &creds)
-
+	helpers.JsonWriter(w, creds)
 }
 
 func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
@@ -197,7 +195,7 @@ func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 		helpers.DBErrorHandling(err, w)
 		return
 	}
-	helpers.JsonWriter(w, &roles)
+	helpers.JsonWriter(w, roles)
 }
 
 func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
@@ -308,5 +306,4 @@ func UpdateLastTimeIn(w http.ResponseWriter, uId uint) error {
 		return err
 	}
 	return nil
-
 }
