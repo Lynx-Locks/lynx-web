@@ -9,24 +9,11 @@ import {
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
-import Modal from "@/components/modal/modal";
-import { SubmitButton } from "@/components/button/button";
-import SearchDropdown from "../searchDropdown/searchDropdown";
-import { Options, SelectType } from "@/types/selectOptions";
-import { getRoleOptions, getUserRoles } from "@/data/roles";
 import Loader from "@/components/loader/loader";
-import axios from "@/axios/client";
+import { useRouter } from "next/navigation";
 
-export default function AdminTable({
-  users,
-  updateUser,
-  deleteUser,
-}: {
-  users: User[];
-  updateUser: (user: User, roles: SelectType) => void;
-  deleteUser: (user: User) => Promise<void>;
-}) {
-  const [settingsUser, setSettingsUser] = useState<User | null>(null);
+export default function AdminTable({ users }: { users: User[] }) {
+  const router = useRouter();
   const [columnHeaders, setColumnHeaders] = useState([
     {
       name: "Name",
@@ -46,10 +33,6 @@ export default function AdminTable({
     },
   ]);
   const [sortedUsers, setSortedUsers] = useState(users);
-  const [selectedRoleOption, setSelectedRoleOption] =
-    useState<SelectType>(null);
-  const [defaultRoles, setDefaultRoles] = useState<Options[]>([]);
-  const [roles, setRoles] = useState<Options[]>([]);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -83,13 +66,7 @@ export default function AdminTable({
 
   const handleClickSettings = async (idx: number) => {
     const user = sortedUsers[idx];
-    setDefaultRoles(await getUserRoles(user.id));
-    setRoles(await getRoleOptions());
-    setSettingsUser(user);
-  };
-
-  const closeModal = () => {
-    setSettingsUser(null);
+    router.push(`/admin/settingsModal/?userId=${user.id}`);
   };
 
   const handleSort = (idx: number) => {
@@ -106,34 +83,6 @@ export default function AdminTable({
       };
     });
     setColumnHeaders(newColumnHeaders);
-  };
-
-  const handleSettingsTextChange = (
-    user: User,
-    key: "name" | "email",
-    value: string,
-  ) => {
-    setSettingsUser({ ...user, [key]: value });
-  };
-
-  const handleSubmitSettings = () => {
-    updateUser(settingsUser!, selectedRoleOption);
-    closeModal();
-  };
-
-  const handleDeleteUser = () => {
-    if (confirm("Are you sure you want to delete this user?") && settingsUser) {
-      deleteUser(settingsUser).then(() => closeModal());
-    }
-  };
-
-  const handleRevokeKey = async () => {
-    if (confirm("Are you sure you want to revoke this user's keys?")) {
-      const resp = await axios.delete(`/users/${settingsUser?.id}/creds`);
-      if (resp.status === 200) {
-        alert("Keys revoked successfully");
-      }
-    }
   };
 
   return (
@@ -188,72 +137,6 @@ export default function AdminTable({
             ))}
           </tbody>
         </table>
-      )}
-      {settingsUser && (
-        <Modal
-          closeModal={closeModal}
-          title={`Settings for ${settingsUser.name}`}
-          content={
-            <div className={styles.settingsModal}>
-              <div className={styles.settingsInputContainer}>
-                <div className={styles.settingsInputLabel}>Name:</div>
-                <input
-                  className={styles.settingsInput}
-                  type="text"
-                  value={settingsUser.name}
-                  onChange={(e) =>
-                    handleSettingsTextChange(
-                      settingsUser,
-                      "name",
-                      e.target.value,
-                    )
-                  }
-                />
-                <div className={styles.settingsInputLabel}>Email:</div>
-                <input
-                  className={styles.settingsInput}
-                  type="text"
-                  value={settingsUser.email}
-                  onChange={(e) =>
-                    handleSettingsTextChange(
-                      settingsUser,
-                      "email",
-                      e.target.value,
-                    )
-                  }
-                />
-                <div className={styles.settingsInputLabel}>Roles:</div>
-                <SearchDropdown
-                  defaultValue={defaultRoles}
-                  options={roles}
-                  placeholder="Select Role(s)..."
-                  subheader=""
-                  setSelectedOption={setSelectedRoleOption}
-                  selectDropdown="settingsModal"
-                  isMulti
-                />
-              </div>
-              <div className={styles.settingsButtonGroup}>
-                <button
-                  className={styles.deleteButton}
-                  onClick={handleRevokeKey}
-                >
-                  Revoke Key
-                </button>
-                <button
-                  className={styles.deleteButton}
-                  onClick={handleDeleteUser}
-                >
-                  Delete User
-                </button>
-              </div>
-              <SubmitButton
-                text="Submit Changes"
-                onClick={handleSubmitSettings}
-              />
-            </div>
-          }
-        />
       )}
     </div>
   );
