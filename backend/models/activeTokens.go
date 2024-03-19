@@ -14,6 +14,8 @@ type ActiveTokens struct {
 }
 
 func (a *ActiveTokens) BeforeCreate(tx *gorm.DB) error {
-	a.ExpiryDate = time.Now().AddDate(0, 1, 0).Unix()
+	if a.ExpiryDate == 0 {
+		a.ExpiryDate = time.Now().AddDate(0, 1, 0).Unix()
+	}
 	return nil
 }

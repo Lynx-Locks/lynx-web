@@ -1,7 +1,11 @@
 package auth
 
 import (
+	"api/db"
+	"api/models"
+	"fmt"
 	"github.com/go-chi/jwtauth"
+	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -84,6 +88,23 @@ func VerifyNotLoggedIn(next http.Handler) http.Handler {
 		}
 
 		// Token is authenticated, pass it through
+		next.ServeHTTP(w, r)
+	})
+}
+
+func InitialAdminCheck(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var count int64
+		db.DB.Model(&models.ActiveTokens{Id: uuid.Max}).Count(&count)
+		adminTokenExists := count > 0
+		db.DB.Model(&models.User{}).Count(&count)
+		onlyAdminExists := count == 1
+		if adminTokenExists && onlyAdminExists {
+			log.WithField("status", http.StatusSeeOther).Info("no users exist, redirecting to initial admin register")
+			http.Redirect(w, r, fmt.Sprintf("/register/?token=%s", uuid.Max.String()), http.StatusSeeOther)
+			return
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

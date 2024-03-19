@@ -3,15 +3,20 @@ package main
 import (
 	"api/auth"
 	"api/config"
+	"api/db"
 	"api/helpers"
+	"api/models"
 	"api/routes"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/acme/autocert"
+	"math"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -23,11 +28,21 @@ import (
 // See https://github.com/go-chi/chi for documentation
 
 func init() {
+	config.Connect()
+
 	if value, ok := os.LookupEnv("NODE_ENV"); !ok || value != "production" {
 		err := godotenv.Load("../.env")
 		if err != nil {
 			panic("Error loading .env file")
 		}
+	}
+
+	var count int64
+	db.DB.Model(&models.User{}).Count(&count)
+	if count == 0 {
+		// Default admin must only be created when there are no other users registered to prevent security risks.
+		// Side effect: Lockout may occur if all admins are deleted while a non-admin user is registered.
+		createInitialAdmin()
 	}
 
 	if value, ok := os.LookupEnv("JWT_SECRET"); ok {
@@ -86,7 +101,6 @@ func main() {
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	}))
-	config.Connect()
 
 	// Admin only
 	r.Group(func(r chi.Router) {
@@ -110,6 +124,7 @@ func main() {
 	r.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
+		r.Use(auth.InitialAdminCheck)
 		r.Use(auth.VerifyNotLoggedIn)
 
 		ServeFrontendRoute(r, "/login/")
@@ -227,5 +242,35 @@ func ServeFrontendRoute(r chi.Router, route string) {
 		r.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
 			proxy.ServeHTTP(w, r)
 		})
+	}
+}
+
+// createInitialAdmin creates an insecure one-time registration for an admin.
+func createInitialAdmin() {
+	log.Info("Creating initial admin")
+	user := models.User{
+		IsAdmin: true,
+	}
+
+	if value, ok := os.LookupEnv("DEFAULT_ADMIN_NAME"); ok {
+		user.Name = value
+	} else {
+		panic("DEFAULT_ADMIN_NAME environment variable not set")
+	}
+	if value, ok := os.LookupEnv("DEFAULT_ADMIN_EMAIL"); ok {
+		user.Email = value
+	} else {
+		panic("DEFAULT_ADMIN_EMAIL environment variable not set")
+	}
+
+	result := db.DB.Create(&user)
+	if result.Error != nil {
+		panic("Error creating initial admin user: " + result.Error.Error())
+	}
+
+	activeToken := models.ActiveTokens{Id: uuid.Max, UserId: user.Id, ExpiryDate: math.MaxInt64}
+	result = db.DB.Create(&activeToken)
+	if result.Error != nil {
+		panic("Error creating initial admin token: " + result.Error.Error())
 	}
 }
