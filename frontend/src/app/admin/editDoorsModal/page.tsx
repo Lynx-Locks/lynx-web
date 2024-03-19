@@ -66,7 +66,7 @@ export default function EditDoors() {
     router.push("/admin");
   };
 
-  const editRolesModalContent = (
+  const editDoorsModalContent = (
     <div>
       <SearchDropdown
         options={doors}
@@ -107,7 +107,7 @@ export default function EditDoors() {
     <Modal
       closeModal={handleModalClose}
       title="Edit Doors"
-      content={editRolesModalContent}
+      content={editDoorsModalContent}
     />
   );
 }

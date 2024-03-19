@@ -2,6 +2,7 @@ package controller
 
 import (
 	"api/dbHelpers"
+	"api/db"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
@@ -40,7 +41,21 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err, door = dbHelpers.CreateNewRecord(w, door)
+	roleIds := helpers.GetAllIdsFromList(door.Roles)
+	if len(roleIds) != 0 {
+		roles := []models.Role{}
+		res := db.DB.Find(&roles, roleIds)
+		if res.Error != nil {
+			helpers.DBErrorHandling(res.Error, w)
+			return
+		}
+		if len(roles) != len(roleIds) {
+			http.Error(w, "One or more invalid roles", http.StatusBadRequest)
+			return
+		}
+		door.Roles = roles
+	}
+	err, door = helpers.CreateNewRecord(w, door)
 
 	if err != nil {
 		return

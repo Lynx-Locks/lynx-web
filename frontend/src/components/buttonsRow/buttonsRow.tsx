@@ -43,7 +43,7 @@ export default function ButtonRow() {
       name: "Add Door",
       type: "Add",
       onClick: () => {
-        router.push("/admin/addDoorModal");
+        router.push("/admin/newDoorModal");
       },
     },
     {
