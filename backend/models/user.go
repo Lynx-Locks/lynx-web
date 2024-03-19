@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/auth"
 	"api/db"
 	"api/helpers"
 	"errors"
@@ -37,7 +38,19 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (u *User) BeforeUpdate(tx *gorm.DB) (err error) {
+	var originalUser User
+	if err := tx.First(&originalUser, u.Id).Error; err != nil {
+		return err
+	}
+	if u.IsAdmin != originalUser.IsAdmin {
+		auth.ClearAllSessions(u.Id)
+	}
 	u.Email = helpers.FormatEmail(u.Email)
+	return
+}
+
+func (u *User) BeforeDelete(tx *gorm.DB) (err error) {
+	auth.ClearAllSessions(u.Id)
 	return
 }
 

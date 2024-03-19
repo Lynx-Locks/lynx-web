@@ -108,7 +108,7 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 		MaxAge: 60 * 60 * 24 * 7 * 4, // Expires in 4 weeks
 	}
 	http.SetCookie(w, &cookie)
-	auth.ActiveSessions[sessionId.String()] = true
+	auth.ActiveSessions[sessionId.String()] = user.Id
 	helpers.JsonWriter(w, "Login Successful")
 }
 

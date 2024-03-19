@@ -5,6 +5,7 @@ import (
 	"api/config"
 	"api/db"
 	"api/helpers"
+	authMiddleware "api/middleware"
 	"api/models"
 	"api/routes"
 	"fmt"
@@ -106,7 +107,7 @@ func main() {
 	r.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(auth.VerifyAdmin)
+		r.Use(authMiddleware.VerifyAdmin)
 
 		ServeFrontendRoute(r, "/admin/*")
 	})
@@ -115,7 +116,7 @@ func main() {
 	r.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(auth.VerifyUser)
+		r.Use(authMiddleware.VerifyUser)
 
 		ServeFrontendRoute(r, "/")
 	})
@@ -124,8 +125,8 @@ func main() {
 	r.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(auth.InitialAdminCheck)
-		r.Use(auth.VerifyNotLoggedIn)
+		r.Use(authMiddleware.InitialAdminCheck)
+		r.Use(authMiddleware.VerifyNotLoggedIn)
 
 		ServeFrontendRoute(r, "/login/")
 	})
