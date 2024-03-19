@@ -41,12 +41,12 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	roleIds := helpers.GetAllIdsFromList(door.Roles)
+	roleIds := dbHelpers.GetAllIdsFromList(door.Roles)
 	if len(roleIds) != 0 {
 		roles := []models.Role{}
 		res := db.DB.Find(&roles, roleIds)
 		if res.Error != nil {
-			helpers.DBErrorHandling(res.Error, w)
+			dbHelpers.DBErrorHandling(res.Error, w)
 			return
 		}
 		if len(roles) != len(roleIds) {
@@ -55,7 +55,7 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 		}
 		door.Roles = roles
 	}
-	err, door = helpers.CreateNewRecord(w, door)
+	err, door = dbHelpers.CreateNewRecord(w, door)
 
 	if err != nil {
 		return
