@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"api/dbHelpers"
 	"api/db"
+	"api/dbHelpers"
 	"api/helpers"
 	"api/models"
 	"encoding/json"
