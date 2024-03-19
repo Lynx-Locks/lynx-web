@@ -112,7 +112,7 @@ export default function EditRoles() {
   return (
     <Modal
       closeModal={handleModalClose}
-      title="Edit Role"
+      title="Edit Roles"
       content={editRolesModalContent}
     />
   );

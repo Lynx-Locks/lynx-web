@@ -31,11 +31,27 @@ export default function ButtonRow() {
       },
     },
     {
-      id: 3,
+      id: 4,
       name: "Edit Roles",
       type: "Edit",
       onClick: () => {
         router.push("/admin/editRolesModal");
+      },
+    },
+    {
+      id: 5,
+      name: "Add Door",
+      type: "Add",
+      onClick: () => {
+        router.push("/admin/addDoorModal");
+      },
+    },
+    {
+      id: 6,
+      name: "Edit Doors",
+      type: "Edit",
+      onClick: () => {
+        router.push("/admin/editDoorsModal");
       },
     },
   ];
