@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getCookie } from "cookies-next";
 
 export default function Navbar({
   page = "",
@@ -28,10 +29,22 @@ export default function Navbar({
     router.push("/login");
   };
 
+  const copyToken = async () => {
+    const token = getCookie("jwt");
+    if (token) {
+      await navigator.clipboard.writeText(token.toString());
+    }
+  };
+
   return (
     <nav className={styles.navContainer}>
       <div className={styles.navLeft}>
         <NavLogo />
+        {user.isAdmin && (
+          <button onClick={copyToken} className={styles.navToken}>
+            Copy Token
+          </button>
+        )}
       </div>
       <div className={styles.navRight}>
         <p className={styles.navUser}>{user.name}</p>
