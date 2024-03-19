@@ -59,6 +59,5 @@ func ParseInt(w http.ResponseWriter, r *http.Request, key string) (error, uint) 
 }
 
 func FormatEmail(email string) string {
-	x := strings.Split(email, "@")
-	return strings.ToLower(strings.Replace(x[0], ".", "", -1) + "@" + x[1])
+	return strings.ToLower(email)
 }

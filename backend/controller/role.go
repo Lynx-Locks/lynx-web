@@ -26,8 +26,8 @@ func UpdateRole(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
 	}
-	ids := helpers.GetAllIdsFromList(reqRole.Doors)
-	err, role := helpers.GetFirstTable(w, models.Role{}, models.Role{Id: reqRole.Id})
+	ids := dbHelpers.GetAllIdsFromList(reqRole.Doors)
+	err, role := dbHelpers.GetFirstTable(w, models.Role{}, models.Role{Id: reqRole.Id})
 	if err != nil {
 		http.Error(w, "Invalid Role", http.StatusBadRequest)
 		return
@@ -36,7 +36,7 @@ func UpdateRole(w http.ResponseWriter, r *http.Request) {
 	if len(ids) != 0 {
 		res := db.DB.Find(&doors, ids)
 		if res.Error != nil {
-			helpers.DBErrorHandling(res.Error, w)
+			dbHelpers.DBErrorHandling(res.Error, w)
 			return
 		}
 		if len(doors) != len(ids) {
@@ -48,7 +48,7 @@ func UpdateRole(w http.ResponseWriter, r *http.Request) {
 	if reqRole.Name != "" {
 		role.Name = reqRole.Name
 	}
-	err, role = helpers.UpdateObject(w, role)
+	err, role = dbHelpers.UpdateObject(w, role)
 	if err != nil {
 		return
 	}
