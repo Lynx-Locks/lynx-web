@@ -19,17 +19,39 @@ func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
 
 func UpdateRole(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	role := models.Role{}
-	err := json.NewDecoder(r.Body).Decode(&role)
-
+	reqRole := models.Role{}
+	err := json.NewDecoder(r.Body).Decode(&reqRole)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 		return
+	}
+	ids := helpers.GetAllIdsFromList(reqRole.Doors)
+	err, role := helpers.GetFirstTable(w, models.Role{}, models.Role{Id: reqRole.Id})
+	if err != nil {
+		http.Error(w, "Invalid Role", http.StatusBadRequest)
+		return
+	}
+	doors := []models.Door{}
+	if len(ids) != 0 {
+		res := db.DB.Find(&doors, ids)
+		if res.Error != nil {
+			helpers.DBErrorHandling(res.Error, w)
+			return
+		}
+		if len(doors) != len(ids) {
+			http.Error(w, "One or more invalid doors", http.StatusBadRequest)
+			return
+		}
+		role.Doors = doors
+	}
+	if reqRole.Name != "" {
+		role.Name = reqRole.Name
 	}
 	err, role = helpers.UpdateObject(w, role)
 	if err != nil {
 		return
 	}
+	err = db.DB.Model(&role).Association("Doors").Replace(&doors)
 	helpers.JsonWriter(w, role)
 }
 

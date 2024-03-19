@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import axios from "@/axios/client";
 import User from "@/types/user";
 import { AdminContext } from "../layout";
-import { getRoleOptions, getUserRoles } from "@/data/roles";
+import { getRoleOptions, getRolesForUser } from "@/data/roles";
 import styles from "../modals.module.css";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { SubmitButton } from "@/components/button/button";
@@ -18,7 +18,6 @@ export default function SettingsModal() {
   const searchParams = useSearchParams();
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
-  const [defaultRoles, setDefaultRoles] = useState<Options[]>([]);
   const [roles, setRoles] = useState<Options[]>([]);
   const { users, setUsers } = useContext(AdminContext);
 
@@ -27,7 +26,7 @@ export default function SettingsModal() {
   useEffect(() => {
     const f = async () => {
       if (userId) {
-        setDefaultRoles(await getUserRoles(parseInt(userId)));
+        setSelectedRoleOption(await getRolesForUser(parseInt(userId)));
         setRoles(await getRoleOptions());
         const userResp = await axios.get(`/users/${userId}`);
         setSettingsUser(userResp.data);
@@ -125,7 +124,9 @@ export default function SettingsModal() {
             />
             <div className={styles.settingsInputLabel}>Roles:</div>
             <SearchDropdown
-              defaultValue={defaultRoles}
+              defaultValue={
+                Array.isArray(selectedRoleOption) ? selectedRoleOption : []
+              }
               options={roles}
               placeholder="Select Role(s)..."
               subheader=""
