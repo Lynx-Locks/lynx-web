@@ -5,6 +5,7 @@ import (
 	"api/config"
 	"api/db"
 	"api/dbHelpers"
+	"api/helpers"
 	"api/models"
 	"encoding/json"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
