@@ -94,7 +94,7 @@ func main() {
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
 		r.Use(auth.VerifyAdmin)
 
-		ServeFrontendRoute(r, "/admin/")
+		ServeFrontendRoute(r, "/admin/*")
 	})
 
 	// User only

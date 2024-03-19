@@ -6,6 +6,7 @@ import axios from "@/axios/client";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
 import { useRouter, useSearchParams } from "next/navigation";
+import NavLogo from "@/components/navLogo/navLogo";
 
 const isValidEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
@@ -57,34 +58,39 @@ const Login = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.loginTitle}>Login</h2>
-      <div className={styles.inputGroup}>
-        <h3 className={styles.inputLabel}>Email</h3>
-        <input
-          className={styles.input}
-          type="text"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+    <div>
+      <div className={styles.logoContainer}>
+        <NavLogo size={128} />
       </div>
-      <button
-        type="submit"
-        className={styles.submitButton}
-        disabled={email == ""}
-        style={
-          email.match(isValidEmail)
-            ? {}
-            : {
-                backgroundColor: "grey",
-                cursor: "not-allowed",
-              }
-        }
-        onClick={handleLogin}
-      >
-        Login
-      </button>
+      <div className={styles.container}>
+        <h2 className={styles.loginTitle}>Login</h2>
+        <div className={styles.inputGroup}>
+          <h3 className={styles.inputLabel}>Email</h3>
+          <input
+            className={styles.input}
+            type="text"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <button
+          type="submit"
+          className={styles.submitButton}
+          disabled={email == ""}
+          style={
+            email.match(isValidEmail)
+              ? {}
+              : {
+                  backgroundColor: "grey",
+                  cursor: "not-allowed",
+                }
+          }
+          onClick={handleLogin}
+        >
+          Login
+        </button>
+      </div>
     </div>
   );
 };
