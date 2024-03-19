@@ -12,6 +12,5 @@ func DoorsRoute() chi.Router {
 	r.Post("/", controller.CreateDoor)
 	r.Put("/", controller.UpdateDoor)
 	r.Delete("/{doorId}", controller.DeleteDoor)
-	r.Get("/unlocked/{doorId}", controller.IsDoorOpen)
 	return r
 }
