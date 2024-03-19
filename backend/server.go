@@ -78,6 +78,24 @@ func init() {
 		if err != nil {
 			fmt.Printf("Error walking the path: %v\n", err)
 		}
+	} else {
+		// Create an admin token for development only
+		var admin models.User
+		result := db.DB.Where(&models.User{IsAdmin: true}).First(&admin)
+		if result.Error != nil {
+			panic("No admins to create dev token")
+		}
+		sessionId, _ := uuid.NewUUID()
+		_, tokenString, err := auth.TokenAuth.Encode(map[string]interface{}{
+			"sessionId": sessionId.String(),
+			"userId":    admin.Id,
+			"isAdmin":   admin.IsAdmin,
+		})
+		auth.ActiveSessions[sessionId.String()] = admin.Id
+		if err != nil {
+			panic("Failed to create dev token")
+		}
+		log.WithField("token", tokenString).Info("Created dev auth token")
 	}
 }
 
