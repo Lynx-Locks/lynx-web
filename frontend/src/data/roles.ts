@@ -23,7 +23,9 @@ export const getRolesForUser = async (userId: number): Promise<Options[]> => {
   }));
 };
 
-export const getDoorOptionsForRole = async (roleId: number): Promise<Options[]> => {
+export const getDoorOptionsForRole = async (
+  roleId: number,
+): Promise<Options[]> => {
   const resp = await axios.get(`/roles/${roleId}/doors`);
   const doors: Door[] = resp.data;
 
@@ -31,4 +33,4 @@ export const getDoorOptionsForRole = async (roleId: number): Promise<Options[]> 
     label: `${d.name} (${d.description})`,
     value: d.id.toString(),
   }));
-}
+};
