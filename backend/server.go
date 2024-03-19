@@ -107,7 +107,7 @@ func main() {
 	r.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(authMiddleware.VerifyAdmin)
+		r.Use(authMiddleware.VerifyAdmin(true))
 
 		ServeFrontendRoute(r, "/admin/*")
 	})
@@ -116,7 +116,7 @@ func main() {
 	r.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(authMiddleware.VerifyUser)
+		r.Use(authMiddleware.VerifyUser(true))
 
 		ServeFrontendRoute(r, "/")
 	})
@@ -175,14 +175,24 @@ func main() {
 
 func api() chi.Router {
 	r := chi.NewRouter()
-	r.Mount("/users", routes.UsersRoute())
-	r.Mount("/auth", routes.WebAuthnRoute())
-	r.Mount("/login", routes.LoginRoute())
-	r.Mount("/logout", routes.LogoutRoute())
-	r.Mount("/doors", routes.DoorsRoute())
-	r.Mount("/roles", routes.RolesRoute())
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello: world"))
+	// Admin only
+	r.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(auth.TokenAuth))
+		r.Use(authMiddleware.VerifyAdmin(false))
+
+		r.Mount("/users", routes.UsersRoute())
+		r.Mount("/doors", routes.DoorsRoute())
+		r.Mount("/roles", routes.RolesRoute())
+	})
+	// Public
+	r.Group(func(r chi.Router) {
+		r.Mount("/auth", routes.WebAuthnRoute())
+		r.Mount("/login", routes.LoginRoute())
+		r.Mount("/logout", routes.LogoutRoute())
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("hello: world"))
+		})
 	})
 	return r
 }

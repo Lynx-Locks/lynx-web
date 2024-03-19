@@ -18,7 +18,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const userResp = await axios.get("/users/login", {
+      const userResp = await axios.get("/login/user", {
         params: {
           email,
         },

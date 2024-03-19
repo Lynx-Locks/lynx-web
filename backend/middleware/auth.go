@@ -28,69 +28,92 @@ func InitialAdminCheck(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+func VerifyAdmin(redirect bool) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token, claims, err := jwtauth.FromContext(r.Context())
 
-func VerifyAdmin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := jwtauth.FromContext(r.Context())
+			if err != nil {
+				log.WithError(err).Warn("no token found")
+				if redirect {
+					http.Redirect(w, r, "/login", http.StatusSeeOther)
+				} else {
+					http.Error(w, "no token found", http.StatusUnauthorized)
+				}
+				return
+			}
 
-		if err != nil {
-			log.WithError(err).Warn("no token found")
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
+			if token == nil || jwt.Validate(token) != nil || claims == nil {
+				log.WithField("status", http.StatusUnauthorized).Error("invalid jwt token")
+				if redirect {
+					http.Redirect(w, r, "/denied", http.StatusSeeOther)
+				} else {
+					http.Error(w, "invalid token", http.StatusUnauthorized)
+				}
+				return
+			}
 
-		if token == nil || jwt.Validate(token) != nil || claims == nil {
-			log.WithField("status", http.StatusUnauthorized).Error("invalid jwt token")
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
+			if !verifySession(w, r, redirect, claims) {
+				return
+			}
 
-		if !verifySession(w, r, claims) {
-			return
-		}
+			isAdmin, ok := claims["isAdmin"]
+			if !ok || !isAdmin.(bool) {
+				log.WithField("status", http.StatusUnauthorized).Warn("user is not admin")
+				if redirect {
+					http.Redirect(w, r, "/denied", http.StatusSeeOther)
+				} else {
+					http.Error(w, "unauthorized", http.StatusUnauthorized)
+				}
+				return
+			}
 
-		isAdmin, ok := claims["isAdmin"]
-		if !ok || !isAdmin.(bool) {
-			log.WithField("status", http.StatusUnauthorized).Warn("user is not admin")
-			http.Redirect(w, r, "/denied", http.StatusSeeOther)
-			return
-		}
-
-		// Token is authenticated, pass it through
-		next.ServeHTTP(w, r)
-	})
+			// Token is authenticated, pass it through
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
-func VerifyUser(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := jwtauth.FromContext(r.Context())
+func VerifyUser(redirect bool) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token, claims, err := jwtauth.FromContext(r.Context())
 
-		if err != nil {
-			log.WithError(err).Warn("no token found")
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
+			if err != nil {
+				log.WithError(err).Warn("no token found")
+				if redirect {
+					http.Redirect(w, r, "/login", http.StatusSeeOther)
+				} else {
+					http.Error(w, "no token found", http.StatusUnauthorized)
+				}
+				return
+			}
 
-		if token == nil || jwt.Validate(token) != nil || claims == nil {
-			log.WithField("status", http.StatusUnauthorized).Error("invalid jwt token")
-			http.Error(w, "invalid token", http.StatusUnauthorized)
-			return
-		}
+			if token == nil || jwt.Validate(token) != nil || claims == nil {
+				log.WithField("status", http.StatusUnauthorized).Error("invalid jwt token")
+				if redirect {
+					http.Redirect(w, r, "/denied", http.StatusSeeOther)
+				} else {
+					http.Error(w, "invalid token", http.StatusUnauthorized)
+				}
+				return
+			}
 
-		if !verifySession(w, r, claims) {
-			return
-		}
+			if !verifySession(w, r, redirect, claims) {
+				return
+			}
 
-		// Token is authenticated, pass it through
-		next.ServeHTTP(w, r)
-	})
+			// Token is authenticated, pass it through
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 func VerifyNotLoggedIn(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, claims, err := jwtauth.FromContext(r.Context())
 
-		if err == nil && token != nil && jwt.Validate(token) == nil && claims != nil && verifySession(w, r, claims) {
+		if err == nil && token != nil && jwt.Validate(token) == nil && claims != nil && verifySession(w, r, true, claims) {
 			if isAdmin, ok := claims["isAdmin"]; ok && isAdmin.(bool) {
 				log.WithField("status", http.StatusSeeOther).Info("admin already logged in")
 				http.Redirect(w, r, "/admin", http.StatusSeeOther)
@@ -107,18 +130,26 @@ func VerifyNotLoggedIn(next http.Handler) http.Handler {
 	})
 }
 
-func verifySession(w http.ResponseWriter, r *http.Request, claims map[string]interface{}) bool {
+func verifySession(w http.ResponseWriter, r *http.Request, redirect bool, claims map[string]interface{}) bool {
 	sessionId, ok := claims["sessionId"]
 	if !ok {
 		log.WithField("status", http.StatusUnauthorized).Error("sessionId missing in jwt")
 		auth.ClearCookie(w)
-		http.Error(w, http.StatusText(401), http.StatusUnauthorized)
+		if redirect {
+			http.Redirect(w, r, "/denied", http.StatusSeeOther)
+		} else {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+		}
 		return false
 	}
 	if _, ok := auth.ActiveSessions[sessionId.(string)]; !ok {
 		log.Warn("token expired")
 		auth.ClearCookie(w)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		if redirect {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		} else {
+			http.Error(w, "token expired", http.StatusUnauthorized)
+		}
 		return false
 	}
 	return true
