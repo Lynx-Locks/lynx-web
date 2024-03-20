@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import styles from "./navLogo.module.css";
 
 export default function NavLogo({ size = 32 }: { size?: number }) {
   const [darkMode, setDarkMode] = useState(true);
@@ -15,7 +16,7 @@ export default function NavLogo({ size = 32 }: { size?: number }) {
   }, []);
 
   return (
-    <div>
+    <div className={styles.navLogoContainer}>
       {darkMode ? (
         <Image
           src="/logo/lynx-white.png"
