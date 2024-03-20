@@ -37,6 +37,16 @@ export default function AdminDashboard({
     getUsers();
   }, [setUsers]);
 
+  const filteredUsers = (users: User[]) => {
+    return users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchInput.toLowerCase()) ||
+        user.timeIn?.toLowerCase().includes(searchInput.toLowerCase()) ||
+        user.lastDateIn?.toLowerCase().includes(searchInput.toLowerCase()),
+    );
+  };
+
   return (
     <div className={styles.dashboardContainer}>
       <h1 className={styles.dashboardHeader}>Users</h1>
@@ -49,15 +59,7 @@ export default function AdminDashboard({
         />
       </div>
       <ButtonsRow />
-      <AdminTable
-        users={users.filter(
-          (user) =>
-            user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.timeIn?.toLowerCase().includes(searchInput.toLowerCase()) ||
-            user.lastDateIn?.toLowerCase().includes(searchInput.toLowerCase()),
-        )}
-      />
+      <AdminTable users={searchInput === "" ? users : filteredUsers(users)} />
     </div>
   );
 }
