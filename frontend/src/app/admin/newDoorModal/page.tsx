@@ -46,7 +46,7 @@ export default function NewDoorModal() {
         : [],
     });
 
-    // router.push("/admin");
+    router.push("/admin");
   };
 
   const newDoorModalContent = (
