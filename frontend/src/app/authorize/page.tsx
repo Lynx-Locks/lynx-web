@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
@@ -18,10 +18,19 @@ export default function AuthorizeUser() {
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
     LoadingStatus.Nil,
   );
+  const [authText, setAuthText] = useState<string>("Open");
+  const doorId = searchParams.get("doorId");
 
-  async function loginWithPasskey() {
+  useEffect(() => {
+    async function getDoorName() {
+      const doorInfo = await axios.get(`/doors/${doorId}`);
+      setAuthText(`Open ${doorInfo.data.name}`);
+    }
+    getDoorName();
+  });
+
+  async function authorizeWithPasskey() {
     setLoadingStatus(LoadingStatus.Loading);
-    const doorId = searchParams.get("doorId");
 
     try {
       const resp = await axios.post(`/auth/authorize/request`);
@@ -51,7 +60,10 @@ export default function AuthorizeUser() {
       {loadingStatus === LoadingStatus.Nil && (
         <div>
           <NavLogo size={128} />
-          <SubmitButton onClick={() => loginWithPasskey()} text="Log In" />
+          <SubmitButton
+            onClick={() => authorizeWithPasskey()}
+            text={authText}
+          />
         </div>
       )}
       {loadingStatus === LoadingStatus.Loading && <Loader />}
