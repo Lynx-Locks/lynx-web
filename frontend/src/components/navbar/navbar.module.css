@@ -14,15 +14,10 @@
   align-items: center;
 }
 
-.navToken {
-  margin-left: 20px;
-}
-
 .navUser {
   margin-right: 20px;
 }
 
-.navToken,
 .navLogout,
 .navLink {
   color: rgb(var(--foreground-rgb));
@@ -35,7 +30,6 @@
   text-align: center;
 }
 
-.navToken:hover,
 .navLogout:hover,
 .navLink:hover {
   color: rgb(var(--background-rgb));

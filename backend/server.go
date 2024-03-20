@@ -2,10 +2,10 @@ package main
 
 import (
 	"api/auth"
+	"api/authMiddleware"
 	"api/config"
 	"api/db"
 	"api/helpers"
-	authMiddleware "api/middleware"
 	"api/models"
 	"api/routes"
 	"fmt"

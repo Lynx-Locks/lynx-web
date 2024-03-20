@@ -14,7 +14,7 @@ export default function TokenConfirmation() {
   return (
     <Modal
       closeModal={handleModalClose}
-      title="Settings"
+      title="Warning"
       content={Confirmation()}
     />
   );
