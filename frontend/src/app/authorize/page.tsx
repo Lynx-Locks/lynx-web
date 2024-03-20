@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
 import LoadingStatus from "@/types/loadingStatus";
 import { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/types";
 import { SubmitButton } from "@/components/button/button";
 import styles from "./authorize.module.css";
 import Loader from "@/components/loader/loader";
-import SuccessMessage from "@/components/successMessage/successMessage";
 import NavLogo from "@/components/navLogo/navLogo";
 import ErrorMessage from "@/components/errorMessage/errorMessage";
 
 export default function AuthorizeUser() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
     LoadingStatus.Nil,
   );
@@ -47,7 +47,8 @@ export default function AuthorizeUser() {
       );
 
       if (verifyResp.status === 200) {
-        setLoadingStatus(LoadingStatus.Success);
+        window.open("/authorize/success", "_self");
+        // router.push(`/authorize/success`);
       }
     } catch (error) {
       console.error(error);
@@ -67,7 +68,6 @@ export default function AuthorizeUser() {
         </div>
       )}
       {loadingStatus === LoadingStatus.Loading && <Loader />}
-      {loadingStatus === LoadingStatus.Success && <SuccessMessage />}
       {loadingStatus === LoadingStatus.Error && <ErrorMessage />}
     </div>
   );
