@@ -1,13 +1,9 @@
-"use client";
-
-import Modal from "@/components/modal/modal";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 import { SubmitButton } from "@/components/button/button";
 import { getCookie } from "cookies-next";
 import { jsx } from "@emotion/react";
 import IntrinsicElements = jsx.JSX.IntrinsicElements;
-import styles from "../settings.module.css";
+import styles from "./tokenConfirmation.module.css";
 
 const Checkbox = ({ children, ...props }: IntrinsicElements["input"]) => (
   <label className={styles.checkboxContainer}>
@@ -16,22 +12,9 @@ const Checkbox = ({ children, ...props }: IntrinsicElements["input"]) => (
   </label>
 );
 
-export default function TokenConfirmation({
-  page = "",
-}: {
-  page?: "portal" | "admin" | "";
-}) {
-  const router = useRouter();
+export default function TokenConfirmation() {
   const [disabled, setDisabled] = useState(true);
   const [copied, setCopied] = useState(false);
-
-  const handleModalClose = () => {
-    if (page == "admin") {
-      router.push("/admin/settings");
-    } else {
-      router.push("/settings");
-    }
-  };
 
   const copyToken = async () => {
     const token = getCookie("jwt");
@@ -41,7 +24,7 @@ export default function TokenConfirmation({
     }
   };
 
-  const accountSettingsModalContent = (
+  return (
     <div>
       <h2 className={styles.subheader}>Access Token Disclosure</h2>
       <div className={styles.paragraph}>
@@ -86,13 +69,5 @@ export default function TokenConfirmation({
         onClick={copyToken}
       />
     </div>
-  );
-
-  return (
-    <Modal
-      closeModal={handleModalClose}
-      title="Settings"
-      content={accountSettingsModalContent}
-    />
   );
 }

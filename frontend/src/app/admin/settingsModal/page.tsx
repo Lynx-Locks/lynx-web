@@ -19,6 +19,11 @@ export default function SettingsModal() {
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
   const [roles, setRoles] = useState<Options[]>([]);
+  const [user, setUser] = useState<{
+    id?: number;
+    name?: string;
+    isAdmin?: boolean;
+  }>({});
   const { users, setUsers } = useContext(AdminContext);
 
   const userId = searchParams.get("userId");
@@ -33,6 +38,10 @@ export default function SettingsModal() {
       }
     };
     f();
+    if (localStorage.getItem("user")) {
+      const user = JSON.parse(String(localStorage.getItem("user")));
+      setUser(user);
+    }
   }, [userId]);
 
   if (!userId) {
@@ -60,7 +69,7 @@ export default function SettingsModal() {
   };
 
   const deleteUser = async (user: User) => {
-    axios.delete(`/users/${user.id}`);
+    await axios.delete(`/users/${user.id}`);
     const newUsers = users.filter((u) => u.id !== user.id);
     setUsers(newUsers);
   };
@@ -78,6 +87,10 @@ export default function SettingsModal() {
     if (confirm("Are you sure you want to delete this user?") && settingsUser) {
       deleteUser(settingsUser).then(() => closeModal());
     }
+  };
+
+  const handleGetToken = () => {
+    router.push(`/admin/settingsModal/tokenConfirmation`);
   };
 
   const handleRevokeKey = async () => {
@@ -139,9 +152,18 @@ export default function SettingsModal() {
             <button className={styles.deleteButton} onClick={handleRevokeKey}>
               Revoke Key
             </button>
-            <button className={styles.deleteButton} onClick={handleDeleteUser}>
-              Delete User
-            </button>
+            {user?.id === settingsUser.id ? (
+              <button className={styles.deleteButton} onClick={handleGetToken}>
+                Get Access Token
+              </button>
+            ) : (
+              <button
+                className={styles.deleteButton}
+                onClick={handleDeleteUser}
+              >
+                Delete User
+              </button>
+            )}
           </div>
           <SubmitButton text="Submit Changes" onClick={handleSubmitSettings} />
         </div>

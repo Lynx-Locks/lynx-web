@@ -39,7 +39,11 @@ const Login = () => {
         // We can set any non-private user info in local storage to avoid addition requests
         localStorage.setItem(
           "user",
-          JSON.stringify({ name: user.name, isAdmin: user.isAdmin }),
+          JSON.stringify({
+            id: user.id,
+            name: user.name,
+            isAdmin: user.isAdmin,
+          }),
         );
         if (referrer) {
           router.push(referrer);

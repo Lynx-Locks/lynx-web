@@ -7,15 +7,17 @@ import axios from "@/axios/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCookie } from "cookies-next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar({
   page = "",
 }: {
   page?: "portal" | "admin" | "";
 }) {
-  const [user, setUser] = useState<{ name?: string; isAdmin?: boolean }>({});
+  const [user, setUser] = useState<{
+    id?: number;
+    name?: string;
+    isAdmin?: boolean;
+  }>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -25,12 +27,10 @@ export default function Navbar({
     }
   }, []);
 
-  const handleClickSettings = () => {
-    if (page === "admin") {
-      router.push("/admin/settings");
-    } else {
-      router.push("/settings");
-    }
+  const handleLogout = async () => {
+    await axios.post("/logout");
+    localStorage.removeItem("name");
+    router.push("/login");
   };
 
   return (
@@ -50,11 +50,9 @@ export default function Navbar({
             Portal Page
           </Link>
         )}
-        <FontAwesomeIcon
-          className={styles.navSettings}
-          icon={faGear}
-          onClick={handleClickSettings}
-        />
+        <button className={styles.navLogout} onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </nav>
   );
