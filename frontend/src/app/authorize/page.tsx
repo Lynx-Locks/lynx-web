@@ -18,13 +18,13 @@ export default function AuthorizeUser() {
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
     LoadingStatus.Nil,
   );
-  const [authText, setAuthText] = useState<string>("Open");
+  const [authText, setAuthText] = useState<string>("Unlock");
   const doorId = searchParams.get("doorId");
 
   useEffect(() => {
     async function getDoorName() {
       const doorInfo = await axios.get(`/doors/${doorId}`);
-      setAuthText(`Open ${doorInfo.data.name}`);
+      setAuthText(`Unlock ${doorInfo.data.name}`);
     }
     getDoorName();
   });
