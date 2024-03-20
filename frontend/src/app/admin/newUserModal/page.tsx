@@ -15,6 +15,7 @@ import { AdminContext } from "../layout";
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 export default function NewUserModal() {
+  const router = useRouter();
   const [newUser, setNewUser] = useState<{ name: string; email: string }>({
     name: "",
     email: "",
@@ -22,8 +23,8 @@ export default function NewUserModal() {
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
   const [roles, setRoles] = useState<Options[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const router = useRouter();
   const { users, setUsers } = React.useContext(AdminContext);
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function NewUserModal() {
       const userResp = await axios.post("/users", {
         name: newUser.name,
         email: newUser.email,
+        isAdmin,
         roles: Array.isArray(selectedRoleOption)
           ? selectedRoleOption.map((role: Options) => ({
               id: parseInt(role.value),
@@ -87,6 +89,15 @@ export default function NewUserModal() {
         setSelectedOption={setSelectedRoleOption}
         isMulti
       />
+      <label className={styles.checkboxLabel}>
+        <input
+          className={styles.modalCheckbox}
+          type="checkbox"
+          checked={isAdmin}
+          onChange={(e) => setIsAdmin(e.target.checked)}
+        />
+        <p>Admin</p>
+      </label>
       <SubmitButton
         disabled={disabled}
         text="Submit"
