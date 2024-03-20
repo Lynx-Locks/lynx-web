@@ -22,7 +22,7 @@ import (
 
 func GetUserAndToken(w http.ResponseWriter, r *http.Request) (user models.User, activeToken models.ActiveTokens, valid bool) {
 	token, err := uuid.Parse(chi.URLParam(r, "token"))
-	if err != nil {
+	if err != nil || token == uuid.Nil {
 		return user, activeToken, false
 	}
 	activeToken = models.ActiveTokens{Id: token}
@@ -86,6 +86,7 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 
 	user, _, valid := GetUserAndToken(w, r)
 	if !valid {
+		http.Error(w, "Invalid registration token", http.StatusUnauthorized)
 		return
 	}
 
