@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "@/axios/client";
 import { startRegistration } from "@simplewebauthn/browser";
 import { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
@@ -10,7 +10,6 @@ import LoadingStatus from "@/types/loadingStatus";
 import styles from "./register.module.css";
 import Loader from "@/components/loader/loader";
 import NavLogo from "@/components/navLogo/navLogo";
-import SuccessMessage from "@/components/successMessage/successMessage";
 import ErrorMessage from "@/components/errorMessage/errorMessage";
 
 const modhex = {
@@ -41,6 +40,7 @@ function modhexToHex(input: string): string {
 
 export default function RegisterUser() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(
     LoadingStatus.Nil,
   );
@@ -76,7 +76,7 @@ export default function RegisterUser() {
         },
       );
       if (status.status === 200) {
-        setLoadingStatus(LoadingStatus.Success);
+        router.push(`/authorize/success`);
       }
     } catch (error) {
       console.error(error);
@@ -105,7 +105,6 @@ export default function RegisterUser() {
         </div>
       )}
       {loadingStatus === LoadingStatus.Loading && <Loader />}
-      {loadingStatus === LoadingStatus.Success && <SuccessMessage />}
       {loadingStatus === LoadingStatus.Error && (
         <div>
           <ErrorMessage />
