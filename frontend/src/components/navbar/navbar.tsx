@@ -7,6 +7,8 @@ import axios from "@/axios/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCookie } from "cookies-next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar({
   page = "",
@@ -23,16 +25,11 @@ export default function Navbar({
     }
   }, []);
 
-  const handleLogout = async () => {
-    await axios.post("/logout");
-    localStorage.removeItem("name");
-    router.push("/login");
-  };
-
-  const copyToken = async () => {
-    const token = getCookie("jwt");
-    if (token) {
-      await navigator.clipboard.writeText(token.toString());
+  const handleClickSettings = () => {
+    if (page === "admin") {
+      router.push("/admin/settings");
+    } else {
+      router.push("/settings");
     }
   };
 
@@ -40,11 +37,6 @@ export default function Navbar({
     <nav className={styles.navContainer}>
       <div className={styles.navLeft}>
         <NavLogo />
-        {user.isAdmin && (
-          <button onClick={copyToken} className={styles.navToken}>
-            Copy Token
-          </button>
-        )}
       </div>
       <div className={styles.navRight}>
         <p className={styles.navUser}>{user.name}</p>
@@ -58,9 +50,11 @@ export default function Navbar({
             Portal Page
           </Link>
         )}
-        <button className={styles.navLogout} onClick={handleLogout}>
-          Logout
-        </button>
+        <FontAwesomeIcon
+          className={styles.navSettings}
+          icon={faGear}
+          onClick={handleClickSettings}
+        />
       </div>
     </nav>
   );

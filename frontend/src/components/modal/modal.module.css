@@ -28,6 +28,12 @@
   /* text-align: center; */
 }
 
+@media screen and (max-width: 600px) {
+  .modalContent {
+    width: 80%;
+  }
+}
+
 /* The Close Button */
 .close {
   float: right;

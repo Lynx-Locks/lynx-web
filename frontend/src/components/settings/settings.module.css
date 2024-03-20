@@ -1,0 +1,39 @@
+.checkbox {
+  margin-right: 10px;
+}
+
+.checkboxContainer {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.paragraph {
+  max-height: 400px; /* Adjust as needed */
+  overflow-y: auto;
+  padding: 15px 10px;
+}
+
+.list {
+  list-style: disc;
+  padding: 15px 20px;
+}
+
+.listItem {
+  padding: 15px 10px;
+}
+
+.alertText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  color: rgba(var(--button-rgb), 0.75);
+}
+
+.subheader {
+  font-size: 20px;
+  font-weight: bold;
+}
