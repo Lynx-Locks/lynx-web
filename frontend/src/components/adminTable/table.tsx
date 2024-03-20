@@ -33,6 +33,30 @@ export default function AdminTable({ users }: { users: User[] }) {
     },
   ]);
   const [sortedUsers, setSortedUsers] = useState(users);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState(false); // Track select all checkbox state
+
+  // Handle checkbox change
+  const handleCheckboxChange = (id: number) => {
+    const newSelectedRows = selectedRows.includes(id)
+      ? selectedRows.filter((rowId) => rowId !== id)
+      : [...selectedRows, id];
+    setSelectedRows(newSelectedRows);
+    setSelectAll(newSelectedRows.length === users.length);
+  };
+
+  // Handle select all checkbox change
+  const handleSelectAllChange = () => {
+    if (selectAll) {
+      // Deselect all rows
+      setSelectedRows([]);
+    } else {
+      // Select all rows
+      const allIds = users.map((u) => u.id);
+      setSelectedRows(allIds);
+    }
+    setSelectAll(!selectAll); // Toggle select all checkbox state
+  };
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -94,7 +118,11 @@ export default function AdminTable({ users }: { users: User[] }) {
           <thead className={styles.tableHeader}>
             <tr>
               <th className={styles.tableCell}>
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={handleSelectAllChange}
+                />
               </th>
               {columnHeaders.map((header, idx) => (
                 <th key={idx} className={styles.tableCell}>
@@ -120,7 +148,11 @@ export default function AdminTable({ users }: { users: User[] }) {
                 }
               >
                 <td className={styles.tableCell}>
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.includes(user.id)}
+                    onChange={() => handleCheckboxChange(user.id)}
+                  />
                 </td>
                 <td className={styles.tableCell}>{user.name}</td>
                 <td className={styles.tableCell}>{user.email}</td>
