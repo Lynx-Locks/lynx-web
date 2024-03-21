@@ -14,7 +14,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const referrer = searchParams.get("token");
+  const referrer = searchParams.get("next");
 
   const handleLogin = async () => {
     try {
@@ -45,7 +45,7 @@ const Login = () => {
             isAdmin: user.isAdmin,
           }),
         );
-        if (referrer) {
+        if (referrer && referrer !== "/") {
           router.push(referrer);
         } else if (user.isAdmin) {
           router.push("/admin/");
