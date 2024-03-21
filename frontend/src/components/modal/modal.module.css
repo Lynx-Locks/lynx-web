@@ -17,12 +17,15 @@
 
 /* Modal Content/Box */
 .modalContent {
+  display: flex;
+  flex-direction: column;
   background-color: rgb(var(--background-rgb));
   margin: 15vh auto; /* 15% from the top and centered */
   padding: 20px;
   border: 3px solid #888;
   border-radius: 10px;
   width: 50%; /* Could be more or less, depending on screen size */
+  min-height: 60vh;
   max-height: 80vh;
   overflow: auto;
   /* text-align: center; */

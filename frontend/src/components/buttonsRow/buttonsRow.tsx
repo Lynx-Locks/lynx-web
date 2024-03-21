@@ -2,7 +2,11 @@ import styles from "./buttonsRow.module.css";
 import { AddButton, EditButton } from "@/components/button/button";
 import { useRouter } from "next/navigation";
 
-export default function ButtonRow() {
+export default function ButtonRow({
+  selectedRows,
+}: {
+  selectedRows: number[];
+}) {
   const router = useRouter();
 
   const buttons = [
@@ -55,6 +59,20 @@ export default function ButtonRow() {
       },
     },
   ];
+
+  if (selectedRows.length > 0) {
+    buttons.push({
+      id: 7,
+      name: "Edit Selection",
+      type: "Edit",
+      onClick: () => {
+        const params = new URLSearchParams();
+        params.append("users", selectedRows.toString());
+        // selectedRows.map((id) => params.append("users", id.toString()));
+        router.push("/admin/editSelectionModal?" + params.toString());
+      },
+    });
+  }
 
   return (
     <div className={styles.buttonRowContainer}>

@@ -16,6 +16,7 @@ export default function AdminDashboard({
   setUsers: Dispatch<SetStateAction<User[]>>;
 }) {
   const [searchInput, setSearchInput] = useState("");
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -47,8 +48,13 @@ export default function AdminDashboard({
           setSearchInput={setSearchInput}
         />
       </div>
-      <ButtonsRow />
-      <AdminTable users={users} searchInput={searchInput} />
+      <ButtonsRow selectedRows={selectedRows} />
+      <AdminTable
+        users={users}
+        searchInput={searchInput}
+        selectedRows={selectedRows}
+        setSelectedRows={setSelectedRows}
+      />
     </div>
   );
 }

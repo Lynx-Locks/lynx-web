@@ -17,15 +17,28 @@ import (
 	"net/smtp"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
-func GetAllUsers(w http.ResponseWriter, _ *http.Request) {
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err, users := dbHelpers.GetAllTable(w, []models.User{})
-	if err != nil {
-		return
+
+	var users []models.User
+	// Get user ids from the query
+	userIdsParam := r.URL.Query().Get("users")
+	if userIdsParam == "" {
+		var err error
+		err, users = dbHelpers.GetAllTable(w, []models.User{})
+		if err != nil {
+			return
+		}
+	} else {
+		// Split the comma-separated string into individual IDs
+		userIds := strings.Split(userIdsParam, ",")
+		db.DB.Find(&users, userIds)
 	}
+
 	helpers.JsonWriter(w, users)
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {

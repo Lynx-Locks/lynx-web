@@ -13,6 +13,20 @@
   height: 40px;
 }
 
+.modalContentContainer,
+.settingsModal {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+
+.modalButtonGroup {
+  display: flex;
+  flex-grow: 1;
+  align-items: flex-end;
+}
+
 .settingsModal {
   text-align: center;
 }
@@ -43,6 +57,7 @@
 .settingsButtonGroup {
   display: flex;
   justify-content: space-evenly;
+  padding-top: 20px;
 }
 
 .deleteButton {

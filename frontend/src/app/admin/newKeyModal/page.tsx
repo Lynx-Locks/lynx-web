@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
 import React from "react";
 import { AdminContext } from "../layout";
+import styles from "../modals.module.css";
 
 export default function NewKeyModal() {
   const [selectedEmailOption, setSelectedEmailOption] =
@@ -37,7 +38,7 @@ export default function NewKeyModal() {
   };
 
   const newKeyModalContent = (
-    <div>
+    <div className={styles.modalContentContainer}>
       <SearchDropdown
         options={emails}
         placeholder="Add Email..."
@@ -45,11 +46,13 @@ export default function NewKeyModal() {
         selectDropdown="tableModal"
         setSelectedOption={setSelectedEmailOption}
       />
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
+      <div className={styles.modalButtonGroup}>
+        <SubmitButton
+          disabled={disabled}
+          text="Submit"
+          onClick={handleModalSubmit}
+        />
+      </div>
     </div>
   );
 
