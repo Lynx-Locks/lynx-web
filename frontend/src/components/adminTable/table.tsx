@@ -12,8 +12,36 @@ import { useEffect, useState } from "react";
 import Loader from "@/components/loader/loader";
 import { useRouter } from "next/navigation";
 
-export default function AdminTable({ users }: { users: User[] }) {
+const sliceUsers = (users: User[], page: number, usersPerPage: number) => {
+  return users.slice(
+    page * usersPerPage,
+    Math.min((page + 1) * usersPerPage, users.length),
+  );
+};
+
+const filterUsers = (users: User[], searchInput: string) => {
+  if (searchInput === "") {
+    return users;
+  }
+  return users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchInput.toLowerCase()) ||
+      user.timeIn?.toLowerCase().includes(searchInput.toLowerCase()) ||
+      user.lastDateIn?.toLowerCase().includes(searchInput.toLowerCase()),
+  );
+};
+
+export default function AdminTable({
+  users,
+  searchInput,
+}: {
+  users: User[];
+  searchInput: string;
+}) {
   const router = useRouter();
+  const [page, setPage] = useState(0);
+  const [usersPerPage, setUsersPerPage] = useState(25);
   const [columnHeaders, setColumnHeaders] = useState([
     {
       name: "Name",
@@ -32,35 +60,20 @@ export default function AdminTable({ users }: { users: User[] }) {
       sort: "",
     },
   ]);
-  const [sortedUsers, setSortedUsers] = useState(users);
+  const [sortedUsers, setSortedUsers] = useState(
+    sliceUsers(filterUsers(users, searchInput), page, usersPerPage),
+  );
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false); // Track select all checkbox state
 
-  // Handle checkbox change
-  const handleCheckboxChange = (id: number) => {
-    const newSelectedRows = selectedRows.includes(id)
-      ? selectedRows.filter((rowId) => rowId !== id)
-      : [...selectedRows, id];
-    setSelectedRows(newSelectedRows);
-    setSelectAll(newSelectedRows.length === users.length);
-  };
-
-  // Handle select all checkbox change
-  const handleSelectAllChange = () => {
-    if (selectAll) {
-      // Deselect all rows
-      setSelectedRows([]);
-    } else {
-      // Select all rows
-      const allIds = users.map((u) => u.id);
-      setSelectedRows(allIds);
-    }
-    setSelectAll(!selectAll); // Toggle select all checkbox state
-  };
+  useEffect(() => {
+    setSelectedRows([]);
+    setSelectAll(false);
+  }, [searchInput]);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
-    const newUsers = [...users];
+    const newUsers = filterUsers(users, searchInput);
     newUsers.sort((a, b) => {
       const first = sortBy?.sort === "asc" ? a : b;
       const second = sortBy?.sort === "asc" ? b : a;
@@ -85,8 +98,30 @@ export default function AdminTable({ users }: { users: User[] }) {
       }
       return 0;
     });
-    setSortedUsers(newUsers);
-  }, [columnHeaders, setSortedUsers, users]);
+    setSortedUsers(sliceUsers(newUsers, page, usersPerPage));
+  }, [columnHeaders, page, searchInput, users, usersPerPage]);
+
+  // Handle checkbox change
+  const handleCheckboxChange = (id: number) => {
+    const newSelectedRows = selectedRows.includes(id)
+      ? selectedRows.filter((rowId) => rowId !== id)
+      : [...selectedRows, id];
+    setSelectedRows(newSelectedRows);
+    setSelectAll(newSelectedRows.length === sortedUsers.length);
+  };
+
+  // Handle select all checkbox change
+  const handleSelectAllChange = () => {
+    if (selectAll) {
+      // Deselect all rows
+      setSelectedRows([]);
+    } else {
+      // Select all rows
+      const allIds = sortedUsers.map((u) => u.id);
+      setSelectedRows(allIds);
+    }
+    setSelectAll(!selectAll); // Toggle select all checkbox state
+  };
 
   const handleClickSettings = async (idx: number) => {
     const user = sortedUsers[idx];
