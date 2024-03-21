@@ -5,7 +5,7 @@ import Search from "@/components/search/search";
 import AdminTable from "@/components/adminTable/table";
 import ButtonsRow from "@/components/buttonsRow/buttonsRow";
 import User from "@/types/user";
-import React, { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import axios from "@/axios/client";
 
 export default function AdminDashboard({
@@ -13,7 +13,7 @@ export default function AdminDashboard({
   setUsers,
 }: {
   users: User[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  setUsers: Dispatch<SetStateAction<User[]>>;
 }) {
   const [searchInput, setSearchInput] = useState("");
 

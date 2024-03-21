@@ -1,8 +1,13 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { FaExclamationCircle } from "react-icons/fa";
 import styles from "./errorMessage.module.css";
+import LoadingStatus from "@/types/loadingStatus";
 
-const ErrorMessage: React.FC = () => {
+export default function ErrorMessage({
+  setLoadingStatus,
+}: {
+  setLoadingStatus: Dispatch<SetStateAction<LoadingStatus>>;
+}) {
   return (
     <div className={styles.errorMessage}>
       <div className={styles.icon}>
@@ -19,8 +24,12 @@ const ErrorMessage: React.FC = () => {
           ⚠️
         </span>
       </div>
+      <button
+        className={styles.tryAgainButton}
+        onClick={() => setLoadingStatus(LoadingStatus.Nil)}
+      >
+        Try Again
+      </button>
     </div>
   );
-};
-
-export default ErrorMessage;
+}

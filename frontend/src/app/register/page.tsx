@@ -107,7 +107,7 @@ export default function RegisterUser() {
       {loadingStatus === LoadingStatus.Loading && <Loader />}
       {loadingStatus === LoadingStatus.Error && (
         <div>
-          <ErrorMessage />
+          <ErrorMessage setLoadingStatus={setLoadingStatus} />
         </div>
       )}
     </div>
