@@ -8,6 +8,7 @@ import {
   faCaretUp,
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
+import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import { useEffect, useState } from "react";
 import Loader from "@/components/loader/loader";
 import { useRouter } from "next/navigation";
@@ -144,11 +145,13 @@ export default function AdminTable({
     setColumnHeaders(newColumnHeaders);
   };
 
-  return (
-    <div className={styles.tableContainer}>
-      {sortedUsers.length === 0 ? (
-        <Loader />
-      ) : (
+  return sortedUsers.length === 0 ? (
+    <div className={styles.loaderContainer}>
+      <Loader />
+    </div>
+  ) : (
+    <div className={styles.tableContent}>
+      <div className={styles.tableContainer}>
         <table className={styles.table} border={1} rules="rows">
           <thead className={styles.tableHeader}>
             <tr>
@@ -204,7 +207,42 @@ export default function AdminTable({
             ))}
           </tbody>
         </table>
-      )}
+      </div>
+      <div className={styles.tableFooter}>
+        <p className={styles.paginationLabel}>Rows per page:</p>
+        <select
+          className={styles.paginationSelect}
+          value={usersPerPage}
+          onChange={(e) => setUsersPerPage(parseInt(e.target.value))}
+        >
+          {[10, 25, 50, 75].map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <div className={styles.footerPageGroup}>
+          <p>
+            {page * usersPerPage + 1} -{" "}
+            {Math.min((page + 1) * usersPerPage, users.length)} of{" "}
+            {users.length}
+          </p>
+        </div>
+        <button
+          className={styles.paginationButton}
+          onClick={() => setPage(page - 1)}
+          disabled={page === 0}
+        >
+          <RxCaretLeft size={24} />
+        </button>
+        <button
+          className={styles.paginationButton}
+          onClick={() => setPage(page + 1)}
+          disabled={page === Math.floor(users.length / usersPerPage)}
+        >
+          <RxCaretRight size={24} />
+        </button>
+      </div>
     </div>
   );
 }
