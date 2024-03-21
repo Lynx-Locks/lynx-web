@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	webauthn2 "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
 	"slices"
@@ -351,6 +352,15 @@ func GetYubiKeyDoorAccess(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.JsonWriter(w, "Login Success, opening door")
+}
+
+func DeleteSessionData(w http.ResponseWriter, r *http.Request) {
+	res := db.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.SessionData{})
+	if res.Error != nil {
+		http.Error(w, "Unable to delete session data", http.StatusInternalServerError)
+		return
+	}
+	helpers.JsonWriter(w, "Session data successfully deleted")
 }
 
 func credHasDoorAccess(cred models.Credential, dId uint) (bool, models.User) {

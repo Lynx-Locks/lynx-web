@@ -13,6 +13,7 @@ func WebAuthnRoute() chi.Router {
 	r.Post("/authorize/request", controller.AuthorizeRequest)
 	r.Post("/authorize/response/{doorId}/{challenge}", controller.AuthorizeResponse)
 	r.Get("/authorize/{doorId}/{yubiKeyId}", controller.GetYubiKeyDoorAccess)
+	r.Delete("/sessionData", controller.DeleteSessionData)
 	r.Get("/unlocked/{doorId}", controller.IsDoorOpen)
 	return r
 }
