@@ -151,14 +151,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err, uId := helpers.ParseInt(w, r, "userId")
+	userIds := struct {
+		Users []uint `json:"users"`
+	}{}
+
+	err := json.NewDecoder(r.Body).Decode(&userIds)
 	if err != nil {
-		return
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	err = dbHelpers.DeleteObjandAssociationsByPk(w, models.User{Id: uId})
-	if err != nil {
-		return
-	}
+
+	db.DB.Select(clause.Associations).Delete(&models.User{}, userIds.Users)
+
 	helpers.JsonWriter(w, "Delete Successful")
 }
 

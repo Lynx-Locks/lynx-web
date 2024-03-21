@@ -68,29 +68,30 @@ export default function SettingsModal() {
     setUsers(newUsers);
   };
 
-  const deleteUser = async (user: User) => {
-    await axios.delete(`/users/${user.id}`);
-    const newUsers = users.filter((u) => u.id !== user.id);
-    setUsers(newUsers);
-  };
-
-  const closeModal = () => {
+  const handleModalClose = () => {
     router.push("/admin");
   };
 
   const handleSubmitSettings = () => {
     updateUser(settingsUser!, selectedRoleOption);
-    closeModal();
-  };
-
-  const handleDeleteUser = () => {
-    if (confirm("Are you sure you want to delete this user?") && settingsUser) {
-      deleteUser(settingsUser).then(() => closeModal());
-    }
+    handleModalClose();
   };
 
   const handleGetToken = () => {
     router.push(`/admin/settingsModal/tokenConfirmation`);
+  };
+
+  const handleDeleteUser = async () => {
+    if (confirm("Are you sure you want to delete this user?") && settingsUser) {
+      await axios.delete(`/users`, {
+        data: {
+          users: [settingsUser.id],
+        },
+      });
+      const newUsers = users.filter((u) => u.id !== settingsUser.id);
+      setUsers(newUsers);
+      handleModalClose();
+    }
   };
 
   const handleRevokeKey = async () => {
@@ -112,7 +113,7 @@ export default function SettingsModal() {
 
   return settingsUser ? (
     <Modal
-      closeModal={closeModal}
+      closeModal={handleModalClose}
       title={`Settings for ${settingsUser.name}`}
       content={
         <div className={styles.settingsModal}>
