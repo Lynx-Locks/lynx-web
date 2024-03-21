@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 import styles from "./search.module.css";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,9 +12,9 @@ export default function Search({
 }: {
   placeholder: string;
   searchInput: string;
-  setSearchInput: React.Dispatch<React.SetStateAction<string>>;
+  setSearchInput: Dispatch<SetStateAction<string>>;
 }) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     setSearchInput(e.target.value);
   };

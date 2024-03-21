@@ -47,8 +47,7 @@ export default function AuthorizeUser() {
       );
 
       if (verifyResp.status === 200) {
-        window.open("/authorize/success", "_self");
-        // router.push(`/authorize/success`);
+        router.push(`/authorize/success`);
       }
     } catch (error) {
       console.error(error);
@@ -68,7 +67,9 @@ export default function AuthorizeUser() {
         </div>
       )}
       {loadingStatus === LoadingStatus.Loading && <Loader />}
-      {loadingStatus === LoadingStatus.Error && <ErrorMessage />}
+      {loadingStatus === LoadingStatus.Error && (
+        <ErrorMessage setLoadingStatus={setLoadingStatus} />
+      )}
     </div>
   );
 }
