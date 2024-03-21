@@ -36,7 +36,7 @@ func VerifyAdmin(redirect bool) func(http.Handler) http.Handler {
 			if err != nil {
 				log.WithError(err).Warn("no token found")
 				if redirect {
-					http.Redirect(w, r, "/login/?next="+r.URL.Path, http.StatusSeeOther)
+					http.Redirect(w, r, "/login/?next="+getReferrer(r), http.StatusSeeOther)
 				} else {
 					http.Error(w, "no token found", http.StatusUnauthorized)
 				}
@@ -82,7 +82,7 @@ func VerifyUser(redirect bool) func(http.Handler) http.Handler {
 			if err != nil {
 				log.WithError(err).Warn("no token found")
 				if redirect {
-					http.Redirect(w, r, "/login/?next="+r.URL.Path, http.StatusSeeOther)
+					http.Redirect(w, r, "/login/?next="+getReferrer(r), http.StatusSeeOther)
 				} else {
 					http.Error(w, "no token found", http.StatusUnauthorized)
 				}
@@ -146,11 +146,19 @@ func verifySession(w http.ResponseWriter, r *http.Request, redirect bool, claims
 		log.Warn("token expired")
 		auth.ClearCookie(w)
 		if redirect {
-			http.Redirect(w, r, "/login/?next="+r.URL.Path, http.StatusSeeOther)
+			http.Redirect(w, r, "/login/?next="+getReferrer(r), http.StatusSeeOther)
 		} else {
 			http.Error(w, "token expired", http.StatusUnauthorized)
 		}
 		return false
 	}
 	return true
+}
+
+func getReferrer(r *http.Request) string {
+	referrer := r.URL.Path
+	if r.URL.RawQuery != "" {
+		referrer += fmt.Sprintf("?%s", r.URL.RawQuery)
+	}
+	return referrer
 }
