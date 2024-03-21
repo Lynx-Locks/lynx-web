@@ -14,8 +14,8 @@ import { SubmitButton } from "@/components/button/button";
 
 export default function SettingsModal() {
   const router = useRouter();
-  const [settingsUser, setSettingsUser] = useState<User | null>(null);
   const searchParams = useSearchParams();
+  const [settingsUser, setSettingsUser] = useState<User | null>(null);
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
   const [roles, setRoles] = useState<Options[]>([]);
@@ -165,7 +165,12 @@ export default function SettingsModal() {
               </button>
             )}
           </div>
-          <SubmitButton text="Submit Changes" onClick={handleSubmitSettings} />
+          <div className={styles.modalButtonGroup}>
+            <SubmitButton
+              text="Submit Changes"
+              onClick={handleSubmitSettings}
+            />
+          </div>
         </div>
       }
     />

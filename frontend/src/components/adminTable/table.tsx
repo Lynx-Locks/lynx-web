@@ -9,7 +9,7 @@ import {
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
 import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Loader from "@/components/loader/loader";
 import { useRouter } from "next/navigation";
 
@@ -36,41 +36,49 @@ const filterUsers = (users: User[], searchInput: string) => {
 export default function AdminTable({
   users,
   searchInput,
+  selectedRows,
+  setSelectedRows,
 }: {
   users: User[];
   searchInput: string;
+  selectedRows: number[];
+  setSelectedRows: Dispatch<SetStateAction<number[]>>;
 }) {
   const router = useRouter();
   const [page, setPage] = useState(0);
   const [usersPerPage, setUsersPerPage] = useState(25);
+  const [pageCount, setPageCount] = useState(users.length);
   const [columnHeaders, setColumnHeaders] = useState([
     {
       name: "Name",
       sort: "",
+      className: styles.tableCell,
     },
     {
       name: "Email",
       sort: "",
+      className: styles.tableCell,
     },
     {
       name: "Last Time In",
       sort: "",
+      className: styles.tableCellMed,
     },
     {
       name: "Date",
       sort: "",
+      className: styles.tableCellMed,
     },
   ]);
   const [sortedUsers, setSortedUsers] = useState(
     sliceUsers(filterUsers(users, searchInput), page, usersPerPage),
   );
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false); // Track select all checkbox state
 
   useEffect(() => {
     setSelectedRows([]);
     setSelectAll(false);
-  }, [searchInput]);
+  }, [searchInput, setSelectedRows, usersPerPage]);
 
   useEffect(() => {
     const sortBy = columnHeaders.find((header) => header.sort !== "");
@@ -100,6 +108,7 @@ export default function AdminTable({
       return 0;
     });
     setSortedUsers(sliceUsers(newUsers, page, usersPerPage));
+    setPageCount(newUsers.length);
   }, [columnHeaders, page, searchInput, users, usersPerPage]);
 
   // Handle checkbox change
@@ -155,7 +164,7 @@ export default function AdminTable({
         <table className={styles.table} border={1} rules="rows">
           <thead className={styles.tableHeader}>
             <tr>
-              <th className={styles.tableCell}>
+              <th className={styles.tableCellSmall}>
                 <input
                   type="checkbox"
                   checked={selectAll}
@@ -163,7 +172,7 @@ export default function AdminTable({
                 />
               </th>
               {columnHeaders.map((header, idx) => (
-                <th key={idx} className={styles.tableCell}>
+                <th key={idx} className={header.className}>
                   <p className={styles.columnHeader}>{header.name}</p>
                   <button onClick={() => handleSort(idx)}>
                     {header.sort === "asc" ? (
@@ -174,7 +183,7 @@ export default function AdminTable({
                   </button>
                 </th>
               ))}
-              <th />
+              <th className={styles.tableCellSmall} />
             </tr>
           </thead>
           <tbody>
@@ -185,7 +194,7 @@ export default function AdminTable({
                   idx < users.length - 1 ? styles.tableRow : styles.tableLastRow
                 }
               >
-                <td className={styles.tableCell}>
+                <td className={styles.tableCellSmall}>
                   <input
                     type="checkbox"
                     checked={selectedRows.includes(user.id)}
@@ -194,9 +203,11 @@ export default function AdminTable({
                 </td>
                 <td className={styles.tableCell}>{user.name}</td>
                 <td className={styles.tableCell}>{user.email}</td>
-                <td className={styles.tableCell}>{user.timeIn || "N/A"}</td>
-                <td className={styles.tableCell}>{user.lastDateIn || "N/A"}</td>
-                <td>
+                <td className={styles.tableCellMed}>{user.timeIn || "N/A"}</td>
+                <td className={styles.tableCellMed}>
+                  {user.lastDateIn || "N/A"}
+                </td>
+                <td className={styles.tableCellSettings}>
                   <FontAwesomeIcon
                     className={styles.settingsIcon}
                     icon={faGear}
@@ -224,8 +235,7 @@ export default function AdminTable({
         <div className={styles.footerPageGroup}>
           <p>
             {page * usersPerPage + 1} -{" "}
-            {Math.min((page + 1) * usersPerPage, users.length)} of{" "}
-            {users.length}
+            {Math.min((page + 1) * usersPerPage, pageCount)} of {pageCount}
           </p>
         </div>
         <button

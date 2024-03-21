@@ -6,6 +6,7 @@
   --foreground-rgb: 0, 0, 0;
   --button-rgb: 242, 155, 4;
   --background-rgb: 249, 250, 251;
+  --button-rgb-hover: 300, 175, 4;
 }
 
 @media (prefers-color-scheme: dark) {

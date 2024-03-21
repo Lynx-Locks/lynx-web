@@ -36,6 +36,23 @@
 
 .tableCell {
   padding: 8px;
+  width: 30%;
+}
+
+.tableCellMed {
+  padding: 8px;
+  width: 15%;
+}
+
+.tableCellSmall {
+  padding: 8px;
+  width: 5%;
+}
+
+.tableCellSettings {
+  width: 5%;
+  padding-right: 20px;
+  text-align: right;
 }
 
 .tableHeadCell {

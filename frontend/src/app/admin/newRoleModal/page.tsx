@@ -61,7 +61,7 @@ export default function NewRoleModal() {
   };
 
   const newRoleModalContent = (
-    <div>
+    <div className={styles.modalContentContainer}>
       <h2 className={styles.subheader}>Name</h2>
       <input
         className={styles.modalInput}
@@ -85,11 +85,13 @@ export default function NewRoleModal() {
         setSelectedOption={setSelectedDoorOption}
         isMulti
       />
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
+      <div className={styles.modalButtonGroup}>
+        <SubmitButton
+          disabled={disabled}
+          text="Submit"
+          onClick={handleModalSubmit}
+        />
+      </div>
     </div>
   );
 

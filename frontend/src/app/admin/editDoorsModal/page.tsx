@@ -67,7 +67,7 @@ export default function EditDoors() {
   };
 
   const editDoorsModalContent = (
-    <div>
+    <div className={styles.modalContentContainer}>
       <SearchDropdown
         options={doors}
         placeholder="Select Door to Change..."
@@ -95,11 +95,13 @@ export default function EditDoors() {
           />
         </div>
       )}
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
+      <div className={styles.modalButtonGroup}>
+        <SubmitButton
+          disabled={disabled}
+          text="Submit"
+          onClick={handleModalSubmit}
+        />
+      </div>
     </div>
   );
 

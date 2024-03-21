@@ -66,7 +66,7 @@ export default function NewUserModal() {
   };
 
   const newUserModalContent = (
-    <div>
+    <div className={styles.modalContentContainer}>
       <h2 className={styles.subheader}>Name</h2>
       <input
         className={styles.modalInput}
@@ -98,11 +98,13 @@ export default function NewUserModal() {
         />
         <p>Admin</p>
       </label>
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
+      <div className={styles.modalButtonGroup}>
+        <SubmitButton
+          disabled={disabled}
+          text="Submit"
+          onClick={handleModalSubmit}
+        />
+      </div>
     </div>
   );
 

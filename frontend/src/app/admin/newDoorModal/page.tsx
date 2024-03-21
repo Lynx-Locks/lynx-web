@@ -50,7 +50,7 @@ export default function NewDoorModal() {
   };
 
   const newDoorModalContent = (
-    <div>
+    <div className={styles.modalContentContainer}>
       <h2 className={styles.subheader}>Name</h2>
       <input
         className={styles.modalInput}
@@ -75,11 +75,13 @@ export default function NewDoorModal() {
         setSelectedOption={setSelectedRoleOption}
         isMulti
       />
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
+      <div className={styles.modalButtonGroup}>
+        <SubmitButton
+          disabled={disabled}
+          text="Submit"
+          onClick={handleModalSubmit}
+        />
+      </div>
     </div>
   );
 

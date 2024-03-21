@@ -11,6 +11,10 @@
   color: black;
 }
 
+.addButton:hover {
+  background-color: rgb(var(--button-rgb-hover));
+}
+
 .submitButton {
   background-color: rgb(var(--button-rgb));
   display: flex;

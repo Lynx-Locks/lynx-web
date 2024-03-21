@@ -71,7 +71,7 @@ export default function EditRoles() {
   };
 
   const editRolesModalContent = (
-    <div>
+    <div className={styles.modalContentContainer}>
       <SearchDropdown
         options={roles}
         placeholder="Select Role to Change..."
@@ -101,11 +101,13 @@ export default function EditRoles() {
           />
         </div>
       )}
-      <SubmitButton
-        disabled={disabled}
-        text="Submit"
-        onClick={handleModalSubmit}
-      />
+      <div className={styles.modalButtonGroup}>
+        <SubmitButton
+          disabled={disabled}
+          text="Submit"
+          onClick={handleModalSubmit}
+        />
+      </div>
     </div>
   );
 
