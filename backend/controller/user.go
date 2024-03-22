@@ -34,7 +34,15 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Split the comma-separated string into individual IDs
-		userIds := strings.Split(userIdsParam, ",")
+		userIds := make([]int, 0)
+		for _, id := range strings.Split(userIdsParam, ",") {
+			intId, err := strconv.Atoi(id)
+			if err != nil {
+				http.Error(w, "Invalid user ID", http.StatusBadRequest)
+				return
+			}
+			userIds = append(userIds, intId)
+		}
 		db.DB.Find(&users, userIds)
 	}
 
@@ -197,7 +205,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
 
-	res := db.DB.Unscoped().Where("user_id IN ?", userIds.Users).Find(&models.Credential{}).Delete(&[]models.Credential{})
+	res := db.DB.Unscoped().Select(clause.Associations).Where("user_id IN ?", userIds.Users).Delete(&[]models.Credential{})
 	if res.Error != nil {
 		dbHelpers.DBErrorHandling(res.Error, w)
 		return
@@ -230,6 +238,7 @@ func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
+		return
 	}
 
 	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Email: helpers.FormatEmail(reqBody.Email)})
