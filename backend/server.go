@@ -198,7 +198,7 @@ func api() chi.Router {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(auth.TokenAuth))
 		r.Use(authMiddleware.VerifyAdmin(false))
-
+		r.Mount("/credentials", routes.CredentialsRouter())
 		r.Mount("/users", routes.UsersRoute())
 		r.Mount("/doors", routes.DoorsRoute())
 		r.Mount("/roles", routes.RolesRoute())
