@@ -162,12 +162,12 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		dbHelpers.DBErrorHandling(res.Error, w)
 		return
 	}
-	if res.RowsAffected < 1 {
-		http.Error(w, "No users found", http.StatusNotFound)
+	if int(res.RowsAffected) < len(userIds.Users) {
+		http.Error(w, "Not enough users found to delete", http.StatusNotFound)
 		return
 	}
 
-	helpers.JsonWriter(w, "Delete Successful")
+	helpers.JsonWriter(w, fmt.Sprintf("%d User(s) Deleted", res.RowsAffected))
 }
 
 func GetUserCreds(w http.ResponseWriter, r *http.Request) {
@@ -202,7 +202,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 		dbHelpers.DBErrorHandling(res.Error, w)
 		return
 	}
-	helpers.JsonWriter(w, "Delete Successful")
+	helpers.JsonWriter(w, fmt.Sprintf("%d Credential(s) Deleted", res.RowsAffected))
 }
 
 func GetUserRoles(w http.ResponseWriter, r *http.Request) {
