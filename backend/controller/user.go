@@ -34,9 +34,9 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Split the comma-separated string into individual IDs
-		userIds := make([]int, 0)
+		userIds := make([]uint64, 0)
 		for _, id := range strings.Split(userIdsParam, ",") {
-			intId, err := strconv.Atoi(id)
+			intId, err := strconv.ParseUint(id, 10, 64)
 			if err != nil {
 				http.Error(w, "Invalid user ID", http.StatusBadRequest)
 				return
