@@ -5,7 +5,7 @@ import { faEdit, faPlus } from "@fortawesome/free-solid-svg-icons";
 type ButtonProps = {
   text: string;
   disabled?: boolean;
-  onClick?: () => void;
+  onClick: () => void;
 };
 
 export function AddButton({ text, onClick }: ButtonProps) {

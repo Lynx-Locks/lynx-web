@@ -68,7 +68,6 @@ export default function ButtonRow({
       onClick: () => {
         const params = new URLSearchParams();
         params.append("users", selectedRows.toString());
-        // selectedRows.map((id) => params.append("users", id.toString()));
         router.push("/admin/editSelectionModal?" + params.toString());
       },
     });
