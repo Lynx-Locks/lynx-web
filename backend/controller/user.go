@@ -22,8 +22,6 @@ import (
 )
 
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	var users []models.User
 	// Get user ids from the query
 	userIdsParam := r.URL.Query().Get("users")
@@ -42,8 +40,6 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	helpers.JsonWriter(w, users)
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
 		return
@@ -56,7 +52,6 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	reqUser := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&reqUser)
 	if err != nil {
@@ -102,8 +97,6 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	email := r.URL.Query().Get("email")
 	if email == "" {
 		http.Error(w, "Email parameter is required", http.StatusBadRequest)
@@ -119,7 +112,6 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var user models.User
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -150,7 +142,6 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	userIds := struct {
 		Users []uint `json:"users"`
 	}{}
@@ -160,13 +151,20 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
 
-	db.DB.Select(clause.Associations).Delete(&models.User{}, userIds.Users)
+	res := db.DB.Unscoped().Select(clause.Associations).Delete(&models.User{}, userIds.Users)
+	if res.Error != nil {
+		dbHelpers.DBErrorHandling(res.Error, w)
+		return
+	}
+	if res.RowsAffected < 1 {
+		http.Error(w, "No users found", http.StatusNotFound)
+		return
+	}
 
 	helpers.JsonWriter(w, "Delete Successful")
 }
 
 func GetUserCreds(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
 		return
@@ -182,25 +180,24 @@ func GetUserCreds(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	err, uId := helpers.ParseInt(w, r, "userId")
+	userIds := struct {
+		Users []uint `json:"users"`
+	}{}
+
+	err := json.NewDecoder(r.Body).Decode(&userIds)
 	if err != nil {
-		return
+		http.Error(w, "Malformed request", http.StatusBadRequest)
 	}
-	res := db.DB.Unscoped().Select(clause.Associations).Where(models.Credential{UserId: uId}).Delete(&[]models.Credential{})
+
+	res := db.DB.Unscoped().Where("user_id IN ?", userIds.Users).Find(&models.Credential{}).Delete(&[]models.Credential{})
 	if res.Error != nil {
 		dbHelpers.DBErrorHandling(res.Error, w)
-		return
-	}
-	if res.RowsAffected < 1 {
-		http.Error(w, "No credentials found, either user has none or user does not exist", http.StatusNotFound)
 		return
 	}
 	helpers.JsonWriter(w, "Delete Successful")
 }
 
 func GetUserRoles(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
 		return
@@ -216,7 +213,6 @@ func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	reqBody := struct {
 		Email string `json:"email"`
 	}{}

@@ -11,6 +11,7 @@ import { getRoleOptions, getRolesForUser } from "@/data/roles";
 import styles from "../modals.module.css";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { SubmitButton } from "@/components/button/button";
+import Loader from "@/components/loader/loader";
 
 export default function SettingsModal() {
   const router = useRouter();
@@ -96,9 +97,14 @@ export default function SettingsModal() {
 
   const handleRevokeKey = async () => {
     if (confirm("Are you sure you want to revoke this user's keys?")) {
-      const resp = await axios.delete(`/users/${settingsUser?.id}/creds`);
+      const resp = await axios.delete(`/users/creds`, {
+        data: {
+          users: [settingsUser?.id],
+        },
+      });
       if (resp.status === 200) {
         alert("Keys revoked successfully");
+        handleModalClose();
       }
     }
   };
@@ -111,71 +117,82 @@ export default function SettingsModal() {
     setSettingsUser({ ...user, [key]: value });
   };
 
-  return settingsUser ? (
+  console.log(selectedRoleOption, roles);
+
+  return (
     <Modal
       closeModal={handleModalClose}
-      title={`Settings for ${settingsUser.name}`}
+      title={settingsUser ? `Settings for ${settingsUser.name}` : "Settings"}
       content={
-        <div className={styles.settingsModal}>
-          <div className={styles.settingsInputContainer}>
-            <div className={styles.settingsInputLabel}>Name:</div>
-            <input
-              className={styles.settingsInput}
-              type="text"
-              value={settingsUser.name}
-              onChange={(e) =>
-                handleSettingsTextChange(settingsUser, "name", e.target.value)
-              }
-            />
-            <div className={styles.settingsInputLabel}>Email:</div>
-            <input
-              className={styles.settingsInput}
-              type="text"
-              value={settingsUser.email}
-              onChange={(e) =>
-                handleSettingsTextChange(settingsUser, "email", e.target.value)
-              }
-            />
-            <div className={styles.settingsInputLabel}>Roles:</div>
-            <SearchDropdown
-              defaultValue={
-                Array.isArray(selectedRoleOption) ? selectedRoleOption : []
-              }
-              options={roles}
-              placeholder="Select Role(s)..."
-              subheader=""
-              setSelectedOption={setSelectedRoleOption}
-              selectDropdown="settingsModal"
-              isMulti
-            />
-          </div>
-          <div className={styles.settingsButtonGroup}>
-            <button className={styles.deleteButton} onClick={handleRevokeKey}>
-              Revoke Key
-            </button>
-            {user?.id === settingsUser.id ? (
-              <button className={styles.deleteButton} onClick={handleGetToken}>
-                Get Access Token
+        settingsUser ? (
+          <div className={styles.settingsModal}>
+            <div className={styles.settingsInputContainer}>
+              <div className={styles.settingsInputLabel}>Name:</div>
+              <input
+                className={styles.settingsInput}
+                type="text"
+                value={settingsUser.name}
+                onChange={(e) =>
+                  handleSettingsTextChange(settingsUser, "name", e.target.value)
+                }
+              />
+              <div className={styles.settingsInputLabel}>Email:</div>
+              <input
+                className={styles.settingsInput}
+                type="text"
+                value={settingsUser.email}
+                onChange={(e) =>
+                  handleSettingsTextChange(
+                    settingsUser,
+                    "email",
+                    e.target.value,
+                  )
+                }
+              />
+              <div className={styles.settingsInputLabel}>Roles:</div>
+              <SearchDropdown
+                defaultValue={
+                  Array.isArray(selectedRoleOption) ? selectedRoleOption : []
+                }
+                options={roles}
+                placeholder="Select Role(s)..."
+                subheader=""
+                setSelectedOption={setSelectedRoleOption}
+                selectDropdown="settingsModal"
+                isMulti
+              />
+            </div>
+            <div className={styles.settingsButtonGroup}>
+              <button className={styles.deleteButton} onClick={handleRevokeKey}>
+                Revoke Key
               </button>
-            ) : (
-              <button
-                className={styles.deleteButton}
-                onClick={handleDeleteUser}
-              >
-                Delete User
-              </button>
-            )}
+              {user?.id === settingsUser.id ? (
+                <button
+                  className={styles.deleteButton}
+                  onClick={handleGetToken}
+                >
+                  Get Access Token
+                </button>
+              ) : (
+                <button
+                  className={styles.deleteButton}
+                  onClick={handleDeleteUser}
+                >
+                  Delete User
+                </button>
+              )}
+            </div>
+            <div className={styles.modalButtonGroup}>
+              <SubmitButton
+                text="Submit Changes"
+                onClick={handleSubmitSettings}
+              />
+            </div>
           </div>
-          <div className={styles.modalButtonGroup}>
-            <SubmitButton
-              text="Submit Changes"
-              onClick={handleSubmitSettings}
-            />
-          </div>
-        </div>
+        ) : (
+          Loader()
+        )
       }
     />
-  ) : (
-    <div />
   );
 }
