@@ -109,6 +109,13 @@ export default function SettingsModal() {
     }
   };
 
+  const handleRefreshSessionData = async () => {
+    if (confirm("Are you sure you want to refresh the session data?")) {
+      await axios.delete(`/credentials/session`);
+      handleModalClose();
+    }
+  };
+
   const handleSettingsTextChange = (
     user: User,
     key: "name" | "email",
@@ -116,8 +123,6 @@ export default function SettingsModal() {
   ) => {
     setSettingsUser({ ...user, [key]: value });
   };
-
-  console.log(selectedRoleOption, roles);
 
   return (
     <Modal
@@ -179,6 +184,14 @@ export default function SettingsModal() {
                   onClick={handleDeleteUser}
                 >
                   Delete User
+                </button>
+              )}
+              {user?.id === settingsUser.id && (
+                <button
+                  className={styles.deleteButton}
+                  onClick={handleRefreshSessionData}
+                >
+                  Refresh Session Data
                 </button>
               )}
             </div>
