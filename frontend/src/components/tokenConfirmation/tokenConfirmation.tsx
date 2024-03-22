@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { SubmitButton } from "@/components/button/button";
 import { getCookie } from "cookies-next";
@@ -21,6 +23,7 @@ export default function TokenConfirmation() {
     if (token) {
       await navigator.clipboard.writeText(token.toString());
       setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -33,7 +36,6 @@ export default function TokenConfirmation() {
           potential risks associated with exposing sensitive authentication
           data.
         </p>
-
         <ul className={styles.list}>
           <li className={styles.listItem}>
             The access token provides direct access to privileged functions and
