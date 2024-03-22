@@ -31,28 +31,36 @@ export default function EditSelectionModal() {
 
   useEffect(() => {
     const f = async () => {
-      const usersResp = await axios.get("/users", {
-        params: {
-          users: searchParams.get("users"),
-        },
-      });
-      console.log(usersResp);
-      setUserOptions(
-        usersResp.data.map((user: User) => ({
-          label: user.email,
-          value: user.id.toString(),
-        })),
-      );
-      setSelectedUsers(
-        usersResp.data.map((user: User) => ({
-          label: user.email,
-          value: user.id.toString(),
-        })),
-      );
-      setRoles(await getRoleOptions());
-      if (localStorage.getItem("user")) {
-        const user = JSON.parse(String(localStorage.getItem("user")));
-        setUser(user);
+      if (searchParams.get("users")) {
+        const usersResp = await axios.get("/users", {
+          params: {
+            users: searchParams.get("users"),
+          },
+        });
+        setSelectedUsers(
+          usersResp.data.map((user: User) => ({
+            label: user.name,
+            value: user.id.toString(),
+          })),
+        );
+        const options = await axios.get("/users");
+        setUserOptions(
+          options.data.map((user: User) => ({
+            label: user.name,
+            value: user.id.toString(),
+          })),
+        );
+        setUserOptions(
+          usersResp.data.map((user: User) => ({
+            label: user.email,
+            value: user.id.toString(),
+          })),
+        );
+        setRoles(await getRoleOptions());
+        if (localStorage.getItem("user")) {
+          const user = JSON.parse(String(localStorage.getItem("user")));
+          setUser(user);
+        }
       }
     };
     f();
@@ -60,6 +68,17 @@ export default function EditSelectionModal() {
 
   const handleModalSubmit = async () => {
     setDisabled(true);
+
+    const users = selectedUsers as Options[];
+    const roles = (selectedRoleOption as Options[]).map((role) => ({
+      id: parseInt(role.value),
+    }));
+    for (const user of users) {
+      await axios.put(`/users`, {
+        id: parseInt(user.value),
+        roles,
+      });
+    }
 
     router.push("/admin");
   };
@@ -87,11 +106,19 @@ export default function EditSelectionModal() {
   };
 
   const handleRevokeKeys = async () => {
-    if (confirm("Are you sure you want to revoke this user's keys?")) {
-      // const resp = await axios.delete(`/users/${settingsUser?.id}/creds`);
-      // if (resp.status === 200) {
-      //   alert("Keys revoked successfully");
-      // }
+    if (
+      confirm("Are you sure you want to revoke this user's keys?") &&
+      Array.isArray(selectedUsers)
+    ) {
+      const resp = await axios.delete(`/users/creds`, {
+        data: {
+          users: selectedUsers.map((u) => parseInt(u.value)),
+        },
+      });
+      if (resp.status === 200) {
+        alert("Keys revoked successfully");
+        handleModalClose();
+      }
     }
   };
 
@@ -102,8 +129,8 @@ export default function EditSelectionModal() {
         options={userOptions}
         placeholder="Select User(s)..."
         subheader="Users"
-        selectDropdown="tableModal"
         setSelectedOption={setSelectedUsers}
+        selectDropdown="tableModal"
         isMulti
       />
       {Array.isArray(selectedUsers) && selectedUsers.length > 0 && (
@@ -148,7 +175,9 @@ export default function EditSelectionModal() {
     <Modal
       closeModal={handleModalClose}
       title="Edit Selected Users"
-      content={disabled ? Loader() : editSelectionModalContent}
+      content={
+        disabled || !selectedUsers ? Loader() : editSelectionModalContent
+      }
     />
   );
 }
