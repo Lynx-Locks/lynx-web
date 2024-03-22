@@ -10,7 +10,7 @@ import (
 )
 
 func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
 	err, roles := dbHelpers.GetAllTable(w, []models.Role{})
 	if err != nil {
 		return

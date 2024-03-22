@@ -22,6 +22,7 @@ import (
 )
 
 func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var users []models.User
 	// Get user ids from the query
 	userIdsParam := r.URL.Query().Get("users")
@@ -40,6 +41,7 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	helpers.JsonWriter(w, users)
 }
 func GetUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
 		return
@@ -52,6 +54,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	reqUser := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&reqUser)
 	if err != nil {
@@ -97,6 +100,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	email := r.URL.Query().Get("email")
 	if email == "" {
 		http.Error(w, "Email parameter is required", http.StatusBadRequest)
@@ -112,6 +116,7 @@ func GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var user models.User
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -142,6 +147,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	userIds := struct {
 		Users []uint `json:"users"`
 	}{}
@@ -165,6 +171,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserCreds(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
 		return
@@ -180,6 +187,7 @@ func GetUserCreds(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	userIds := struct {
 		Users []uint `json:"users"`
 	}{}
@@ -198,6 +206,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserRoles(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	err, uId := helpers.ParseInt(w, r, "userId")
 	if err != nil {
 		return
@@ -213,6 +222,7 @@ func GetUserRoles(w http.ResponseWriter, r *http.Request) {
 }
 
 func SendRegistrationEmail(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	reqBody := struct {
 		Email string `json:"email"`
 	}{}
@@ -290,6 +300,7 @@ func sendEmail(user models.User, token uuid.UUID) error {
 }
 
 func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User, valid bool) {
+	w.Header().Set("Content-Type", "application/json")
 	valid = true
 	id, err := strconv.ParseUint(chi.URLParam(r, "userId"), 10, 32)
 	if err != nil {
@@ -308,6 +319,7 @@ func GetUserByUrlParam(w http.ResponseWriter, r *http.Request) (user models.User
 }
 
 func UpdateLastTimeIn(w http.ResponseWriter, uId uint) error {
+	w.Header().Set("Content-Type", "application/json")
 	err, user := dbHelpers.GetFirstTable(w, models.User{}, models.User{Id: uId})
 	if err != nil {
 		return err
