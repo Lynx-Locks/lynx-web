@@ -34,14 +34,14 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Split the comma-separated string into individual IDs
-		userIds := make([]uint64, 0)
+		userIds := make([]uint, 0)
 		for _, id := range strings.Split(userIdsParam, ",") {
-			intId, err := strconv.ParseUint(id, 10, 64)
+			intId, err := strconv.ParseUint(id, 10, 32)
 			if err != nil {
 				http.Error(w, "Invalid user ID", http.StatusBadRequest)
 				return
 			}
-			userIds = append(userIds, intId)
+			userIds = append(userIds, uint(intId))
 		}
 		db.DB.Find(&users, userIds)
 	}
@@ -130,6 +130,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
+		return
 	}
 
 	ids := dbHelpers.GetAllIdsFromList(user.Roles)
@@ -163,6 +164,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&userIds)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
+		return
 	}
 
 	res := db.DB.Unscoped().Select(clause.Associations).Delete(&models.User{}, userIds.Users)
@@ -203,6 +205,7 @@ func DeleteUserCreds(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&userIds)
 	if err != nil {
 		http.Error(w, "Malformed request", http.StatusBadRequest)
+		return
 	}
 
 	res := db.DB.Unscoped().Select(clause.Associations).Where("user_id IN ?", userIds.Users).Delete(&[]models.Credential{})
