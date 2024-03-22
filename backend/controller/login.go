@@ -14,8 +14,6 @@ import (
 )
 
 func LoginRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	// Find the user
 	user, valid := GetUserByUrlParam(w, r)
 	if !valid {
@@ -53,8 +51,6 @@ func LoginRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	user, valid := GetUserByUrlParam(w, r)
 	if !valid {
 		return
@@ -113,8 +109,6 @@ func LoginResponse(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	at, err := r.Cookie("jwt")
 	if err != nil {
 		http.Error(w, "not logged in", http.StatusUnauthorized)

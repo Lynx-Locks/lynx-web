@@ -10,7 +10,6 @@ import (
 )
 
 func GetAllDoors(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, doors := dbHelpers.GetAllTable(w, []models.Door{})
 	if err != nil {
 		return
@@ -19,7 +18,6 @@ func GetAllDoors(w http.ResponseWriter, _ *http.Request) {
 }
 
 func GetDoor(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, dId := helpers.ParseInt(w, r, "doorId")
 	if err != nil {
 		return
@@ -32,7 +30,6 @@ func GetDoor(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateDoor(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	door := models.Door{}
 	err := json.NewDecoder(r.Body).Decode(&door)
 
@@ -48,7 +45,6 @@ func UpdateDoor(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateDoor(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var door models.Door
 	err := json.NewDecoder(r.Body).Decode(&door)
 	if err != nil {
@@ -77,7 +73,6 @@ func CreateDoor(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteDoor(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, dId := helpers.ParseInt(w, r, "doorId")
 	if err != nil {
 		return
@@ -90,7 +85,6 @@ func DeleteDoor(w http.ResponseWriter, r *http.Request) {
 }
 
 func IsDoorOpen(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, dId := helpers.ParseInt(w, r, "doorId")
 	if err != nil {
 		return

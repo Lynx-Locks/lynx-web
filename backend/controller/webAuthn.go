@@ -82,8 +82,6 @@ func SaveDBCredential(w http.ResponseWriter, credential *webauthn2.Credential) e
 
 // https://webauthn.guide/#registration
 func RegisterRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	user, _, valid := GetUserAndToken(w, r)
 	if !valid {
 		http.Error(w, "Invalid registration token", http.StatusUnauthorized)
@@ -123,8 +121,6 @@ func RegisterRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	user, activeToken, valid := GetUserAndToken(w, r)
 	if !valid {
 		return
@@ -219,8 +215,6 @@ func RegisterResponse(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthorizeRequest(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	login, session, err := config.WebAuthn.BeginDiscoverableLogin()
 	if err != nil {
 		http.Error(w, "Could not begin log in", http.StatusInternalServerError)
@@ -252,8 +246,6 @@ func AuthorizeRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthorizeResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	err, dId := helpers.ParseInt(w, r, "doorId")
 	if err != nil {
 		return

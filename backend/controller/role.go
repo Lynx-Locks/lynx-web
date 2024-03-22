@@ -10,7 +10,6 @@ import (
 )
 
 func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, roles := dbHelpers.GetAllTable(w, []models.Role{})
 	if err != nil {
 		return
@@ -19,7 +18,6 @@ func GetAllRoles(w http.ResponseWriter, _ *http.Request) {
 }
 
 func UpdateRole(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	reqRole := models.Role{}
 	err := json.NewDecoder(r.Body).Decode(&reqRole)
 	if err != nil {
@@ -57,7 +55,6 @@ func UpdateRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateRole(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var role models.Role
 	err := json.NewDecoder(r.Body).Decode(&role)
 	if err != nil {
@@ -100,7 +97,6 @@ func CreateRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteRole(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, rId := helpers.ParseInt(w, r, "roleId")
 	if err != nil {
 		return
@@ -113,7 +109,6 @@ func DeleteRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, rId := helpers.ParseInt(w, r, "roleId")
 	if err != nil {
 		return
@@ -153,7 +148,6 @@ func ReplaceDoorAssociation(w http.ResponseWriter, r *http.Request) {
 	helpers.JsonWriter(w, role)
 }
 func GetDoorAssociations(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	err, rId := helpers.ParseInt(w, r, "roleId")
 	if err != nil {
 		return
