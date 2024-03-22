@@ -10,6 +10,7 @@ import (
 )
 
 func DeleteSessionData(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	res := db.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.SessionData{})
 	if res.Error != nil {
 		http.Error(w, "Unable to delete session data", http.StatusInternalServerError)
