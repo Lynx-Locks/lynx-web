@@ -4,6 +4,7 @@ import (
 	"api/db"
 	"api/helpers"
 	"api/models"
+	"fmt"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -14,5 +15,5 @@ func DeleteSessionData(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unable to delete session data", http.StatusInternalServerError)
 		return
 	}
-	helpers.JsonWriter(w, "Session data successfully deleted")
+	helpers.JsonWriter(w, fmt.Sprintf("Successfully deleted %d rows from session data", res.RowsAffected))
 }
