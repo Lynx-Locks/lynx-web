@@ -28,7 +28,7 @@ export default function EditSelectionModal() {
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
   const { users, setUsers } = useContext(AdminContext);
-  const { setSubmitted } = useContext(SubmitSelectedUsersContext);
+  const setSubmitted = useContext(SubmitSelectedUsersContext);
 
   useEffect(() => {
     const f = async () => {
