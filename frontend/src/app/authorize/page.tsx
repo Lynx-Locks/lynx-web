@@ -19,18 +19,33 @@ export default function AuthorizeUser() {
     LoadingStatus.Nil,
   );
   const [authText, setAuthText] = useState<string>("Unlock");
-  const doorId = searchParams.get("doorId");
+  const [doorId, setDoorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const doorId = searchParams.get("doorId");
+    if (doorId) {
+      setDoorId(doorId);
+      router.replace("/authorize");
+    }
+  }, [router, searchParams]);
 
   useEffect(() => {
     async function getDoorName() {
-      const doorInfo = await axios.get(`auth/doors/${doorId}`);
+      const doorInfo = await axios.get(`/auth/doors/${doorId}`);
       setAuthText(`Unlock ${doorInfo.data.name}`);
     }
-    getDoorName();
-  });
+    if (doorId) {
+      getDoorName();
+    }
+  }, [doorId]);
 
   async function authorizeWithPasskey() {
     setLoadingStatus(LoadingStatus.Loading);
+
+    if (!doorId) {
+      router.replace("/authorize/error");
+      return;
+    }
 
     try {
       const resp = await axios.post(`/auth/authorize/request`);
