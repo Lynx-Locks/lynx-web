@@ -76,7 +76,7 @@ export default function RegisterUser() {
         },
       );
       if (status.status === 200) {
-        router.push(`/authorize/success`);
+        router.replace(`/authorize/success`);
       }
     } catch (error) {
       console.error(error);
