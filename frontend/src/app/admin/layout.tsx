@@ -11,10 +11,9 @@ export const AdminContext = createContext<{
   setUsers: Dispatch<SetStateAction<User[]>>;
 }>({ users: [], setUsers: () => {} });
 
-export const SubmitSelectedUsersContext = createContext<{
-  submitted: boolean;
-  setSubmitted: Dispatch<SetStateAction<boolean>>;
-}>({ submitted: false, setSubmitted: () => {} });
+export const SubmitSelectedUsersContext = createContext<
+  Dispatch<SetStateAction<boolean>>
+>(() => {});
 
 export default function AdminLayout({
   children,
@@ -27,12 +26,7 @@ export default function AdminLayout({
 
   return (
     <AdminContext.Provider value={{ users, setUsers }}>
-      <SubmitSelectedUsersContext.Provider
-        value={{
-          submitted: submittedUserSelection,
-          setSubmitted: setSubmittedUserSelection,
-        }}
-      >
+      <SubmitSelectedUsersContext.Provider value={setSubmittedUserSelection}>
         <Navbar page="admin" />
         <Dashboard
           users={users}
