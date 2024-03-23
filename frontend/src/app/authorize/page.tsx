@@ -23,7 +23,7 @@ export default function AuthorizeUser() {
 
   useEffect(() => {
     async function getDoorName() {
-      const doorInfo = await axios.get(`/doors/${doorId}`);
+      const doorInfo = await axios.get(`auth/doors/${doorId}`);
       setAuthText(`Unlock ${doorInfo.data.name}`);
     }
     getDoorName();
