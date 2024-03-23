@@ -11,9 +11,13 @@ import axios from "@/axios/client";
 export default function AdminDashboard({
   users,
   setUsers,
+  submittedUserSelection,
+  setSubmittedUserSelection,
 }: {
   users: User[];
   setUsers: Dispatch<SetStateAction<User[]>>;
+  submittedUserSelection: boolean;
+  setSubmittedUserSelection: Dispatch<SetStateAction<boolean>>;
 }) {
   const [searchInput, setSearchInput] = useState("");
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -36,6 +40,13 @@ export default function AdminDashboard({
     };
     getUsers();
   }, [setUsers]);
+
+  useEffect(() => {
+    if (submittedUserSelection) {
+      setSelectedRows([]);
+      setSubmittedUserSelection(false);
+    }
+  }, [submittedUserSelection, setSubmittedUserSelection]);
 
   return (
     <div className={styles.dashboardContainer}>

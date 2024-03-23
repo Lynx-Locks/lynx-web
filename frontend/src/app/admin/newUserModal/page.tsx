@@ -1,7 +1,7 @@
 "use client";
 
 import Modal from "@/components/modal/modal";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styles from "../modals.module.css";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
@@ -9,7 +9,6 @@ import { SubmitButton } from "@/components/button/button";
 import { getRoleOptions } from "@/data/roles";
 import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
-import React from "react";
 import { AdminContext } from "../layout";
 
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -25,7 +24,7 @@ export default function NewUserModal() {
   const [roles, setRoles] = useState<Options[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const { users, setUsers } = React.useContext(AdminContext);
+  const { users, setUsers } = useContext(AdminContext);
 
   useEffect(() => {
     const f = async () => {
