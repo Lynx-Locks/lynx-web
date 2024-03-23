@@ -1,14 +1,13 @@
 "use client";
 
 import Modal from "@/components/modal/modal";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styles from "../modals.module.css";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { Options, SelectType } from "@/types/selectOptions";
 import { SubmitButton } from "@/components/button/button";
 import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
-import React from "react";
 import { AdminContext } from "../layout";
 import { getDoorOptions } from "@/data/doors";
 
@@ -23,7 +22,7 @@ export default function NewRoleModal() {
     useState<SelectType>(null);
   const [disabled, setDisabled] = useState(false);
   const router = useRouter();
-  const { users } = React.useContext(AdminContext);
+  const { users } = useContext(AdminContext);
 
   const emails = users.map((user) => ({
     label: user.email,

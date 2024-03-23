@@ -11,7 +11,7 @@ import styles from "../modals.module.css";
 import { SubmitButton } from "@/components/button/button";
 import { getRoleOptions } from "@/data/roles";
 import Loader from "@/components/loader/loader";
-import { AdminContext } from "../layout";
+import { AdminContext, SubmitSelectedUsersContext } from "../layout";
 
 export default function EditSelectionModal() {
   const router = useRouter();
@@ -28,6 +28,7 @@ export default function EditSelectionModal() {
   const [selectedRoleOption, setSelectedRoleOption] =
     useState<SelectType>(null);
   const { users, setUsers } = useContext(AdminContext);
+  const { setSubmitted } = useContext(SubmitSelectedUsersContext);
 
   useEffect(() => {
     const f = async () => {
@@ -68,6 +69,7 @@ export default function EditSelectionModal() {
 
   const handleModalSubmit = async () => {
     setDisabled(true);
+    setSubmitted(true);
 
     const users = selectedUsers as Options[];
     const roles = (selectedRoleOption as Options[]).map((role) => ({
@@ -101,6 +103,7 @@ export default function EditSelectionModal() {
         (u) => !selectedUsers.some((s) => parseInt(s.value) === u.id),
       );
       setUsers(newUsers);
+      setSubmitted(true);
       handleModalClose();
     }
   };

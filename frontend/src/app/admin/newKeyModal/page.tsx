@@ -1,13 +1,12 @@
 "use client";
 
 import Modal from "@/components/modal/modal";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import SearchDropdown from "@/components/searchDropdown/searchDropdown";
 import { SelectType } from "@/types/selectOptions";
 import { SubmitButton } from "@/components/button/button";
 import { useRouter } from "next/navigation";
 import axios from "@/axios/client";
-import React from "react";
 import { AdminContext } from "../layout";
 import styles from "../modals.module.css";
 
@@ -16,7 +15,7 @@ export default function NewKeyModal() {
     useState<SelectType>(null);
   const [disabled, setDisabled] = useState(false);
   const router = useRouter();
-  const { users } = React.useContext(AdminContext);
+  const { users } = useContext(AdminContext);
 
   const emails = users.map((user) => ({
     label: user.email,
