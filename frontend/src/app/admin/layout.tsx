@@ -3,7 +3,7 @@
 import Dashboard from "@/components/adminDashboard/adminDashboard";
 import Navbar from "@/components/navbar/navbar";
 import User from "@/types/user";
-import { Dispatch, SetStateAction, createContext, useEffect } from "react";
+import { Dispatch, SetStateAction, createContext } from "react";
 import { useState } from "react";
 
 export const AdminContext = createContext<{
