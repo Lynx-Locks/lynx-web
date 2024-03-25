@@ -33,6 +33,19 @@ const filterUsers = (users: User[], searchInput: string) => {
   );
 };
 
+function parseTimeString(timeString: string) {
+  let [time, meridiem] = timeString.split(" ");
+  let [hours, minutes, seconds] = time.split(":").map(Number);
+
+  if (meridiem === "PM" && hours !== 12) {
+    hours += 12;
+  } else if (meridiem === "AM" && hours === 12) {
+    hours = 0;
+  }
+
+  return new Date(2000, 0, 1, hours, minutes, seconds);
+}
+
 export default function AdminTable({
   users,
   searchInput,
@@ -87,19 +100,26 @@ export default function AdminTable({
       const first = sortBy?.sort === "asc" ? a : b;
       const second = sortBy?.sort === "asc" ? b : a;
       if (sortBy?.name === "Last Time In") {
+        const mult = sortBy?.sort === "asc" ? 1 : -1;
+        if (!first.timeIn) {
+          return mult;
+        } else if (!second.timeIn) {
+          return -mult;
+        }
         return (
-          (first.timeIn &&
-            second.timeIn &&
-            first.timeIn.localeCompare(second.timeIn)) ||
-          (sortBy?.sort === "asc" ? 1 : -1)
+          parseTimeString(first.timeIn).getTime() -
+          parseTimeString(second.timeIn).getTime()
         );
       } else if (sortBy?.name === "Date") {
-        return (
-          (first.lastDateIn &&
-            second.lastDateIn &&
-            first.lastDateIn.localeCompare(second.lastDateIn)) ||
-          (sortBy?.sort === "asc" ? 1 : -1)
-        );
+        const mult = sortBy?.sort === "asc" ? 1 : -1;
+        if (!first.lastDateIn) {
+          return mult;
+        } else if (!second.lastDateIn) {
+          return -mult;
+        }
+        const firstDate = new Date(first.lastDateIn).getTime();
+        const secondDate = new Date(second.lastDateIn).getTime();
+        return firstDate - secondDate;
       } else if (sortBy?.name === "Email") {
         return first.email.localeCompare(second.email);
       } else if (sortBy?.name === "Name") {
