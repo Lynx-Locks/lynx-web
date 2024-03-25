@@ -27,7 +27,7 @@
   width: 50%; /* Could be more or less, depending on screen size */
   min-height: 60vh;
   max-height: 80vh;
-  overflow: auto;
+  overflow: none;
   /* text-align: center; */
 }
 
